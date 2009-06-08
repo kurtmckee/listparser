@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!--
+    Description: Valid OPML (//outline[@text] overrides //outline[@title])
+    Eval: result['feeds'][0]['name'] == 'text'
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline text="text" title='title' type="rss" xmlUrl="http://domain/feed" />
+    </body>
+</opml>

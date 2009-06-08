@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+    Liferea uses type="pie" when referring to Atom feeds
+
+    Description: Valid OPML (/opml/body/outline[@type='pie'])
+    Eval: result['feeds'][0]['name'] == 'feedName'
+    Eval: result['feeds'][0]['url'] == 'http://domain/feed'
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline text="feedName" type="pie" xmlUrl="http://domain/feed" />
+    </body>
+</opml>
