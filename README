@@ -1,4 +1,4 @@
-listparser.py - Parse OPML feed lists into a negotiable format.
+listparser.py - Parse OPML subscription lists into a negotiable format.
 Copyright (C) 2009 Kurt McKee <contactme@kurtmckee.org>
 
 listparser.py is currently designed to tear through subscription lists
