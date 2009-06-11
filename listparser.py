@@ -15,51 +15,85 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import urllib2
-import BeautifulSoup
+import xml.sax
 
 def parse(filename_or_url):
     try:
         f = urllib2.urlopen(filename_or_url)
     except:
         return {}
-    soup = BeautifulSoup.BeautifulSoup(f)
+    parser = xml.sax.make_parser()
+    handler = ContentHandler()
+    xml.sax.parse(f, handler)
     f.close()
 
-    if soup.opml:
-       return _parse_opml(soup)
+    return handler.harvest
 
-    return {}
-
-def _parse_opml(soup):
-    lst = {
-        'meta': {},
-        'feeds': [],
-    }
-
-    # Collect the list's metadata
-    if soup.opml.head:
-        if soup.opml.head.title:
-            lst['meta']['title'] = soup.opml.head.title.string
-        if soup.opml.head.ownername:
-            lst['meta'].setdefault('author', {})['name'] = soup.opml.head.ownername.string
-        if soup.opml.head.owneremail:
-            lst['meta'].setdefault('author', {})['email'] = soup.opml.head.owneremail.string
-        if soup.opml.head.ownerid:
-            lst['meta'].setdefault('author', {})['url'] = soup.opml.head.ownerid.string
-
-    # When repeated, attributes listed first have lower precedence than those listed last
-    opml_mapping = (
-        ('url', 'xmlurl'),
-        # Feed name (prefer 'text' to 'title')
-        ('name', 'title'),
-        ('name', 'text'),
-    )
-    # Collect all available Feeds in the OPML document
-    for outline in soup.findAll('outline', attrs = {'type': ('rss', 'pie'), 'xmlurl': True}):
-        feed = {}
-        for mapping in opml_mapping:
-            if outline.has_key(mapping[1]):
-                feed[mapping[0]] = outline[mapping[1]]
-        lst['feeds'].append(feed)
-
-    return lst
+class ContentHandler(xml.sax.handler.ContentHandler):
+    def __init__(self):
+        self.harvest = {'bozo': 0}
+        self.expect = ''
+    def startElement(self, name, attrs):
+        if hasattr(self, '_start_%s' % name):
+            getattr(self, '_start_%s' % name)(attrs)
+    def endElement(self, name):
+        if hasattr(self, '_end_%s' % name):
+            getattr(self, '_end_%s' % name)()
+    def characters(self, content):
+        if not self.expect:
+            return
+        # If `expect` contains something like "userinfo_contact_email_domain",
+        # then after these next lines, node will point to the nested dictionary
+        # `self.harvest['userinfo']['contact']['email']`, and
+        # `...['email']['domain']` will be filled with `content`.
+        node = reduce(lambda x, y: x.setdefault(y, {}), self.expect.split('_')[:-1], self.harvest)
+        node[self.expect.split('_')[-1]] = node.setdefault(self.expect.split('_')[-1], '') + content
+    def endExpect(self):
+        self.expect = ''
+    def _start_opml(self, attrs):
+        self.harvest['version'] = "opml"
+        if attrs.has_key('version'):
+            if attrs['version'] in ("1.0", "1.1"):
+                self.harvest['version'] = "opml1"
+            elif attrs['version'] == "2.0":
+                self.harvest['version'] = "opml2"
+            else:
+                self.harvest['bozo'] = 1
+                self.harvest['bozo_detail'] = "Unknown OPML version"
+    def _start_outline(self, attrs):
+        if 'xmlurl' in [i.lower() for i in attrs.keys()]:
+            if not attrs.has_key('type'):
+                self.harvest['bozo'] = 1
+                self.harvest['bozo_detail'] = "<outline> MUST have a `type` attribute"
+            if attrs.has_key('type') and attrs['type'].lower() not in ('rss', 'pie'):
+                return
+            if not attrs.has_key('xmlUrl'):
+                self.harvest['bozo'] = 1
+                self.harvest['bozo_detail'] = "Only `xmlUrl` EXACTLY is valid"
+            # This list comprehension selects the `xmlUrl` attribute no matter its case
+            xmlurl = attrs[[i for i in attrs.keys() if i.lower() == "xmlurl"][0]]
+            if attrs.has_key('text'):
+                name = attrs['text']
+            else:
+                self.harvest['bozo'] = 1
+                self.harvest['bozo_detail'] = "An <outline> has no `text` attribute"
+                if attrs.has_key('title'):
+                    name = attrs['title']
+                else:
+                    name = xmlurl
+            self.harvest.setdefault('feeds', []).append({
+                'name': name,
+                'url': xmlurl,
+            })
+    def _start_title(self, attrs):
+        self.expect = 'meta_title'
+    _end_title = endExpect
+    def _start_ownerId(self, attrs):
+        self.expect = 'meta_author_url'
+    _end_ownerId = endExpect
+    def _start_ownerEmail(self, attrs):
+        self.expect = 'meta_author_email'
+    _end_ownerEmail = endExpect
+    def _start_ownerName(self, attrs):
+        self.expect = 'meta_author_name'
+    _end_ownerName = endExpect
