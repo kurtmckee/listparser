@@ -2,9 +2,8 @@ listparser.py - Parse OPML subscription lists into a negotiable format.
 Copyright (C) 2009 Kurt McKee <contactme@kurtmckee.org>
 
 listparser.py is currently designed to tear through subscription lists
-and return all of the feeds that it finds. It requires BeautifulSoup,
-but this dependency will soon be stripped out. It also only supports
-OPML, but will one day support other subscription list formats.
+and return all of the feeds that it finds. It only supports OPML, but
+will one day support other subscription list formats.
 
 
 Usage
@@ -13,9 +12,13 @@ Usage
 >>> import listparser
 >>> result = listparser.parse('http://planet.gnome.org/opml.xml')
 
-A dictionary will be returned with two keys: `meta` and `feeds`.
-`feeds` will be a list of feeds, the URLs of which are contained
-in a key called `url`. Continuing the example:
+A dictionary will be returned with several keys:
+`meta`: information about the subscription list
+`feeds`: a list of feeds
+`bozo`: '1' if there is a problem with the list, '0' otherwise.
+`bozo_detail`: an English description if `bozo` is True 
+
+Continuing the example:
 
 >>> result['meta']['title']
 u'Planet GNOME'
