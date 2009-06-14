@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-from os.path import abspath, dirname, join
+from os.path import abspath, dirname, join, splitext
 import threading
 import unittest
 import BaseHTTPServer
@@ -65,8 +65,13 @@ def make_testcase(evals, testfile):
     return lambda self: self.worker(evals, testfile)
 
 numtests = 0
-testpath = join(dirname(abspath(__file__)), 'tests')
-files = (f for r, d, files in os.walk(testpath) for f in files if f.endswith('.xml'))
+testpath = join(dirname(abspath(__file__)), 'tests/')
+# files contains a list of relative paths to test files
+# HACK: replace() is only being used because os.path.relpath()
+# was only added to Python in version 2.6
+files = (join(r, f).replace(testpath, '', 1)
+            for r, d, files in os.walk(testpath)
+            for f in files if f.endswith('.xml'))
 for testfile in files:
     description = ''
     evals = []
@@ -86,7 +91,7 @@ for testfile in files:
         raise ValueError("Eval not found in test %s" % testfile)
     testcase = make_testcase(evals, testfile)
     testcase.__doc__ = '%s: %s' % (testfile, description)
-    setattr(TestCases, 'test_%s' % testfile.split('.xml')[0], testcase)
+    setattr(TestCases, 'test_%s' % splitext(testfile)[0], testcase)
     numtests += 1
 
 server = ServerThread(numtests)
