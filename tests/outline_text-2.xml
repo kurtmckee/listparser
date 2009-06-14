@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <!--
-    Description: Valid OPML (//outline[@text] overrides //outline[@title])
+    Description: //outline/@text overrides //outline/@title
+    Eval: result['bozo'] == 0
     Eval: result['feeds'][0]['name'] == 'text'
 -->
 <opml version="2.0">
