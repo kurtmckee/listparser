@@ -22,12 +22,25 @@ def parse(filename_or_url):
         f = urllib2.urlopen(filename_or_url)
     except:
         return {}
-    parser = xml.sax.make_parser()
     handler = ContentHandler()
-    xml.sax.parse(f, handler)
+    errhandler = ErrorHandler()
+    errhandler.content = handler
+    parser = xml.sax.make_parser()
+    parser.setContentHandler(handler)
+    parser.setErrorHandler(errhandler)
+    parser.parse(f)
     f.close()
 
     return handler.harvest
+
+class ErrorHandler(xml.sax.handler.ErrorHandler):
+    def fatalError(self, exception):
+        if isinstance(exception, xml.sax.SAXParseException):
+            if exception.getMessage() == 'undefined entity':
+                self.content.harvest['bozo'] = 1
+                self.content.harvest['bozo_detail'] = repr(exception)
+                return
+        raise exception
 
 class ContentHandler(xml.sax.handler.ContentHandler):
     def __init__(self):
