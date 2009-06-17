@@ -33,6 +33,7 @@ def parse(filename_or_url):
 
 class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def __init__(self):
+        xml.sax.handler.ContentHandler.__init__(self)
         self.harvest = {'bozo': 0}
         self.expect = ''
 
