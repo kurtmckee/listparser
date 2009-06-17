@@ -22,29 +22,31 @@ def parse(filename_or_url):
         f = urllib2.urlopen(filename_or_url)
     except:
         return {}
-    handler = ContentHandler()
-    errhandler = ErrorHandler()
-    errhandler.content = handler
+    handler = Handler()
     parser = xml.sax.make_parser()
     parser.setContentHandler(handler)
-    parser.setErrorHandler(errhandler)
+    parser.setErrorHandler(handler)
     parser.parse(f)
     f.close()
 
     return handler.harvest
 
-class ErrorHandler(xml.sax.handler.ErrorHandler):
+class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
+    def __init__(self):
+        self.harvest = {'bozo': 0}
+        self.expect = ''
+
+    # ErrorHandler functions
+    # ----------------------
     def warning(self, exception):
-        self.content.harvest['bozo'] = 1
-        self.content.harvest['bozo_detail'] = repr(exception)
+        self.harvest['bozo'] = 1
+        self.harvest['bozo_detail'] = repr(exception)
         return
     error = warning
     fatalError = warning
 
-class ContentHandler(xml.sax.handler.ContentHandler):
-    def __init__(self):
-        self.harvest = {'bozo': 0}
-        self.expect = ''
+    # ContentHandler functions
+    # ------------------------
     def startElement(self, name, attrs):
         if hasattr(self, '_start_%s' % name):
             getattr(self, '_start_%s' % name)(attrs)
