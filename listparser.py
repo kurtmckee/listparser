@@ -34,13 +34,12 @@ def parse(filename_or_url):
     return handler.harvest
 
 class ErrorHandler(xml.sax.handler.ErrorHandler):
-    def fatalError(self, exception):
-        if isinstance(exception, xml.sax.SAXParseException):
-            if exception.getMessage() == 'undefined entity':
-                self.content.harvest['bozo'] = 1
-                self.content.harvest['bozo_detail'] = repr(exception)
-                return
-        raise exception
+    def warning(self, exception):
+        self.content.harvest['bozo'] = 1
+        self.content.harvest['bozo_detail'] = repr(exception)
+        return
+    error = warning
+    fatalError = warning
 
 class ContentHandler(xml.sax.handler.ContentHandler):
     def __init__(self):
