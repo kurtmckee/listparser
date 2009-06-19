@@ -2,7 +2,7 @@
 <!--
     LiveJournal omits the <outline> type attribute
 
-    Description: missing //outline/@type
+    Description: //outline/@type missing
     Eval: result['bozo'] == 1
     Eval: len(result['feeds']) == 1
 -->

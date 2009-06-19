@@ -2,7 +2,7 @@
 <!--
     LiveJournal spells xmlUrl `xmlURL` for no reason
 
-    Description: miscapitalized //outline/@xmlUrl
+    Description: //outline/@xmlUrl miscapitalized
     Eval: result['bozo'] == 1
     Eval: result['feeds'][0]['url'] == 'http://domain/feed'
 -->
