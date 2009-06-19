@@ -81,7 +81,8 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "<outline> MUST have a `type` attribute"
             if attrs.has_key('type') and attrs['type'].lower() not in ('rss', 'pie'):
-                return
+                self.harvest['bozo'] = 1
+                self.harvest['bozo_detail'] = "//outline/@type is not recognized"
             if not attrs.has_key('xmlUrl'):
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "Only `xmlUrl` EXACTLY is valid"
