@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<opml version="2.0">
+    <head>
+        <title>listparser project feeds</title>
+        <ownerName>Kurt McKee</ownerName>
+        <ownerEmail>contactme@kurtmckee.org</ownerEmail>
+        <ownerId>http://kurtmckee.org/</ownerId>
+    </head>
+    <body>
+        <outline type="rss" text="listparser blog"
+            xmlUrl="http://kurtmckee.livejournal.com/data/atom?tag=listparser" />
+        <outline type="rss" text="listparser releases"
+            xmlUrl="http://freshmeat.net/projects/listparser/releases.atom" />
+        <outline type="rss" text="listparser changelog"
+            xmlUrl="http://github.com/feeds/kurtmckee/commits/listparser/master" />
+    </body>
+</opml>
