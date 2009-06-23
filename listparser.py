@@ -95,7 +95,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "Unknown OPML version"
     def _start_outline(self, attrs):
-        if 'xmlurl' in [i.lower() for i in attrs.keys()]:
+        if 'xmlurl' in (i.lower() for i in attrs.keys()):
             if not attrs.has_key('type'):
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "<outline> MUST have a `type` attribute"
@@ -105,8 +105,8 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             if not attrs.has_key('xmlUrl'):
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "Only `xmlUrl` EXACTLY is valid"
-            # This list comprehension selects the `xmlUrl` attribute no matter its case
-            xmlurl = attrs[[i for i in attrs.keys() if i.lower() == "xmlurl"][0]]
+            # This generator expression selects the `xmlUrl` attribute no matter its case
+            xmlurl = (v for k, v in attrs.items() if k.lower() == "xmlurl").next()
             if attrs.has_key('text'):
                 name = attrs['text']
             else:
@@ -183,7 +183,7 @@ def _rfc822(date):
                  ('m',): -12,
                  ('y',): 12,
                  }
-        [tzhour] = [tzinfo[k] for k in tzinfo if m['tz'] in k]
+        tzhour = (v for k, v in tzinfo.items() if m['tz'] in k).next()
         delta = datetime.timedelta(0,0,0,0,0, tzhour)
     stamp = datetime.datetime(*[m[x] for x in ('year','month','day','hour','minute','second')])
     return stamp - delta
