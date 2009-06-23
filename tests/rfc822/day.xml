@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+    Description: RFC 822: days
+    Eval: result['bozo'] == 0
+    Eval: result['meta']['created_parsed'].day == 21
+-->
+<opml version="2.0">
+    <head>
+        <dateCreated>Sun, 21 Jun 2009 12:00:00 GMT</dateCreated>
+    </head>
+    <body>
+        <outline text="node" />
+    </body>
+</opml>

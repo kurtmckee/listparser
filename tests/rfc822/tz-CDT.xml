@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+    Description: RFC 822: timezone CDT
+    Eval: result['bozo'] == 0
+    Eval: result['meta']['created_parsed'].hour == 18
+-->
+<opml version="2.0">
+    <head>
+        <dateCreated>Mon, 22 Jun 2009 13:15:17 CDT</dateCreated>
+    </head>
+    <body>
+        <outline text="node" />
+    </body>
+</opml>

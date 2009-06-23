@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+    Description: /opml/head/dateCreated invalid
+    Eval: result['bozo'] == 1
+    Eval: not result['meta'].get('created_parsed', False)
+-->
+<opml version="2.0">
+    <head>
+        <dateCreated>sometime last week-ish, I think</dateCreated>
+    </head>
+    <body>
+        <outline text="node" />
+    </body>
+</opml>

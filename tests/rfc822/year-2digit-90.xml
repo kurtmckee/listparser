@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+    Description: RFC 822: 2digit year '90
+    Eval: result['bozo'] == 0
+    Eval: result['meta']['created_parsed'].year == 1990
+-->
+<opml version="2.0">
+    <head>
+        <dateCreated>Thu, 21 Jun 90 12:00:00 GMT</dateCreated>
+    </head>
+    <body>
+        <outline text="node" />
+    </body>
+</opml>

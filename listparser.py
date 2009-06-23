@@ -16,6 +16,8 @@
 
 __version__ = "0.1"
 
+import datetime
+import re
 import urllib2
 import xml.sax
 
@@ -30,6 +32,21 @@ def parse(filename_or_url):
     parser.setErrorHandler(handler)
     parser.parse(f)
     f.close()
+
+    if handler.harvest.get('meta', {}).get('created', '').strip():
+        d = _rfc822(handler.harvest['meta']['created'].strip())
+        if d:
+            handler.harvest['meta']['created_parsed'] = d
+        else:
+            handler.harvest['bozo'] = 1
+            handler.harvest['bozo_detail'] = "dateCreated is not a valid datetime"
+    if handler.harvest.get('meta', {}).get('modified', '').strip():
+        d = _rfc822(handler.harvest['meta']['modified'].strip())
+        if d:
+            handler.harvest['meta']['modified_parsed'] = d
+        else:
+            handler.harvest['bozo'] = 1
+            handler.harvest['bozo_detail'] = "dateModified is not a valid datetime"
 
     return handler.harvest
 
@@ -115,3 +132,58 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def _start_ownerName(self, attrs):
         self.expect = 'meta_author_name'
     _end_ownerName = endExpect
+    def _start_dateCreated(self, attrs):
+        self.expect = 'meta_created'
+    _end_dateCreated = endExpect
+    def _start_dateModified(self, attrs):
+        self.expect = 'meta_modified'
+    _end_dateModified = endExpect
+
+def _rfc822(date):
+    """Parse RFC 822 dates and times, with one minor
+    difference: years may be 4DIGIT or 2DIGIT.
+    http://tools.ietf.org/html/rfc822#section-5"""
+    month_ = "(?P<month>jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)"
+    year_ = "(?P<year>(?:\d{2})?\d{2})"
+    day_ = "(?P<day>\d{2})"
+    date_ = "%s %s %s" % (day_, month_, year_)
+    
+    hour_ = "(?P<hour>\d{2}):(?P<minute>\d{2})(?::(?P<second>\d{2}))?"
+    tz_ = "(?P<tz>ut|gmt|[ecmp][sd]t|[zamny]|[+-]\d{4})"
+    time_ = "%s %s" % (hour_, tz_)
+
+    dayname_ = "(?P<dayname>mon|tue|wed|thu|fri|sat|sun)"
+    dt_ = "(?:%s, )?%s %s" % (dayname_, date_, time_)
+
+    try:
+        m = re.match(dt_, date.lower()).groupdict(0)
+    except:
+        return None
+    # directly convert everything listed into an int
+    m.update((x, int(m[x])) for x in ('year', 'day', 'hour', 'minute', 'second'))
+    # convert month to an int in the range 1..12
+    m['month'] = (month_.index(m['month']) - 9) // 4 + 1
+    # ensure year is 4 digits; assume everything in the 90's is the 1990's
+    if m['year'] < 100:
+        m['year'] += (1900, 2000)[m['year'] < 90]
+    if m['tz'][0] in '+-':
+        tzhour, tzmin = int(m['tz'][1:-2]), int(m['tz'][-2:])
+        tzhour, tzmin = [(-2 * (m['tz'][0] == '-') + 1) * x for x in (tzhour, tzmin)]
+        delta = datetime.timedelta(0,0,0,0, tzmin, tzhour)
+    else:
+        tzinfo = {
+                 ('ut','gmt','z'): 0,
+                 ('edt',): -4,
+                 ('est','cdt'): -5,
+                 ('cst','mdt'): -6,
+                 ('mst','pdt'): -7,
+                 ('pst',): -8,
+                 ('a',): -1,
+                 ('n',): 1,
+                 ('m',): -12,
+                 ('y',): 12,
+                 }
+        [tzhour] = [tzinfo[k] for k in tzinfo if m['tz'] in k]
+        delta = datetime.timedelta(0,0,0,0,0, tzhour)
+    stamp = datetime.datetime(*[m[x] for x in ('year','month','day','hour','minute','second')])
+    return stamp - delta

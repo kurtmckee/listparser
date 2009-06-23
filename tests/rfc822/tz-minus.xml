@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+    Carracas, Venezuela operates 4 hours 30 minutes behind UTC
+    Description: RFC 822: timezone -0430
+    Eval: result['bozo'] == 0
+    Eval: result['meta']['created_parsed'].hour == 17
+    Eval: result['meta']['created_parsed'].minute == 45
+-->
+<opml version="2.0">
+    <head>
+        <dateCreated>Mon, 22 Jun 2009 13:15:17 -0430</dateCreated>
+    </head>
+    <body>
+        <outline text="node" />
+    </body>
+</opml>
