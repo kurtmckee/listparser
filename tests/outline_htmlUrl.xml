@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!--
+    Description: //outline/@htmlUrl
+    Eval: result['bozo'] == 0
+    Eval: result['feeds'][0]['webpage'] == 'http://domain.com/'
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline text="feedname" type="rss" xmlUrl="http://domain.com/feed" htmlUrl="http://domain.com/" />
+    </body>
+</opml>

@@ -96,6 +96,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest['bozo_detail'] = "Unknown OPML version"
     def _start_outline(self, attrs):
         if 'xmlurl' in (i.lower() for i in attrs.keys()):
+            feed = dict()
             if not attrs.has_key('type'):
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "<outline> MUST have a `type` attribute"
@@ -106,20 +107,19 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "Only `xmlUrl` EXACTLY is valid"
             # This generator expression selects the `xmlUrl` attribute no matter its case
-            xmlurl = (v for k, v in attrs.items() if k.lower() == "xmlurl").next()
+            feed['url'] = (v for k, v in attrs.items() if k.lower() == "xmlurl").next()
             if attrs.has_key('text'):
-                name = attrs['text']
+                feed['name'] = attrs['text']
             else:
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "An <outline> has no `text` attribute"
                 if attrs.has_key('title'):
-                    name = attrs['title']
+                    feed['name'] = attrs['title']
                 else:
-                    name = xmlurl
-            self.harvest.setdefault('feeds', []).append({
-                'name': name,
-                'url': xmlurl,
-            })
+                    feed['name'] = feed['url']
+            if attrs.has_key('htmlUrl'):
+                feed['webpage'] = attrs['htmlUrl']
+            self.harvest.setdefault('feeds', []).append(feed)
     def _start_title(self, attrs):
         self.expect = 'meta_title'
     _end_title = endExpect
