@@ -94,6 +94,9 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             else:
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "Unknown OPML version"
+        else:
+            self.harvest['bozo'] = 1
+            self.harvest['bozo_detail'] = "<opml> MUST have a version attribute"
     def _start_outline(self, attrs):
         if 'xmlurl' in (i.lower() for i in attrs.keys()):
             feed = dict()

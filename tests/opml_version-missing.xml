@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!--
+    Description: OPML version missing
+    Eval: result['bozo'] == 1
+    Eval: result['version'] == 'opml'
+-->
+<opml>
+    <head></head>
+    <body>
+        <outline text="node" />
+    </body>
+</opml>
