@@ -1,0 +1,9 @@
+v0.2 (26 June 2009) "Leveling up"
+    * RFC 822 date and time support added (+39 tests)
+    * Added more thorough OPML version attribute detection (+5 tests)
+    * `dateModified` and `dateCreated` OPML tags supported (+4 tests)
+    * Added test cases for existing functionality (+2 tests)
+    * <outline> `htmlUrl` attribute support added (+1 test)
+
+v0.1 (19 June 2009) "Achievement unlocked"
+    * Initial release
