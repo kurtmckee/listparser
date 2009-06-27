@@ -98,4 +98,4 @@ server = ServerThread(numtests)
 server.start()
 
 testsuite = unittest.TestLoader().loadTestsFromTestCase(TestCases)
-unittest.TextTestRunner(verbosity=2).run(testsuite)
+unittest.TextTestRunner(verbosity=1).run(testsuite)
