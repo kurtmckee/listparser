@@ -111,6 +111,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest['bozo_detail'] = "Only `xmlUrl` EXACTLY is valid"
             # This generator expression selects the `xmlUrl` attribute no matter its case
             feed['url'] = (v for k, v in attrs.items() if k.lower() == "xmlurl").next()
+            # Fill feed['title'] with either @text, @title, or @xmlurl, in that order
             if attrs.has_key('text'):
                 feed['title'] = attrs['text']
             else:
