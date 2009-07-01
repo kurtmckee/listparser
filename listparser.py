@@ -120,8 +120,11 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                     feed['title'] = attrs['title']
                 else:
                     feed['title'] = feed['url']
-            if attrs.has_key('htmlUrl'):
-                feed['webpage'] = attrs['htmlUrl']
+            # Fill feed['claims'] up with information that is *purported* to
+            # be duplicated from the feed itself.
+            for k in ('htmlUrl', 'title', 'description'):
+                if attrs.has_key(k):
+                    feed.setdefault('claims', {})[k] = attrs[k]
             self.harvest.setdefault('feeds', []).append(feed)
     def _start_title(self, attrs):
         self.expect = 'meta_title'
