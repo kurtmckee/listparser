@@ -112,14 +112,14 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             # This generator expression selects the `xmlUrl` attribute no matter its case
             feed['url'] = (v for k, v in attrs.items() if k.lower() == "xmlurl").next()
             if attrs.has_key('text'):
-                feed['name'] = attrs['text']
+                feed['title'] = attrs['text']
             else:
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "An <outline> has no `text` attribute"
                 if attrs.has_key('title'):
-                    feed['name'] = attrs['title']
+                    feed['title'] = attrs['title']
                 else:
-                    feed['name'] = feed['url']
+                    feed['title'] = feed['url']
             if attrs.has_key('htmlUrl'):
                 feed['webpage'] = attrs['htmlUrl']
             self.harvest.setdefault('feeds', []).append(feed)

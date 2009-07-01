@@ -2,7 +2,7 @@
 <!--
     Description: //outline/@xmlUrl used when @text and @title are missing
     Eval: result['bozo'] == 1
-    Eval: result['feeds'][0]['name'] == 'http://domain/feed'
+    Eval: result['feeds'][0]['title'] == 'http://domain/feed'
 -->
 <opml version="2.0">
     <head></head>
