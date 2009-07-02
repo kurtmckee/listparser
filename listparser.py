@@ -127,6 +127,24 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 if attrs.has_key(k):
                     feed.setdefault('claims', {})[k] = attrs[k]
             self.harvest.setdefault('feeds', []).append(feed)
+        # Subscription lists
+        elif attrs.has_key('type') and attrs['type'].lower() in ('link', 'include'):
+            if not attrs.has_key('url'):
+                self.harvest['bozo'] = 1
+                self.harvest['bozo_detail'] = "`link` and `include` types MUST has a `url` attribute"
+                return
+            sublist = dict()
+            if attrs['type'].lower() == 'link' and not attrs['url'].endswith('.opml'):
+                self.harvest['bozo'] = 1
+                self.harvest['bozo_detail'] = "`link` types' `url` attribute MUST end with '.opml'"
+            sublist['url'] = attrs['url']
+            if attrs.has_key('text'):
+                sublist['title'] = attrs['text']
+            else:
+                self.harvest['bozo'] = 1
+                self.harvest['bozo_detail'] = "outlines MUST have a `text` attribute"
+                sublist['title'] = sublist['url']
+            self.harvest.setdefault('lists', []).append(sublist)
     def _start_title(self, attrs):
         self.expect = 'meta_title'
     _end_title = endExpect
