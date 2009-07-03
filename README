@@ -16,7 +16,7 @@ A dictionary will be returned with several keys:
 `meta`: information about the subscription list
 `feeds`: a list of feeds
 `bozo`: '1' if there is a problem with the list, '0' otherwise.
-`bozo_detail`: an English description if `bozo` is True 
+`bozo_detail`: a description of the problem if `bozo` is True 
 
 Continuing the example:
 
@@ -25,7 +25,7 @@ u'Planet GNOME'
 >>> len(result['feeds'])
 301
 >>> result['feeds'][0].keys()
-['url', 'name']
+['url', 'title']
 
 
 Todo
