@@ -145,6 +145,10 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest['bozo_detail'] = "outlines MUST have a `text` attribute"
                 sublist['title'] = sublist['url']
             self.harvest.setdefault('lists', []).append(sublist)
+        elif attrs.has_key('type') and attrs['type'].lower() == 'rss':
+            # @type='rss' but there's no xmlUrl!
+            self.harvest['bozo'] = 1
+            self.harvest['bozo_detail'] = "an rss outline node is missing an xmlUrl attribute"
     def _start_title(self, attrs):
         self.expect = 'meta_title'
     _end_title = endExpect
