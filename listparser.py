@@ -121,6 +121,19 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                     feed['title'] = attrs['title']
                 else:
                     feed['title'] = feed['url']
+            # Handle feed categories and tags
+            if attrs.has_key('category'):
+                def or_strip(x, y):
+                    return x.strip() or y.strip()
+                tags = [x.strip() for x in attrs['category'].split(',') if x.strip() and '/' not in x]
+                cats = (x.strip() for x in attrs['category'].split(',') if '/' in x)
+                cats = (x.split('/') for x in cats if reduce(or_strip, x.split('/')))
+                cats = (xlist for xlist in cats if reduce(or_strip, xlist))
+                cats = [[y.strip() for y in xlist if y.strip()] for xlist in cats]
+                if tags:
+                    feed['tags'] = tags
+                if cats:
+                    feed['categories'] = cats
             # Fill feed['claims'] up with information that is *purported* to
             # be duplicated from the feed itself.
             for k in ('htmlUrl', 'title', 'description'):
