@@ -16,6 +16,7 @@
 
 __version__ = "0.3"
 
+import copy
 import datetime
 import re
 import urllib2
@@ -55,6 +56,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         xml.sax.handler.ContentHandler.__init__(self)
         self.harvest = {'bozo': 0}
         self.expect = ''
+        self.hierarchy = []
 
     # ErrorHandler functions
     # ----------------------
@@ -134,6 +136,10 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                     feed['tags'] = tags
                 if cats:
                     feed['categories'] = cats
+            if len(self.hierarchy) == 1:
+                feed.setdefault('tags', []).extend(self.hierarchy)
+            if self.hierarchy:
+                feed.setdefault('categories', []).append(copy.copy(self.hierarchy))
             # Fill feed['claims'] up with information that is *purported* to
             # be duplicated from the feed itself.
             for k in ('htmlUrl', 'title', 'description'):
@@ -145,6 +151,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             if not attrs.has_key('url'):
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "`link` and `include` types MUST has a `url` attribute"
+                self.hierarchy.append('')
                 return
             sublist = {'url': attrs['url'].strip()}
             if attrs['type'].lower() == 'link' and not sublist['url'].endswith('.opml'):
@@ -161,6 +168,13 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             # @type='rss' but there's no xmlUrl!
             self.harvest['bozo'] = 1
             self.harvest['bozo_detail'] = "an rss outline node is missing an xmlUrl attribute"
+        elif attrs.has_key('text'):
+            # Assume that this is a grouping node
+            self.hierarchy.append(attrs['text'].strip())
+            return
+        self.hierarchy.append('')
+    def _end_outline(self):
+        self.hierarchy.pop()
     def _start_title(self, attrs):
         self.expect = 'meta_title'
     _end_title = endExpect

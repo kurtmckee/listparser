@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+    Description: Hierarchy 2 (nested groupings)
+    Eval: result['bozo'] == 0
+    Eval: not result['feeds'][0].has_key('tags')
+    Eval: len(result['feeds'][0]['categories']) == 1
+    Eval: result['feeds'][0]['categories'][0] == ['grouping1', 'grouping2']
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline text="grouping1">
+            <outline text="grouping2">
+                <outline text="feedname" type="rss" xmlUrl="http://domain/feed" />
+            </outline>
+        </outline>
+    </body>
+</opml>

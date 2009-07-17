@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+    Description: Hierarchy 4 (hierarchy mixed with @category)
+    Eval: result['bozo'] == 0
+    Eval: 'grouping' in result['feeds'][0]['tags']
+    Eval: 'tag' in result['feeds'][0]['tags']
+    Eval: ['grouping'] in result['feeds'][0]['categories']
+    Eval: ['parent', 'child'] in result['feeds'][0]['categories']
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline text="grouping">
+            <outline category="tag,/parent/child" text="feedname" type="rss" xmlUrl="http://domain/feed" />
+        </outline>
+    </body>
+</opml>
