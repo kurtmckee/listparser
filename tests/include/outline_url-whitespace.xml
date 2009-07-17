@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!--
+    Description: //outline[@type='include']/@url stripped of whitespace
+    Eval: result['bozo'] == 0
+    Eval: result['lists'][0]['url'] == 'http://domain.com/sublist/'
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline text="sublistName" type="include" url=" http://domain.com/sublist/ " />
+    </body>
+</opml>

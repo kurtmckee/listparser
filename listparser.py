@@ -110,7 +110,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "Only `xmlUrl` EXACTLY is valid"
             # This generator expression selects the `xmlUrl` attribute no matter its case
-            feed['url'] = (v for k, v in attrs.items() if k.lower() == "xmlurl").next()
+            feed['url'] = (v.strip() for k, v in attrs.items() if k.lower() == "xmlurl").next()
             # Fill feed['title'] with either @text, @title, or @xmlurl, in that order
             if attrs.has_key('text'):
                 feed['title'] = attrs['text']
@@ -138,7 +138,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             # be duplicated from the feed itself.
             for k in ('htmlUrl', 'title', 'description'):
                 if attrs.has_key(k):
-                    feed.setdefault('claims', {})[k] = attrs[k]
+                    feed.setdefault('claims', {})[k] = attrs[k].strip()
             self.harvest.setdefault('feeds', []).append(feed)
         # Subscription lists
         elif attrs.has_key('type') and attrs['type'].lower() in ('link', 'include'):
@@ -146,11 +146,10 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "`link` and `include` types MUST has a `url` attribute"
                 return
-            sublist = dict()
-            if attrs['type'].lower() == 'link' and not attrs['url'].endswith('.opml'):
+            sublist = {'url': attrs['url'].strip()}
+            if attrs['type'].lower() == 'link' and not sublist['url'].endswith('.opml'):
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "`link` types' `url` attribute MUST end with '.opml'"
-            sublist['url'] = attrs['url']
             if attrs.has_key('text'):
                 sublist['title'] = attrs['text']
             else:
