@@ -2,7 +2,8 @@
 <!--
     Description: //outline/@category (tags 3)
     Eval: result['bozo'] == 0
-    Eval: result['feeds'][0]['tags'] == ['news', 'sports']
+    Eval: 'news' in result['feeds'][0]['tags']
+    Eval: 'sports' in result['feeds'][0]['tags']
     Eval: result['feeds'][0]['categories'][0] == ['news', 'sports']
 -->
 <opml version="2.0">
