@@ -22,9 +22,12 @@ import re
 import urllib2
 import xml.sax
 
-def parse(filename_or_url):
+USER_AGENT = "listparser/%s +http://freshmeat.net/projects/listparser" % (__version__)
+
+def parse(filename_or_url, agent=USER_AGENT):
     try:
-        f = urllib2.urlopen(filename_or_url)
+        request = urllib2.Request(filename_or_url, headers={'User-Agent': agent})
+        f = urllib2.urlopen(request)
     except:
         return {}
     handler = Handler()
