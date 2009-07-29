@@ -44,13 +44,7 @@ def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
     parser.parse(fileobj)
     fileobj.close()
 
-    handler.harvest['headers'] = dict(getattr(fileobj, 'headers', {}))
-    if handler.harvest['headers'].get('etag'):
-        handler.harvest['etag'] = handler.harvest['headers'].get('etag')
-    if handler.harvest['headers'].get('last-modified'):
-        if _rfc822(handler.harvest['headers']['last-modified']):
-            handler.harvest['modified'] = _rfc822(handler.harvest['headers']['last-modified'])
-
+    handler.harvest.update(info)
     if handler.harvest.get('meta', {}).get('created', '').strip():
         d = _rfc822(handler.harvest['meta']['created'].strip())
         if d:
@@ -232,11 +226,21 @@ def _mkfile(obj, agent, etag, modified):
     try:
         request = urllib2.Request(obj, headers=headers)
         opener = urllib2.build_opener(HTTPRedirectHandler)
-        return opener.open(request), {}
+        ret = opener.open(request)
     except urllib2.HTTPError, e:
         return None, {'status': e.code}
     except:
         return None, {}
+
+    info = {'status': 200}
+    info['headers'] = dict(getattr(ret, 'headers', {}))
+    if info['headers'].get('etag'):
+        info['etag'] = info['headers'].get('etag')
+    if info['headers'].get('last-modified'):
+        if _rfc822(info['headers']['last-modified']):
+            info['modified'] = _rfc822(info['headers']['last-modified'])
+    return ret, info
+
 
 def _rfc822(date):
     """Parse RFC 822 dates and times, with one minor
