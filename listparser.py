@@ -24,10 +24,29 @@ import xml.sax
 
 USER_AGENT = "listparser/%s +http://freshmeat.net/projects/listparser" % (__version__)
 
-def parse(filename_or_url, agent=USER_AGENT):
+class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, hdrs, newurl):
+        if code in (301, 302, 303, 307):
+            # keep track somehow
+            pass
+        super(self, HTTPRedirectHandler).redirect_request(req, fp, code, msg, hdrs, newurl)
+
+def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
+    headers = {'User-Agent': agent}
+    if etag:
+        headers['If-None-Match'] = etag
+    if modified:
+        if type(modified) in (str, unicode):
+            headers['If-Modified-Since'] = modified
+        elif type(modified) is datetime.datetime:
+            # It is assumed that `modified` is in UTC time
+            headers['If-Modified-Since'] = modified.strftime('%a, %d %b %Y %H:%M:%S GMT')
     try:
-        request = urllib2.Request(filename_or_url, headers={'User-Agent': agent})
-        f = urllib2.urlopen(request)
+        request = urllib2.Request(filename_or_url, headers=headers)
+        opener = urllib2.build_opener(HTTPRedirectHandler)
+        f = opener.open(request)
+    except urllib2.HTTPError, e:
+        return {'status': e.code}
     except:
         return {}
     handler = Handler()
@@ -36,6 +55,13 @@ def parse(filename_or_url, agent=USER_AGENT):
     parser.setErrorHandler(handler)
     parser.parse(f)
     f.close()
+
+    handler.harvest['headers'] = dict(f.headers)
+    if handler.harvest['headers'].get('etag'):
+        handler.harvest['etag'] = handler.harvest['headers'].get('etag')
+    if handler.harvest['headers'].get('last-modified'):
+        if _rfc822(handler.harvest['headers']['last-modified']):
+            handler.harvest['modified'] = _rfc822(handler.harvest['headers']['last-modified'])
 
     if handler.harvest.get('meta', {}).get('created', '').strip():
         d = _rfc822(handler.harvest['meta']['created'].strip())
