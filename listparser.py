@@ -19,6 +19,7 @@ __version__ = "0.4"
 import copy
 import datetime
 import re
+import StringIO
 import urllib2
 import xml.sax
 
@@ -32,31 +33,18 @@ class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):
         super(self, HTTPRedirectHandler).redirect_request(req, fp, code, msg, hdrs, newurl)
 
 def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
-    headers = {'User-Agent': agent}
-    if etag:
-        headers['If-None-Match'] = etag
-    if modified:
-        if type(modified) in (str, unicode):
-            headers['If-Modified-Since'] = modified
-        elif type(modified) is datetime.datetime:
-            # It is assumed that `modified` is in UTC time
-            headers['If-Modified-Since'] = modified.strftime('%a, %d %b %Y %H:%M:%S GMT')
-    try:
-        request = urllib2.Request(filename_or_url, headers=headers)
-        opener = urllib2.build_opener(HTTPRedirectHandler)
-        f = opener.open(request)
-    except urllib2.HTTPError, e:
-        return {'status': e.code}
-    except:
-        return {}
+    fileobj, info = _mkfile(filename_or_url, agent, etag, modified)
+    if not fileobj:
+        return info
+
     handler = Handler()
     parser = xml.sax.make_parser()
     parser.setContentHandler(handler)
     parser.setErrorHandler(handler)
-    parser.parse(f)
-    f.close()
+    parser.parse(fileobj)
+    fileobj.close()
 
-    handler.harvest['headers'] = dict(f.headers)
+    handler.harvest['headers'] = dict(getattr(fileobj, 'headers', {}))
     if handler.harvest['headers'].get('etag'):
         handler.harvest['etag'] = handler.harvest['headers'].get('etag')
     if handler.harvest['headers'].get('last-modified'):
@@ -222,6 +210,33 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def _start_dateModified(self, attrs):
         self.expect = 'meta_modified'
     _end_dateModified = endExpect
+
+def _mkfile(obj, agent, etag, modified):
+    if hasattr(obj, 'read') and hasattr(obj, 'close'):
+        # It's file-like
+        return obj, {}
+    elif type(obj) in (str, unicode):
+        if not obj.find('://') in (3, 4, 5) or obj.find('\n') != -1:
+            # It's not a URL; make the string a file
+            return StringIO.StringIO(obj), {}
+    # It's a URL
+    headers = {'User-Agent': agent}
+    if etag:
+        headers['If-None-Match'] = etag
+    if modified:
+        if type(modified) in (str, unicode):
+            headers['If-Modified-Since'] = modified
+        elif type(modified) is datetime.datetime:
+            # It is assumed that `modified` is in UTC time
+            headers['If-Modified-Since'] = modified.strftime('%a, %d %b %Y %H:%M:%S GMT')
+    try:
+        request = urllib2.Request(obj, headers=headers)
+        opener = urllib2.build_opener(HTTPRedirectHandler)
+        return opener.open(request), {}
+    except urllib2.HTTPError, e:
+        return None, {'status': e.code}
+    except:
+        return None, {}
 
 def _rfc822(date):
     """Parse RFC 822 dates and times, with one minor
