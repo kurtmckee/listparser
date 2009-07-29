@@ -45,21 +45,6 @@ def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
     fileobj.close()
 
     handler.harvest.update(info)
-    if handler.harvest.get('meta', {}).get('created', '').strip():
-        d = _rfc822(handler.harvest['meta']['created'].strip())
-        if d:
-            handler.harvest['meta']['created_parsed'] = d
-        else:
-            handler.harvest['bozo'] = 1
-            handler.harvest['bozo_detail'] = "dateCreated is not a valid datetime"
-    if handler.harvest.get('meta', {}).get('modified', '').strip():
-        d = _rfc822(handler.harvest['meta']['modified'].strip())
-        if d:
-            handler.harvest['meta']['modified_parsed'] = d
-        else:
-            handler.harvest['bozo'] = 1
-            handler.harvest['bozo_detail'] = "dateModified is not a valid datetime"
-
     return handler.harvest
 
 class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
@@ -200,10 +185,26 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     _end_ownerName = endExpect
     def _start_dateCreated(self, attrs):
         self.expect = 'meta_created'
-    _end_dateCreated = endExpect
+    def _end_dateCreated(self):
+        if self.harvest.get('meta', {}).get('created', '').strip():
+            d = _rfc822(self.harvest['meta']['created'].strip())
+            if d:
+                self.harvest['meta']['created_parsed'] = d
+            else:
+                self.harvest['bozo'] = 1
+                self.harvest['bozo_detail'] = "dateCreated is not a valid datetime"
+        self.expect = ''
     def _start_dateModified(self, attrs):
         self.expect = 'meta_modified'
-    _end_dateModified = endExpect
+    def _end_dateModified(self):
+        if self.harvest.get('meta', {}).get('modified', '').strip():
+            d = _rfc822(self.harvest['meta']['modified'].strip())
+            if d:
+                self.harvest['meta']['modified_parsed'] = d
+            else:
+                self.harvest['bozo'] = 1
+                self.harvest['bozo_detail'] = "dateModified is not a valid datetime"
+        self.expect = ''
 
 def _mkfile(obj, agent, etag, modified):
     if hasattr(obj, 'read') and hasattr(obj, 'close'):
