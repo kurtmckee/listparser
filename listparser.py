@@ -31,6 +31,10 @@ class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):
         result.status = code
         result.newurl = result.geturl()
         return result
+    # The default implementations in urllib2.HTTPRedirectHandler
+    # are identical, so hardcoding a http_error_301 call above
+    # won't affect anything
+    http_error_302 = http_error_303 = http_error_307 = http_error_301
 
 def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
     fileobj, info = _mkfile(filename_or_url, agent, etag, modified)

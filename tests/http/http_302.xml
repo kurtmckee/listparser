@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+    Description: HTTP 302 redirect
+    Status: 302
+    Location: /tests/http/destination.xml
+    Eval: result['status'] == 302
+    Eval: result['href'].endswith('/tests/http/destination.xml')
+    Eval: result['meta']['title'] == 'Redirection destination'
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline text="redirect 302" />
+    </body>
+</opml>

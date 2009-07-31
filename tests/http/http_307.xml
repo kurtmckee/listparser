@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+    Description: HTTP 307 redirect
+    Status: 307
+    Location: /tests/http/destination.xml
+    Eval: result['status'] == 307
+    Eval: result['href'].endswith('/tests/http/destination.xml')
+    Eval: result['meta']['title'] == 'Redirection destination'
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline text="redirect 307" />
+    </body>
+</opml>

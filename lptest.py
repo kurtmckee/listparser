@@ -87,9 +87,11 @@ files = (join(r, f).replace(testpath, '', 1)
             for r, d, files in os.walk(testpath)
             for f in files if f.endswith('.xml'))
 for testfile in files:
-    numtests += 1
     if 'http/destination' in testfile:
+        # destination.xml is the target of four redirect requests
+        numtests += 4
         continue
+    numtests += 1
     description = ''
     evals = []
     openfile = open(join(testpath, testfile))
