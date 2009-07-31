@@ -25,13 +25,27 @@ import listparser
 
 class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_GET(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'text/xml')
-        self.end_headers()
+        status = 200
+        location = u''
+        reply = u''
+        end_directives = False
         f = open(dirname(abspath(__file__)) + self.path, 'r')
         for line in f:
-            self.wfile.write(line)
+            reply += line
+            if not end_directives:
+                if line.strip() == '-->':
+                    end_directives = True
+                elif 'Status:' in line:
+                    status = int(line.strip()[7:])
+                elif 'Location:' in line:
+                    location = line.strip()[9:].strip()
         f.close()
+        self.send_response(status)
+        if location:
+            self.send_header('Location', location)
+        self.send_header('Content-type', 'text/xml')
+        self.end_headers()
+        self.wfile.write(reply)
     def log_request(self, *arg, **karg):
         pass
 
@@ -73,6 +87,9 @@ files = (join(r, f).replace(testpath, '', 1)
             for r, d, files in os.walk(testpath)
             for f in files if f.endswith('.xml'))
 for testfile in files:
+    numtests += 1
+    if 'http/destination' in testfile:
+        continue
     description = ''
     evals = []
     openfile = open(join(testpath, testfile))
@@ -92,7 +109,6 @@ for testfile in files:
     testcase = make_testcase(evals, testfile)
     testcase.__doc__ = '%s: %s' % (testfile, description)
     setattr(TestCases, 'test_%s' % splitext(testfile)[0], testcase)
-    numtests += 1
 
 server = ServerThread(numtests)
 server.start()
