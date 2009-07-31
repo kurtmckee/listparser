@@ -30,7 +30,7 @@ class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):
         if code in (301, 302, 303, 307):
             # keep track somehow
             pass
-        super(self, HTTPRedirectHandler).redirect_request(req, fp, code, msg, hdrs, newurl)
+        return urllib2.HTTPRedirectHandler.redirect_request(self, req, fp, code, msg, hdrs, newurl)
 
 def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
     fileobj, info = _mkfile(filename_or_url, agent, etag, modified)
