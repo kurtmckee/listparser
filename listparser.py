@@ -26,11 +26,11 @@ import xml.sax
 USER_AGENT = "listparser/%s +http://freshmeat.net/projects/listparser" % (__version__)
 
 class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, hdrs, newurl):
-        if code in (301, 302, 303, 307):
-            # keep track somehow
-            pass
-        return urllib2.HTTPRedirectHandler.redirect_request(self, req, fp, code, msg, hdrs, newurl)
+    def http_error_301(self, req, fp, code, msg, hdrs):
+        result = urllib2.HTTPRedirectHandler.http_error_301(self, req, fp, code, msg, hdrs)
+        result.status = code
+        result.newurl = result.geturl()
+        return result
 
 def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
     fileobj, info = _mkfile(filename_or_url, agent, etag, modified)
@@ -233,7 +233,8 @@ def _mkfile(obj, agent, etag, modified):
     except:
         return None, {}
 
-    info = {'status': 200}
+    info = {'status': getattr(ret, 'status', 200)}
+    info['href'] = getattr(ret, 'newurl', obj)
     info['headers'] = dict(getattr(ret, 'headers', {}))
     if info['headers'].get('etag'):
         info['etag'] = info['headers'].get('etag')
