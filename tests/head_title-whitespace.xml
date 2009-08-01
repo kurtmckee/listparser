@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+    Description: /opml/head/title stripped of whitespace
+    Eval: result['bozo'] == 0
+    Eval: result['meta']['title'] == u'listtitle'
+-->
+<opml version="2.0">
+    <head>
+        <title>
+            listtitle
+        </title>
+    </head>
+    <body>
+        <outline text="node" />
+    </body>
+</opml>

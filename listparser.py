@@ -164,7 +164,10 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self.hierarchy.pop()
     def _start_title(self, attrs):
         self.expect = 'meta_title'
-    _end_title = endExpect
+    def _end_title(self):
+        if self.harvest.get('meta', {}).get('title', False):
+            self.harvest['meta']['title'] = self.harvest['meta']['title'].strip()
+        self.expect = ''
     def _start_ownerId(self, attrs):
         self.expect = 'meta_author_url'
     _end_ownerId = endExpect
