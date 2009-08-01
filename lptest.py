@@ -39,6 +39,14 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                     status = int(line.strip()[7:])
                 elif 'Location:' in line:
                     location = line.strip()[9:].strip()
+                elif 'ETag:' in line:
+                    etag = line.strip()[5:].strip()
+                    if self.headers['if-none-match'] == etag:
+                        status = 304
+                elif 'Modified:' in line:
+                    modified = line.strip()[10:].strip()
+                    if self.headers['if-modified-since'] == modified:
+                        status = 304
         f.close()
         self.send_response(status)
         if location:
@@ -67,16 +75,17 @@ class TestCases(unittest.TestCase):
         pass
     def tearDown(self):
         pass
-    def worker(self, evals, testfile):
-        result = listparser.parse('http://localhost:8091/tests/' + testfile)
+    def worker(self, evals, testfile, etag, modified):
+        result = listparser.parse('http://localhost:8091/tests/' + testfile,
+            etag=etag, modified=modified)
         map(self.assert_, map(eval, evals))
 
-def make_testcase(evals, testfile):
+def make_testcase(evals, testfile, etag, modified):
     # HACK: Only necessary in order to ensure that `evals` is evaluated
     # for every testcase, not just for the last one in the loop below
     # (where, apparently, `lambda` would cause it to be evaluated only
     # once at the end of the loop, containing the final testcase' values).
-    return lambda self: self.worker(evals, testfile)
+    return lambda self: self.worker(evals, testfile, etag, modified)
 
 numtests = 0
 testpath = join(dirname(abspath(__file__)), 'tests/')
@@ -93,6 +102,7 @@ for testfile in files:
         continue
     numtests += 1
     description = ''
+    etag = modified = None
     evals = []
     openfile = open(join(testpath, testfile))
     for line in openfile:
@@ -103,12 +113,16 @@ for testfile in files:
             description = line.split('Description:')[1].strip()
         if 'Eval:' in line:
             evals.append(line.split('Eval:')[1].strip())
+        if 'ETag:' in line:
+            etag = line.strip()[5:].strip()
+        if 'Modified:' in line:
+            modified = line.strip()[9:].strip()
     openfile.close()
     if not description:
         raise ValueError("Description not found in test %s" % testfile)
     if not evals:
         raise ValueError("Eval not found in test %s" % testfile)
-    testcase = make_testcase(evals, testfile)
+    testcase = make_testcase(evals, testfile, etag, modified)
     testcase.__doc__ = '%s: %s' % (testfile, description)
     setattr(TestCases, 'test_%s' % splitext(testfile)[0], testcase)
 
