@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+    Description: HTTP 404
+    Status: 404
+    Eval: result['status'] == 404
+    Eval: result['meta']['title'] == 'Found despite an HTTP 404'
+-->
+<opml version="2.0">
+    <head>
+        <title>Found despite an HTTP 404</title>
+    </head>
+    <body>
+        <outline text="node" />
+    </body>
+</opml>

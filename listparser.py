@@ -36,6 +36,13 @@ class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):
     # won't affect anything
     http_error_302 = http_error_303 = http_error_307 = http_error_301
 
+class HTTPErrorHandler(urllib2.HTTPDefaultErrorHandler):
+    def http_error_default(self, req, fp, code, msg, hdrs):
+        # The default implementation just raises HTTPError.
+        # Forget that.
+        fp.status = code
+        return fp
+
 def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
     fileobj, info = _mkfile(filename_or_url, agent, etag, modified)
     if not fileobj:
@@ -230,7 +237,7 @@ def _mkfile(obj, agent, etag, modified):
             headers['If-Modified-Since'] = modified.strftime('%a, %d %b %Y %H:%M:%S GMT')
     try:
         request = urllib2.Request(obj, headers=headers)
-        opener = urllib2.build_opener(HTTPRedirectHandler)
+        opener = urllib2.build_opener(HTTPRedirectHandler, HTTPErrorHandler)
         ret = opener.open(request)
     except urllib2.HTTPError, e:
         return None, {'status': e.code}
