@@ -25,24 +25,6 @@ import xml.sax
 
 USER_AGENT = "listparser/%s +http://freshmeat.net/projects/listparser" % (__version__)
 
-class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):
-    def http_error_301(self, req, fp, code, msg, hdrs):
-        result = urllib2.HTTPRedirectHandler.http_error_301(self, req, fp, code, msg, hdrs)
-        result.status = code
-        result.newurl = result.geturl()
-        return result
-    # The default implementations in urllib2.HTTPRedirectHandler
-    # are identical, so hardcoding a http_error_301 call above
-    # won't affect anything
-    http_error_302 = http_error_303 = http_error_307 = http_error_301
-
-class HTTPErrorHandler(urllib2.HTTPDefaultErrorHandler):
-    def http_error_default(self, req, fp, code, msg, hdrs):
-        # The default implementation just raises HTTPError.
-        # Forget that.
-        fp.status = code
-        return fp
-
 def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
     fileobj, info = _mkfile(filename_or_url, agent, etag, modified)
     if not fileobj:
@@ -66,7 +48,6 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self.hierarchy = []
 
     # ErrorHandler functions
-    # ----------------------
     def warning(self, exception):
         self.harvest['bozo'] = 1
         self.harvest['bozo_detail'] = repr(exception)
@@ -75,7 +56,6 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     fatalError = warning
 
     # ContentHandler functions
-    # ------------------------
     def startElement(self, name, attrs):
         if hasattr(self, '_start_%s' % name):
             getattr(self, '_start_%s' % name)(attrs)
@@ -216,6 +196,24 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "dateModified is not a valid datetime"
         self.expect = ''
+
+class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):
+    def http_error_301(self, req, fp, code, msg, hdrs):
+        result = urllib2.HTTPRedirectHandler.http_error_301(self, req, fp, code, msg, hdrs)
+        result.status = code
+        result.newurl = result.geturl()
+        return result
+    # The default implementations in urllib2.HTTPRedirectHandler
+    # are identical, so hardcoding a http_error_301 call above
+    # won't affect anything
+    http_error_302 = http_error_303 = http_error_307 = http_error_301
+
+class HTTPErrorHandler(urllib2.HTTPDefaultErrorHandler):
+    def http_error_default(self, req, fp, code, msg, hdrs):
+        # The default implementation just raises HTTPError.
+        # Forget that.
+        fp.status = code
+        return fp
 
 def _mkfile(obj, agent, etag, modified):
     if hasattr(obj, 'read') and hasattr(obj, 'close'):
