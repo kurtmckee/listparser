@@ -20,6 +20,7 @@ import threading
 import unittest
 import BaseHTTPServer
 import SimpleHTTPServer
+import StringIO
 
 import listparser
 
@@ -75,6 +76,20 @@ class TestCases(unittest.TestCase):
         pass
     def tearDown(self):
         pass
+    def testStringInput(self):
+        t = """<?xml version="1.0"?><opml version="2.0"><head><title>
+        String Input Test</title></head><body><outline text="node" />
+        </body></opml>"""
+        result = listparser.parse(t)
+        self.assert_(result['bozo'] == 0)
+        self.assert_(result['meta']['title'] == u'String Input Test')
+    def testFileishInput(self):
+        t = """<?xml version="1.0"?><opml version="2.0"><head><title>
+        Fileish Input Test</title></head><body><outline text="node" />
+        </body></opml>"""
+        result = listparser.parse(StringIO.StringIO(t))
+        self.assert_(result['bozo'] == 0)
+        self.assert_(result['meta']['title'] == u'Fileish Input Test')
     def worker(self, evals, testfile, etag, modified):
         result = listparser.parse('http://localhost:8091/tests/' + testfile,
             etag=etag, modified=modified)
