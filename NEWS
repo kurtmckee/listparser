@@ -1,3 +1,11 @@
+v0.5 (1 Aug 2009) "Going green"
+    * Send a (configurable) User-Agent header
+    * Support HTTP ETag and Last-Modified headers
+    * Support HTTP redirects and errors
+    * Support parsing of strings and file-like objects (not just URLs)
+    * The subscription list title is now stripped of whitespace
+    * Added 11 more tests
+
 v0.4 (18 July 2009) "07/18,29"
     * Support categories and tags specified in @category
     * Support categorization using nested <outline> tags
