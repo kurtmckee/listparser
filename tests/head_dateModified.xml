@@ -2,6 +2,7 @@
 <!--
     Description: /opml/head/dateModified
     Eval: result['bozo'] == 0
+    Eval: result['meta']['modified'] == 'Sun, 21 Jun 2009 12:00:00 GMT'
     Eval: result['meta'].get('modified_parsed', False)
 -->
 <opml version="2.0">
