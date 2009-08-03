@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <!--
-    Description: //outline/@title
+    Description: //outline/@title used when @text is missing
     Eval: result['bozo'] == 1
     Eval: result['feeds'][0]['title'] == 'feedname'
 -->
 <opml version="2.0">
     <head></head>
     <body>
-        <outline title="feedname" type="rss" xmlUrl="http://domain/feed" />
+        <outline title="feedname" type="rss" xmlUrl="http://domain.com/feed" />
     </body>
 </opml>
