@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+    Description: /opml/head/ownerName stripped of whitespace
+    Eval: result['bozo'] == 0
+    Eval: result['meta']['author']['name'] == 'authorname'
+-->
+<opml version="2.0">
+    <head>
+        <ownerName>
+            authorname
+        </ownerName>
+    </head>
+    <body>
+        <outline text="node" />
+    </body>
+</opml>

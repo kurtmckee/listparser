@@ -71,8 +71,6 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         # `...['email']['domain']` will be filled with `content`.
         node = reduce(lambda x, y: x.setdefault(y, {}), self.expect.split('_')[:-1], self.harvest)
         node[self.expect.split('_')[-1]] = node.setdefault(self.expect.split('_')[-1], '') + content
-    def endExpect(self):
-        self.expect = ''
     def _start_opml(self, attrs):
         self.harvest['version'] = "opml"
         if attrs.has_key('version'):
@@ -102,12 +100,12 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             feed['url'] = (v.strip() for k, v in attrs.items() if k.lower() == "xmlurl").next()
             # Fill feed['title'] with either @text, @title, or @xmlurl, in that order
             if attrs.has_key('text'):
-                feed['title'] = attrs['text']
+                feed['title'] = attrs['text'].strip()
             else:
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "An <outline> has no `text` attribute"
                 if attrs.has_key('title'):
-                    feed['title'] = attrs['title']
+                    feed['title'] = attrs['title'].strip()
                 else:
                     feed['title'] = feed['url']
             # Handle feed categories and tags
@@ -145,7 +143,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "`link` types' `url` attribute MUST end with '.opml'"
             if attrs.has_key('text'):
-                sublist['title'] = attrs['text']
+                sublist['title'] = attrs['text'].strip()
             else:
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "outlines MUST have a `text` attribute"
@@ -170,17 +168,27 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self.expect = ''
     def _start_ownerId(self, attrs):
         self.expect = 'meta_author_url'
-    _end_ownerId = endExpect
+    def _end_ownerId(self):
+        if self.harvest.get('meta', {}).get('author', {}).get('url', False):
+            self.harvest['meta']['author']['url'] = self.harvest['meta']['author']['url'].strip()
+        self.expect = ''
     def _start_ownerEmail(self, attrs):
         self.expect = 'meta_author_email'
-    _end_ownerEmail = endExpect
+    def _end_ownerEmail(self):
+        if self.harvest.get('meta', {}).get('author', {}).get('email', False):
+            self.harvest['meta']['author']['email'] = self.harvest['meta']['author']['email'].strip()
+        self.expect = ''
     def _start_ownerName(self, attrs):
         self.expect = 'meta_author_name'
-    _end_ownerName = endExpect
+    def _end_ownerName(self):
+        if self.harvest.get('meta', {}).get('author', {}).get('name', False):
+            self.harvest['meta']['author']['name'] = self.harvest['meta']['author']['name'].strip()
+        self.expect = ''
     def _start_dateCreated(self, attrs):
         self.expect = 'meta_created'
     def _end_dateCreated(self):
         if self.harvest.get('meta', {}).get('created', '').strip():
+            self.harvest['meta']['created'] = self.harvest['meta']['created'].strip()
             d = _rfc822(self.harvest['meta']['created'].strip())
             if d:
                 self.harvest['meta']['created_parsed'] = d
@@ -192,6 +200,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self.expect = 'meta_modified'
     def _end_dateModified(self):
         if self.harvest.get('meta', {}).get('modified', '').strip():
+            self.harvest['meta']['modified'] = self.harvest['meta']['modified'].strip()
             d = _rfc822(self.harvest['meta']['modified'].strip())
             if d:
                 self.harvest['meta']['modified_parsed'] = d
