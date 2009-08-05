@@ -157,6 +157,12 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             # Assume that this is a grouping node
             self.hierarchy.append(attrs['text'].strip())
             return
+        elif attrs.has_key('title'):
+            # Assume that this is a grouping node
+            self.harvest['bozo'] = 1
+            self.harvest['bozo_detail'] = "outlines MUST have a `text` attribute"
+            self.hierarchy.append(attrs['title'].strip())
+            return
         self.hierarchy.append('')
     def _end_outline(self):
         self.hierarchy.pop()

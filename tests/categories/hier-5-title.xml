@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+    The Wordpress hierarchy uses @title instead of @text.
+
+    Description: Hierarchy 5 (@title used when @text is missing)
+    Eval: result['bozo'] == 1
+    Eval: 'wordpress' in result['feeds'][0]['tags']
+    Eval: ['wordpress'] in result['feeds'][0]['categories']
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline title="wordpress">
+            <outline text="feedname" type="rss" xmlUrl="http://domain/feed" />
+        </outline>
+    </body>
+</opml>
