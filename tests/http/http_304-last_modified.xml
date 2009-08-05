@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+    This file will actually be tested twice: once with `modified` set
+    to a string, and a second time with `modified` set to a datetime.
+
+    Description: HTTP 304 Not Modified (Last-Modified)
+    Modified: Wed, 05 Aug 2009 12:35:00 GMT
+    Eval: result['status'] == 304
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline text="node" />
+    </body>
+</opml>

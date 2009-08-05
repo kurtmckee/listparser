@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import datetime # required by evals
 import os
 from os.path import abspath, dirname, join, splitext
 import threading
@@ -27,7 +28,7 @@ import listparser
 class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_GET(self):
         status = 200
-        location = u''
+        location = etag = modified = None
         reply = u''
         end_directives = False
         f = open(dirname(abspath(__file__)) + self.path, 'r')
@@ -42,16 +43,20 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                     location = line.strip()[9:].strip()
                 elif 'ETag:' in line:
                     etag = line.strip()[5:].strip()
-                    if self.headers['if-none-match'] == etag:
+                    if self.headers.get('if-none-match') == etag:
                         status = 304
                 elif 'Modified:' in line:
                     modified = line.strip()[10:].strip()
-                    if self.headers['if-modified-since'] == modified:
+                    if self.headers.get('if-modified-since') == modified:
                         status = 304
         f.close()
         self.send_response(status)
         if location:
             self.send_header('Location', location)
+        if etag:
+            self.send_header('ETag', etag)
+        if modified:
+            self.send_header('Last-Modified', modified)
         self.send_header('Content-type', 'text/xml')
         self.end_headers()
         self.wfile.write(reply)
@@ -115,7 +120,12 @@ for testfile in files:
         # destination.xml is the target of four redirect requests
         numtests += 4
         continue
-    numtests += 1
+    elif 'http/http_304-last_modified' in testfile:
+        # http_304-last_modified.xml must be called twice:
+        # once with `modified` as a string, and again as a datetime
+        numtests += 2
+    else:
+        numtests += 1
     description = ''
     etag = modified = None
     evals = []
@@ -128,18 +138,27 @@ for testfile in files:
             description = line.split('Description:')[1].strip()
         if 'Eval:' in line:
             evals.append(line.split('Eval:')[1].strip())
-        if 'ETag:' in line:
-            etag = line.strip()[5:].strip()
-        if 'Modified:' in line:
-            modified = line.strip()[9:].strip()
+        if 'http/http_304' in testfile:
+            if 'ETag:' in line:
+                etag = line.strip()[5:].strip()
+            if 'Modified:' in line:
+                modified = line.strip()[9:].strip()
     openfile.close()
     if not description:
         raise ValueError("Description not found in test %s" % testfile)
     if not evals:
         raise ValueError("Eval not found in test %s" % testfile)
-    testcase = make_testcase(evals, testfile, etag, modified)
-    testcase.__doc__ = '%s: %s' % (testfile, description)
-    setattr(TestCases, 'test_%s' % splitext(testfile)[0], testcase)
+    if 'http/http_304-last_modified' in testfile:
+        testcase = make_testcase(evals, testfile, etag, modified)
+        testcase.__doc__ = '%s: %s [string]' % (testfile, description)
+        setattr(TestCases, 'test_%s_1' % splitext(testfile)[0], testcase)
+        testcase = make_testcase(evals, testfile, etag, listparser._rfc822(modified))
+        testcase.__doc__ = '%s: %s [datetime]' % (testfile, description)
+        setattr(TestCases, 'test_%s_2' % splitext(testfile)[0], testcase)
+    else:
+        testcase = make_testcase(evals, testfile, etag, modified)
+        testcase.__doc__ = '%s: %s' % (testfile, description)
+        setattr(TestCases, 'test_%s' % splitext(testfile)[0], testcase)
 
 server = ServerThread(numtests)
 server.start()

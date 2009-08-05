@@ -1,9 +1,8 @@
 <?xml version="1.0"?>
 <!--
-    Description: HTTP ETag
+    Description: HTTP 304 Not Modified (ETag)
     ETag: "12345"
-    Eval: result['bozo'] == 0
-    Eval: result['etag'] == '"12345"'
+    Eval: result['status'] == 304
 -->
 <opml version="2.0">
     <head></head>

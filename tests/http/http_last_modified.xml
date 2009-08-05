@@ -2,7 +2,8 @@
 <!--
     Description: HTTP Last-Modified
     Modified: Fri, 31 Jul 2009 11:59:00 GMT
-    Eval: result['status'] == 304
+    Eval: result['bozo'] == 0
+    Eval: type(result['modified']) is datetime.datetime
 -->
 <opml version="2.0">
     <head></head>
