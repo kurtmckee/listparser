@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+    Wordpress uses type="link" when referring to feeds.
+    Luckily, @xmlUrl tips off that this is a feed.
+
+    Description: //outline[@type='link'] (but @xmlUrl is included to mean it's a feed)
+    Eval: result['bozo'] == 1
+    Eval: len(result['feeds']) == 1
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline text="feedname" type="link" xmlUrl="http://domain.com/feed" />
+    </body>
+</opml>
