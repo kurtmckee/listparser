@@ -249,8 +249,6 @@ def _mkfile(obj, agent, etag, modified):
         request = urllib2.Request(obj, headers=headers)
         opener = urllib2.build_opener(HTTPRedirectHandler, HTTPErrorHandler)
         ret = opener.open(request)
-    except urllib2.HTTPError, e:
-        return None, {'status': e.code}
     except:
         return None, {}
 
