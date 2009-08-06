@@ -104,12 +104,12 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.hierarchy.append('')
                 return
             # Fill feed['title'] with either @text, @title, or @xmlurl, in that order
-            if attrs.has_key('text'):
+            if attrs.has_key('text') and attrs.get('text', '').strip():
                 feed['title'] = attrs['text'].strip()
             else:
                 self.harvest['bozo'] = 1
-                self.harvest['bozo_detail'] = "An <outline> has no `text` attribute"
-                if attrs.has_key('title'):
+                self.harvest['bozo_detail'] = "An <outline> has a missing or empty `text` attribute"
+                if attrs.has_key('title') and attrs.get('title', '').strip():
                     feed['title'] = attrs['title'].strip()
                 else:
                     feed['title'] = feed['url']
