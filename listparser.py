@@ -46,7 +46,6 @@ def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
     parser.parse(fileobj)
     fileobj.close()
 
-    handler.harvest.update(info)
     return handler.harvest
 
 class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
