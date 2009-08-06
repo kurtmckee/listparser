@@ -26,11 +26,20 @@ import xml.sax
 USER_AGENT = "listparser/%s +http://freshmeat.net/projects/listparser" % (__version__)
 
 def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
+    guarantees = {
+        'bozo': 0,
+        'feeds': [],
+        'lists': [],
+        'meta': {},
+        'version': None,
+    }
     fileobj, info = _mkfile(filename_or_url, agent, etag, modified)
+    guarantees.update(info)
     if not fileobj:
-        return info
+        return guarantees
 
     handler = Handler()
+    handler.harvest.update(guarantees)
     parser = xml.sax.make_parser()
     parser.setContentHandler(handler)
     parser.setErrorHandler(handler)
@@ -43,7 +52,7 @@ def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
 class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def __init__(self):
         xml.sax.handler.ContentHandler.__init__(self)
-        self.harvest = {'bozo': 0}
+        self.harvest = {}
         self.expect = ''
         self.hierarchy = []
 

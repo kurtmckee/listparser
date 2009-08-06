@@ -4,7 +4,7 @@
 
     Description: //outline/@xmlUrl is empty
     Eval: result['bozo'] == 1
-    Eval: result.has_key('feeds') == False
+    Eval: len(result['feeds']) == 0
 -->
 <opml version="2.0">
     <head></head>
