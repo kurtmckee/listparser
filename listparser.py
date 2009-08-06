@@ -155,7 +155,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             if attrs['type'].lower() == 'link' and not sublist['url'].endswith('.opml'):
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "`link` types' `url` attribute MUST end with '.opml'"
-            if attrs.has_key('text'):
+            if attrs.get('text', '').strip():
                 sublist['title'] = attrs['text'].strip()
             else:
                 self.harvest['bozo'] = 1

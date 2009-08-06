@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!--
+    Description: //outline[@type='link']/@url used when @text is effectively empty
+    Eval: result['bozo'] == 1
+    Eval: result['lists'][0]['title'] == 'http://domain.com/sublist.opml'
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline text=" " type="link" url="http://domain.com/sublist.opml" />
+    </body>
+</opml>
