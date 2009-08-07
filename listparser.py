@@ -143,7 +143,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             for k in ('htmlUrl', 'title', 'description'):
                 if attrs.has_key(k):
                     feed.setdefault('claims', {})[k] = attrs[k].strip()
-            self.harvest.setdefault('feeds', []).append(feed)
+            self.harvest['feeds'].append(feed)
         # Subscription lists
         elif attrs.has_key('type') and attrs['type'].lower() in ('link', 'include'):
             if not attrs.has_key('url'):
@@ -161,7 +161,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_detail'] = "outlines MUST have a `text` attribute"
                 sublist['title'] = sublist['url']
-            self.harvest.setdefault('lists', []).append(sublist)
+            self.harvest['lists'].append(sublist)
         elif attrs.has_key('type') and attrs['type'].lower() == 'rss':
             # @type='rss' but there's no xmlUrl!
             self.harvest['bozo'] = 1
@@ -182,31 +182,31 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def _start_title(self, attrs):
         self.expect = 'meta_title'
     def _end_title(self):
-        if self.harvest.get('meta', {}).get('title', False):
+        if self.harvest['meta'].get('title', False):
             self.harvest['meta']['title'] = self.harvest['meta']['title'].strip()
         self.expect = ''
     def _start_ownerId(self, attrs):
         self.expect = 'meta_author_url'
     def _end_ownerId(self):
-        if self.harvest.get('meta', {}).get('author', {}).get('url', False):
+        if self.harvest['meta'].get('author', {}).get('url', False):
             self.harvest['meta']['author']['url'] = self.harvest['meta']['author']['url'].strip()
         self.expect = ''
     def _start_ownerEmail(self, attrs):
         self.expect = 'meta_author_email'
     def _end_ownerEmail(self):
-        if self.harvest.get('meta', {}).get('author', {}).get('email', False):
+        if self.harvest['meta'].get('author', {}).get('email', False):
             self.harvest['meta']['author']['email'] = self.harvest['meta']['author']['email'].strip()
         self.expect = ''
     def _start_ownerName(self, attrs):
         self.expect = 'meta_author_name'
     def _end_ownerName(self):
-        if self.harvest.get('meta', {}).get('author', {}).get('name', False):
+        if self.harvest['meta'].get('author', {}).get('name', False):
             self.harvest['meta']['author']['name'] = self.harvest['meta']['author']['name'].strip()
         self.expect = ''
     def _start_dateCreated(self, attrs):
         self.expect = 'meta_created'
     def _end_dateCreated(self):
-        if self.harvest.get('meta', {}).get('created', '').strip():
+        if self.harvest['meta'].get('created', '').strip():
             self.harvest['meta']['created'] = self.harvest['meta']['created'].strip()
             d = _rfc822(self.harvest['meta']['created'].strip())
             if d:
@@ -218,7 +218,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def _start_dateModified(self, attrs):
         self.expect = 'meta_modified'
     def _end_dateModified(self):
-        if self.harvest.get('meta', {}).get('modified', '').strip():
+        if self.harvest['meta'].get('modified', '').strip():
             self.harvest['meta']['modified'] = self.harvest['meta']['modified'].strip()
             d = _rfc822(self.harvest['meta']['modified'].strip())
             if d:
