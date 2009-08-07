@@ -250,10 +250,12 @@ def _mkfile(obj, agent, etag, modified):
     if hasattr(obj, 'read') and hasattr(obj, 'close'):
         # It's file-like
         return obj, {}
-    elif type(obj) in (str, unicode):
-        if not obj.find('://') in (3, 4, 5) or obj.find('\n') != -1:
-            # It's not a URL; make the string a file
-            return StringIO.StringIO(obj), {}
+    elif not isinstance(obj, (str, unicode)):
+        # This isn't a known-parsable object
+        return None, {'bozo': 1, 'bozo_exception': 'unparsable object'}
+    if obj.find('\n') != -1 or not obj.find('://') in (3, 4, 5):
+        # It's not a URL; make the string a file
+        return StringIO.StringIO(obj), {}
     # It's a URL
     headers = {'User-Agent': agent}
     if etag:

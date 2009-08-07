@@ -81,6 +81,9 @@ class TestCases(unittest.TestCase):
         pass
     def tearDown(self):
         pass
+    def testUnparsableObject(self):
+        result = listparser.parse(True)
+        self.assert_(result['bozo'] == 1)
     def testStringInput(self):
         t = """<?xml version="1.0"?><opml version="2.0"><head><title>
         String Input Test</title></head><body><outline text="node" />
