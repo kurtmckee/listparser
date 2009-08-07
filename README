@@ -14,11 +14,12 @@ Usage
 ... 'http://github.com/kurtmckee/listparser/raw/master/project.opml')
 
 A dictionary will be returned with several keys:
-`meta`: information about the subscription list
+`meta`: a dictionary of information about the subscription list
 `feeds`: a list of feeds
 `lists`: a list of subscription lists
-`bozo`: '1' if there is a problem with the list, '0' otherwise
-`bozo_exception`: a description of the problem if `bozo` is True 
+`version`: an OPML version identifier
+`bozo`: 1 if there is a problem with the list, 0 otherwise
+`bozo_exception`: (if `bozo` is 1) a description of the problem
 
 Continuing the example:
 

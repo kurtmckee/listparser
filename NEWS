@@ -1,3 +1,9 @@
+v0.6 (7 Aug 2009) "Hatchet Hotel"
+    * Certain return result elements are now guaranteed
+    * `bozo_detail` has been renamed `bozo_exception`
+    * Better support for Wordpress' wp-links-opml.php output
+    * Added 22 new tests (and modified several others)
+
 v0.5 (1 Aug 2009) "Going green"
     * Send a (configurable) User-Agent header
     * Support HTTP ETag and Last-Modified headers
