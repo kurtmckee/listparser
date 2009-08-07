@@ -58,7 +58,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     # ErrorHandler functions
     def warning(self, exception):
         self.harvest['bozo'] = 1
-        self.harvest['bozo_detail'] = repr(exception)
+        self.harvest['bozo_exception'] = repr(exception)
         return
     error = warning
     fatalError = warning
@@ -88,27 +88,27 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest['version'] = "opml2"
             else:
                 self.harvest['bozo'] = 1
-                self.harvest['bozo_detail'] = "Unknown OPML version"
+                self.harvest['bozo_exception'] = "Unknown OPML version"
         else:
             self.harvest['bozo'] = 1
-            self.harvest['bozo_detail'] = "<opml> MUST have a version attribute"
+            self.harvest['bozo_exception'] = "<opml> MUST have a version attribute"
     def _start_outline(self, attrs):
         if 'xmlurl' in (i.lower() for i in attrs.keys()):
             feed = dict()
             if not attrs.has_key('type'):
                 self.harvest['bozo'] = 1
-                self.harvest['bozo_detail'] = "<outline> MUST have a `type` attribute"
+                self.harvest['bozo_exception'] = "<outline> MUST have a `type` attribute"
             elif attrs['type'].lower() != 'rss':
                 self.harvest['bozo'] = 1
-                self.harvest['bozo_detail'] = "//outline/@type is not recognized"
+                self.harvest['bozo_exception'] = "//outline/@type is not recognized"
             if not attrs.has_key('xmlUrl'):
                 self.harvest['bozo'] = 1
-                self.harvest['bozo_detail'] = "Only `xmlUrl` EXACTLY is valid"
+                self.harvest['bozo_exception'] = "Only `xmlUrl` EXACTLY is valid"
             # This generator expression selects the `xmlUrl` attribute no matter its case
             feed['url'] = (v.strip() for k, v in attrs.items() if k.lower() == "xmlurl").next()
             if not feed['url']:
                 self.harvest['bozo'] = 1
-                self.harvest['bozo_detail'] = "`xmlUrl` is empty!"
+                self.harvest['bozo_exception'] = "`xmlUrl` is empty!"
                 self.hierarchy.append('')
                 return
             # Fill feed['title'] with either @text, @title, or @xmlurl, in that order
@@ -116,7 +116,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 feed['title'] = attrs['text'].strip()
             else:
                 self.harvest['bozo'] = 1
-                self.harvest['bozo_detail'] = "An <outline> has a missing or empty `text` attribute"
+                self.harvest['bozo_exception'] = "An <outline> has a missing or empty `text` attribute"
                 if attrs.has_key('title') and attrs.get('title', '').strip():
                     feed['title'] = attrs['title'].strip()
                 else:
@@ -148,24 +148,24 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         elif attrs.has_key('type') and attrs['type'].lower() in ('link', 'include'):
             if not attrs.has_key('url'):
                 self.harvest['bozo'] = 1
-                self.harvest['bozo_detail'] = "`link` and `include` types MUST has a `url` attribute"
+                self.harvest['bozo_exception'] = "`link` and `include` types MUST has a `url` attribute"
                 self.hierarchy.append('')
                 return
             sublist = {'url': attrs['url'].strip()}
             if attrs['type'].lower() == 'link' and not sublist['url'].endswith('.opml'):
                 self.harvest['bozo'] = 1
-                self.harvest['bozo_detail'] = "`link` types' `url` attribute MUST end with '.opml'"
+                self.harvest['bozo_exception'] = "`link` types' `url` attribute MUST end with '.opml'"
             if attrs.get('text', '').strip():
                 sublist['title'] = attrs['text'].strip()
             else:
                 self.harvest['bozo'] = 1
-                self.harvest['bozo_detail'] = "outlines MUST have a `text` attribute"
+                self.harvest['bozo_exception'] = "outlines MUST have a `text` attribute"
                 sublist['title'] = sublist['url']
             self.harvest['lists'].append(sublist)
         elif attrs.has_key('type') and attrs['type'].lower() == 'rss':
             # @type='rss' but there's no xmlUrl!
             self.harvest['bozo'] = 1
-            self.harvest['bozo_detail'] = "an rss outline node is missing an xmlUrl attribute"
+            self.harvest['bozo_exception'] = "an rss outline node is missing an xmlUrl attribute"
         elif attrs.has_key('text'):
             # Assume that this is a grouping node
             self.hierarchy.append(attrs['text'].strip())
@@ -173,7 +173,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         elif attrs.has_key('title'):
             # Assume that this is a grouping node
             self.harvest['bozo'] = 1
-            self.harvest['bozo_detail'] = "outlines MUST have a `text` attribute"
+            self.harvest['bozo_exception'] = "outlines MUST have a `text` attribute"
             self.hierarchy.append(attrs['title'].strip())
             return
         self.hierarchy.append('')
@@ -213,7 +213,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest['meta']['created_parsed'] = d
             else:
                 self.harvest['bozo'] = 1
-                self.harvest['bozo_detail'] = "dateCreated is not a valid datetime"
+                self.harvest['bozo_exception'] = "dateCreated is not a valid datetime"
         self.expect = ''
     def _start_dateModified(self, attrs):
         self.expect = 'meta_modified'
@@ -225,7 +225,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest['meta']['modified_parsed'] = d
             else:
                 self.harvest['bozo'] = 1
-                self.harvest['bozo_detail'] = "dateModified is not a valid datetime"
+                self.harvest['bozo_exception'] = "dateModified is not a valid datetime"
         self.expect = ''
 
 class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):

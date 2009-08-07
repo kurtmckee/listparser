@@ -18,7 +18,7 @@ A dictionary will be returned with several keys:
 `feeds`: a list of feeds
 `lists`: a list of subscription lists
 `bozo`: '1' if there is a problem with the list, '0' otherwise
-`bozo_detail`: a description of the problem if `bozo` is True 
+`bozo_exception`: a description of the problem if `bozo` is True 
 
 Continuing the example:
 
