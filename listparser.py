@@ -26,13 +26,13 @@ import xml.sax
 USER_AGENT = "listparser/%s +http://freshmeat.net/projects/listparser" % (__version__)
 
 def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
-    guarantees = {
+    guarantees = SuperDict({
         'bozo': 0,
         'feeds': [],
         'lists': [],
-        'meta': {},
+        'meta': SuperDict(),
         'version': None,
-    }
+    })
     fileobj, info = _mkfile(filename_or_url, agent, etag, modified)
     guarantees.update(info)
     if not fileobj:
@@ -51,7 +51,7 @@ def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
 class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def __init__(self):
         xml.sax.handler.ContentHandler.__init__(self)
-        self.harvest = {}
+        self.harvest = SuperDict()
         self.expect = ''
         self.hierarchy = []
 
@@ -77,7 +77,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         # then after these next lines, node will point to the nested dictionary
         # `self.harvest['userinfo']['contact']['email']`, and
         # `...['email']['domain']` will be filled with `content`.
-        node = reduce(lambda x, y: x.setdefault(y, {}), self.expect.split('_')[:-1], self.harvest)
+        node = reduce(lambda x, y: x.setdefault(y, SuperDict()), self.expect.split('_')[:-1], self.harvest)
         node[self.expect.split('_')[-1]] = node.setdefault(self.expect.split('_')[-1], '') + content
     def _start_opml(self, attrs):
         self.harvest['version'] = "opml"
@@ -94,7 +94,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             self.harvest['bozo_exception'] = "<opml> MUST have a version attribute"
     def _start_outline(self, attrs):
         if 'xmlurl' in (i.lower() for i in attrs.keys()):
-            feed = dict()
+            feed = SuperDict()
             if not attrs.has_key('type'):
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_exception'] = "<outline> MUST have a `type` attribute"
@@ -142,7 +142,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             # be duplicated from the feed itself.
             for k in ('htmlUrl', 'title', 'description'):
                 if attrs.has_key(k):
-                    feed.setdefault('claims', {})[k] = attrs[k].strip()
+                    feed.setdefault('claims', SuperDict())[k] = attrs[k].strip()
             self.harvest['feeds'].append(feed)
         # Subscription lists
         elif attrs.has_key('type') and attrs['type'].lower() in ('link', 'include'):
@@ -151,7 +151,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest['bozo_exception'] = "`link` and `include` types MUST has a `url` attribute"
                 self.hierarchy.append('')
                 return
-            sublist = {'url': attrs['url'].strip()}
+            sublist = SuperDict({'url': attrs['url'].strip()})
             if attrs['type'].lower() == 'link' and not sublist['url'].endswith('.opml'):
                 self.harvest['bozo'] = 1
                 self.harvest['bozo_exception'] = "`link` types' `url` attribute MUST end with '.opml'"
@@ -188,19 +188,19 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def _start_ownerId(self, attrs):
         self.expect = 'meta_author_url'
     def _end_ownerId(self):
-        if self.harvest['meta'].get('author', {}).get('url', False):
+        if self.harvest['meta'].get('author', SuperDict()).get('url', False):
             self.harvest['meta']['author']['url'] = self.harvest['meta']['author']['url'].strip()
         self.expect = ''
     def _start_ownerEmail(self, attrs):
         self.expect = 'meta_author_email'
     def _end_ownerEmail(self):
-        if self.harvest['meta'].get('author', {}).get('email', False):
+        if self.harvest['meta'].get('author', SuperDict()).get('email', False):
             self.harvest['meta']['author']['email'] = self.harvest['meta']['author']['email'].strip()
         self.expect = ''
     def _start_ownerName(self, attrs):
         self.expect = 'meta_author_name'
     def _end_ownerName(self):
-        if self.harvest['meta'].get('author', {}).get('name', False):
+        if self.harvest['meta'].get('author', SuperDict()).get('name', False):
             self.harvest['meta']['author']['name'] = self.harvest['meta']['author']['name'].strip()
         self.expect = ''
     def _start_dateCreated(self, attrs):
@@ -249,13 +249,13 @@ class HTTPErrorHandler(urllib2.HTTPDefaultErrorHandler):
 def _mkfile(obj, agent, etag, modified):
     if hasattr(obj, 'read') and hasattr(obj, 'close'):
         # It's file-like
-        return obj, {}
+        return obj, SuperDict()
     elif not isinstance(obj, (str, unicode)):
         # This isn't a known-parsable object
-        return None, {'bozo': 1, 'bozo_exception': 'unparsable object'}
+        return None, SuperDict({'bozo': 1, 'bozo_exception': 'unparsable object'})
     if obj.find('\n') != -1 or not obj.find('://') in (3, 4, 5):
         # It's not a URL; make the string a file
-        return StringIO.StringIO(obj), {}
+        return StringIO.StringIO(obj), SuperDict()
     # It's a URL
     headers = {'User-Agent': agent}
     if etag:
@@ -271,11 +271,11 @@ def _mkfile(obj, agent, etag, modified):
         opener = urllib2.build_opener(HTTPRedirectHandler, HTTPErrorHandler)
         ret = opener.open(request)
     except:
-        return None, {}
+        return None, SuperDict()
 
-    info = {'status': getattr(ret, 'status', 200)}
+    info = SuperDict({'status': getattr(ret, 'status', 200)})
     info['href'] = getattr(ret, 'newurl', obj)
-    info['headers'] = dict(getattr(ret, 'headers', {}))
+    info['headers'] = SuperDict(getattr(ret, 'headers', {}))
     if info['headers'].get('etag'):
         info['etag'] = info['headers'].get('etag')
     if info['headers'].get('last-modified'):
@@ -332,3 +332,23 @@ def _rfc822(date):
         delta = datetime.timedelta(0,0,0,0,0, tzhour)
     stamp = datetime.datetime(*[m[x] for x in ('year','month','day','hour','minute','second')])
     return stamp - delta
+
+class SuperDict(dict):
+    """
+    SuperDict is a dictionary object with keys posing as instance attributes.
+
+    >>> i = SuperDict()
+    >>> i.one = 1
+    >>> i
+    {'one': 1}
+    """
+
+    def __getattribute__(self, name):
+        if dict.has_key(self, name):
+            return dict.get(self, name)
+        else:
+            return dict.__getattribute__(self, name)
+
+    def __setattr__(self, name, value):
+        self[name] = value
+        return value
