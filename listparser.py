@@ -57,8 +57,8 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
 
     # ErrorHandler functions
     def warning(self, exception):
-        self.harvest['bozo'] = 1
-        self.harvest['bozo_exception'] = repr(exception)
+        self.harvest.bozo = 1
+        self.harvest.bozo_exception = repr(exception)
         return
     error = warning
     fatalError = warning
@@ -80,47 +80,47 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         node = reduce(lambda x, y: x.setdefault(y, SuperDict()), self.expect.split('_')[:-1], self.harvest)
         node[self.expect.split('_')[-1]] = node.setdefault(self.expect.split('_')[-1], '') + content
     def _start_opml(self, attrs):
-        self.harvest['version'] = "opml"
+        self.harvest.version = "opml"
         if attrs.has_key('version'):
             if attrs['version'] in ("1.0", "1.1"):
-                self.harvest['version'] = "opml1"
+                self.harvest.version = "opml1"
             elif attrs['version'] == "2.0":
-                self.harvest['version'] = "opml2"
+                self.harvest.version = "opml2"
             else:
-                self.harvest['bozo'] = 1
-                self.harvest['bozo_exception'] = "Unknown OPML version"
+                self.harvest.bozo = 1
+                self.harvest.bozo_exception = "Unknown OPML version"
         else:
-            self.harvest['bozo'] = 1
-            self.harvest['bozo_exception'] = "<opml> MUST have a version attribute"
+            self.harvest.bozo = 1
+            self.harvest.bozo_exception = "<opml> MUST have a version attribute"
     def _start_outline(self, attrs):
         if 'xmlurl' in (i.lower() for i in attrs.keys()):
             feed = SuperDict()
             if not attrs.has_key('type'):
-                self.harvest['bozo'] = 1
-                self.harvest['bozo_exception'] = "<outline> MUST have a `type` attribute"
+                self.harvest.bozo = 1
+                self.harvest.bozo_exception = "<outline> MUST have a `type` attribute"
             elif attrs['type'].lower() != 'rss':
-                self.harvest['bozo'] = 1
-                self.harvest['bozo_exception'] = "//outline/@type is not recognized"
+                self.harvest.bozo = 1
+                self.harvest.bozo_exception = "//outline/@type is not recognized"
             if not attrs.has_key('xmlUrl'):
-                self.harvest['bozo'] = 1
-                self.harvest['bozo_exception'] = "Only `xmlUrl` EXACTLY is valid"
+                self.harvest.bozo = 1
+                self.harvest.bozo_exception = "Only `xmlUrl` EXACTLY is valid"
             # This generator expression selects the `xmlUrl` attribute no matter its case
-            feed['url'] = (v.strip() for k, v in attrs.items() if k.lower() == "xmlurl").next()
-            if not feed['url']:
-                self.harvest['bozo'] = 1
-                self.harvest['bozo_exception'] = "`xmlUrl` is empty!"
+            feed.url = (v.strip() for k, v in attrs.items() if k.lower() == "xmlurl").next()
+            if not feed.url:
+                self.harvest.bozo = 1
+                self.harvest.bozo_exception = "`xmlUrl` is empty!"
                 self.hierarchy.append('')
                 return
-            # Fill feed['title'] with either @text, @title, or @xmlurl, in that order
+            # Fill feed.title with either @text, @title, or @xmlUrl, in that order
             if attrs.has_key('text') and attrs.get('text', '').strip():
-                feed['title'] = attrs['text'].strip()
+                feed.title = attrs['text'].strip()
             else:
-                self.harvest['bozo'] = 1
-                self.harvest['bozo_exception'] = "An <outline> has a missing or empty `text` attribute"
+                self.harvest.bozo = 1
+                self.harvest.bozo_exception = "An <outline> has a missing or empty `text` attribute"
                 if attrs.has_key('title') and attrs.get('title', '').strip():
-                    feed['title'] = attrs['title'].strip()
+                    feed.title = attrs['title'].strip()
                 else:
-                    feed['title'] = feed['url']
+                    feed.title = feed.url
             # Handle feed categories and tags
             if attrs.has_key('category'):
                 def or_strip(x, y):
@@ -131,49 +131,49 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 cats = (xlist for xlist in cats if reduce(or_strip, xlist))
                 cats = [[y.strip() for y in xlist if y.strip()] for xlist in cats]
                 if tags:
-                    feed['tags'] = tags
+                    feed.tags = tags
                 if cats:
-                    feed['categories'] = cats
+                    feed.categories = cats
             if len(self.hierarchy) == 1:
                 feed.setdefault('tags', []).extend(self.hierarchy)
             if self.hierarchy:
                 feed.setdefault('categories', []).append(copy.copy(self.hierarchy))
-            # Fill feed['claims'] up with information that is *purported* to
+            # Fill feed.claims up with information that is *purported* to
             # be duplicated from the feed itself.
             for k in ('htmlUrl', 'title', 'description'):
                 if attrs.has_key(k):
                     feed.setdefault('claims', SuperDict())[k] = attrs[k].strip()
-            self.harvest['feeds'].append(feed)
+            self.harvest.feeds.append(feed)
         # Subscription lists
         elif attrs.has_key('type') and attrs['type'].lower() in ('link', 'include'):
             if not attrs.has_key('url'):
-                self.harvest['bozo'] = 1
-                self.harvest['bozo_exception'] = "`link` and `include` types MUST has a `url` attribute"
+                self.harvest.bozo = 1
+                self.harvest.bozo_exception = "`link` and `include` types MUST has a `url` attribute"
                 self.hierarchy.append('')
                 return
             sublist = SuperDict({'url': attrs['url'].strip()})
             if attrs['type'].lower() == 'link' and not sublist['url'].endswith('.opml'):
-                self.harvest['bozo'] = 1
-                self.harvest['bozo_exception'] = "`link` types' `url` attribute MUST end with '.opml'"
+                self.harvest.bozo = 1
+                self.harvest.bozo_exception = "`link` types' `url` attribute MUST end with '.opml'"
             if attrs.get('text', '').strip():
-                sublist['title'] = attrs['text'].strip()
+                sublist.title = attrs['text'].strip()
             else:
-                self.harvest['bozo'] = 1
-                self.harvest['bozo_exception'] = "outlines MUST have a `text` attribute"
-                sublist['title'] = sublist['url']
-            self.harvest['lists'].append(sublist)
+                self.harvest.bozo = 1
+                self.harvest.bozo_exception = "outlines MUST have a `text` attribute"
+                sublist.title = sublist.url
+            self.harvest.lists.append(sublist)
         elif attrs.has_key('type') and attrs['type'].lower() == 'rss':
             # @type='rss' but there's no xmlUrl!
-            self.harvest['bozo'] = 1
-            self.harvest['bozo_exception'] = "an rss outline node is missing an xmlUrl attribute"
+            self.harvest.bozo = 1
+            self.harvest.bozo_exception = "an rss outline node is missing an xmlUrl attribute"
         elif attrs.has_key('text'):
             # Assume that this is a grouping node
             self.hierarchy.append(attrs['text'].strip())
             return
         elif attrs.has_key('title'):
             # Assume that this is a grouping node
-            self.harvest['bozo'] = 1
-            self.harvest['bozo_exception'] = "outlines MUST have a `text` attribute"
+            self.harvest.bozo = 1
+            self.harvest.bozo_exception = "outlines MUST have a `text` attribute"
             self.hierarchy.append(attrs['title'].strip())
             return
         self.hierarchy.append('')
@@ -182,50 +182,50 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def _start_title(self, attrs):
         self.expect = 'meta_title'
     def _end_title(self):
-        if self.harvest['meta'].get('title', False):
-            self.harvest['meta']['title'] = self.harvest['meta']['title'].strip()
+        if self.harvest.meta.get('title', False):
+            self.harvest.meta.title = self.harvest.meta.title.strip()
         self.expect = ''
     def _start_ownerId(self, attrs):
         self.expect = 'meta_author_url'
     def _end_ownerId(self):
-        if self.harvest['meta'].get('author', SuperDict()).get('url', False):
-            self.harvest['meta']['author']['url'] = self.harvest['meta']['author']['url'].strip()
+        if self.harvest.meta.get('author', SuperDict()).get('url', False):
+            self.harvest.meta.author.url = self.harvest.meta.author.url.strip()
         self.expect = ''
     def _start_ownerEmail(self, attrs):
         self.expect = 'meta_author_email'
     def _end_ownerEmail(self):
-        if self.harvest['meta'].get('author', SuperDict()).get('email', False):
-            self.harvest['meta']['author']['email'] = self.harvest['meta']['author']['email'].strip()
+        if self.harvest.meta.get('author', SuperDict()).get('email', False):
+            self.harvest.meta.author.email = self.harvest.meta.author.email.strip()
         self.expect = ''
     def _start_ownerName(self, attrs):
         self.expect = 'meta_author_name'
     def _end_ownerName(self):
-        if self.harvest['meta'].get('author', SuperDict()).get('name', False):
-            self.harvest['meta']['author']['name'] = self.harvest['meta']['author']['name'].strip()
+        if self.harvest.meta.get('author', SuperDict()).get('name', False):
+            self.harvest.meta.author.name = self.harvest.meta.author.name.strip()
         self.expect = ''
     def _start_dateCreated(self, attrs):
         self.expect = 'meta_created'
     def _end_dateCreated(self):
-        if self.harvest['meta'].get('created', '').strip():
-            self.harvest['meta']['created'] = self.harvest['meta']['created'].strip()
-            d = _rfc822(self.harvest['meta']['created'].strip())
+        if self.harvest.meta.get('created', '').strip():
+            self.harvest.meta.created = self.harvest.meta.created.strip()
+            d = _rfc822(self.harvest.meta.created.strip())
             if d:
-                self.harvest['meta']['created_parsed'] = d
+                self.harvest.meta.created_parsed = d
             else:
-                self.harvest['bozo'] = 1
-                self.harvest['bozo_exception'] = "dateCreated is not a valid datetime"
+                self.harvest.bozo = 1
+                self.harvest.bozo_exception = "dateCreated is not a valid datetime"
         self.expect = ''
     def _start_dateModified(self, attrs):
         self.expect = 'meta_modified'
     def _end_dateModified(self):
-        if self.harvest['meta'].get('modified', '').strip():
-            self.harvest['meta']['modified'] = self.harvest['meta']['modified'].strip()
-            d = _rfc822(self.harvest['meta']['modified'].strip())
+        if self.harvest.meta.get('modified', '').strip():
+            self.harvest.meta.modified = self.harvest.meta.modified.strip()
+            d = _rfc822(self.harvest.meta.modified.strip())
             if d:
-                self.harvest['meta']['modified_parsed'] = d
+                self.harvest.meta.modified_parsed = d
             else:
-                self.harvest['bozo'] = 1
-                self.harvest['bozo_exception'] = "dateModified is not a valid datetime"
+                self.harvest.bozo = 1
+                self.harvest.bozo_exception = "dateModified is not a valid datetime"
         self.expect = ''
 
 class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):
@@ -274,13 +274,13 @@ def _mkfile(obj, agent, etag, modified):
         return None, SuperDict()
 
     info = SuperDict({'status': getattr(ret, 'status', 200)})
-    info['href'] = getattr(ret, 'newurl', obj)
-    info['headers'] = SuperDict(getattr(ret, 'headers', {}))
-    if info['headers'].get('etag'):
-        info['etag'] = info['headers'].get('etag')
-    if info['headers'].get('last-modified'):
-        if _rfc822(info['headers']['last-modified']):
-            info['modified'] = _rfc822(info['headers']['last-modified'])
+    info.href = getattr(ret, 'newurl', obj)
+    info.headers = SuperDict(getattr(ret, 'headers', {}))
+    if info.headers.get('etag'):
+        info.etag = info.headers.get('etag')
+    if info.headers.get('last-modified'):
+        if _rfc822(info.headers['last-modified']):
+            info.modified = _rfc822(info.headers['last-modified'])
     return ret, info
 
 
