@@ -276,8 +276,9 @@ def _mkfile(obj, agent, etag, modified):
     if info.headers.get('etag'):
         info.etag = info.headers.get('etag')
     if info.headers.get('last-modified'):
+        info.modified = info.headers['last-modified']
         if _rfc822(info.headers['last-modified']):
-            info.modified = _rfc822(info.headers['last-modified'])
+            info.modified_parsed = _rfc822(info.headers['last-modified'])
     return ret, info
 
 
