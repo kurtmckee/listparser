@@ -93,6 +93,16 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             self.harvest.bozo = 1
             self.harvest.bozo_exception = "<opml> MUST have a version attribute"
     def _start_outline(self, attrs):
+        # Find an appropriate title in @text or @title
+        if attrs.has_key('text') and attrs.get('text', '').strip():
+            title = attrs['text'].strip()
+        else:
+            self.harvest.bozo = 1
+            self.harvest.bozo_exception = "An <outline> has a missing or empty `text` attribute"
+            if attrs.has_key('title') and attrs.get('title', '').strip():
+                title = attrs['title'].strip()
+            else:
+                title = None
         if 'xmlurl' in (i.lower() for i in attrs.keys()):
             feed = SuperDict()
             if not attrs.has_key('type'):
@@ -111,14 +121,8 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest.bozo_exception = "`xmlUrl` is empty!"
                 self.hierarchy.append('')
                 return
-            # Fill feed.title with either @text or @title, in that order
-            if attrs.has_key('text') and attrs.get('text', '').strip():
-                feed.title = attrs['text'].strip()
-            else:
-                self.harvest.bozo = 1
-                self.harvest.bozo_exception = "An <outline> has a missing or empty `text` attribute"
-                if attrs.has_key('title') and attrs.get('title', '').strip():
-                    feed.title = attrs['title'].strip()
+            if title is not None:
+                feed.title = title
             # Handle feed categories and tags
             if attrs.has_key('category'):
                 def or_strip(x, y):
@@ -156,25 +160,16 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             if attrs['type'].lower() == 'link' and not sublist['url'].endswith('.opml'):
                 self.harvest.bozo = 1
                 self.harvest.bozo_exception = "`link` types' `url` attribute MUST end with '.opml'"
-            if attrs.get('text', '').strip():
-                sublist.title = attrs['text'].strip()
-            else:
-                self.harvest.bozo = 1
-                self.harvest.bozo_exception = "outlines MUST have a `text` attribute"
+            if title is not None:
+                sublist.title = title
             self.harvest.lists.append(sublist)
         elif attrs.has_key('type') and attrs['type'].lower() == 'rss':
             # @type='rss' but there's no xmlUrl!
             self.harvest.bozo = 1
             self.harvest.bozo_exception = "an rss outline node is missing an xmlUrl attribute"
-        elif attrs.has_key('text'):
+        elif title is not None:
             # Assume that this is a grouping node
-            self.hierarchy.append(attrs['text'].strip())
-            return
-        elif attrs.has_key('title'):
-            # Assume that this is a grouping node
-            self.harvest.bozo = 1
-            self.harvest.bozo_exception = "outlines MUST have a `text` attribute"
-            self.hierarchy.append(attrs['title'].strip())
+            self.hierarchy.append(title)
             return
         self.hierarchy.append('')
     def _end_outline(self):
