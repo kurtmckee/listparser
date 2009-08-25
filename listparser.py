@@ -132,10 +132,13 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                     feed.tags = tags
                 if cats:
                     feed.categories = cats
-            if len(self.hierarchy) == 1:
-                feed.setdefault('tags', []).extend(self.hierarchy)
-            if self.hierarchy:
+            # Copy the current hierarchy into `categories`
+            if self.hierarchy and self.hierarchy not in feed.get('categories', []):
                 feed.setdefault('categories', []).append(copy.copy(self.hierarchy))
+            # Copy all single-element `categories` into `tags`
+            tags = [i[0] for i in feed.get('categories', []) if len(i) == 1 and i[0] not in feed.get('tags', [])]
+            if tags:
+                feed.setdefault('tags', []).extend(tags)
             # Fill feed.claims up with information that is *purported* to
             # be duplicated from the feed itself.
             for k in ('htmlUrl', 'title', 'description'):

@@ -2,6 +2,7 @@
 <!--
     Description: //outline/@category (categories 2)
     Eval: result['bozo'] == 0
+    Eval: not result['feeds'][0].has_key('tags')
     Eval: len(result['feeds'][0]['categories']) == 1
     Eval: result['feeds'][0]['categories'][0] == ['root', 'parent', 'child']
 -->

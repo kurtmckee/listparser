@@ -4,6 +4,7 @@
     Eval: result['bozo'] == 0
     Eval: len(result['feeds'][0]['categories']) == 1
     Eval: result['feeds'][0]['categories'][0] == ['root']
+    Eval: 'root' in result['feeds'][0]['tags']
 -->
 <opml version="2.0">
     <head></head>
