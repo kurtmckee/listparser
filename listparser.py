@@ -111,7 +111,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest.bozo_exception = "`xmlUrl` is empty!"
                 self.hierarchy.append('')
                 return
-            # Fill feed.title with either @text, @title, or @xmlUrl, in that order
+            # Fill feed.title with either @text or @title, in that order
             if attrs.has_key('text') and attrs.get('text', '').strip():
                 feed.title = attrs['text'].strip()
             else:
@@ -119,8 +119,6 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest.bozo_exception = "An <outline> has a missing or empty `text` attribute"
                 if attrs.has_key('title') and attrs.get('title', '').strip():
                     feed.title = attrs['title'].strip()
-                else:
-                    feed.title = feed.url
             # Handle feed categories and tags
             if attrs.has_key('category'):
                 def or_strip(x, y):
@@ -160,7 +158,6 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             else:
                 self.harvest.bozo = 1
                 self.harvest.bozo_exception = "outlines MUST have a `text` attribute"
-                sublist.title = sublist.url
             self.harvest.lists.append(sublist)
         elif attrs.has_key('type') and attrs['type'].lower() == 'rss':
             # @type='rss' but there's no xmlUrl!
