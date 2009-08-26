@@ -204,7 +204,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         if self.harvest.meta.get('created', '').strip():
             self.harvest.meta.created = self.harvest.meta.created.strip()
             d = _rfc822(self.harvest.meta.created.strip())
-            if d:
+            if isinstance(d, datetime.datetime):
                 self.harvest.meta.created_parsed = d
             else:
                 self.harvest.bozo = 1
@@ -216,7 +216,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         if self.harvest.meta.get('modified', '').strip():
             self.harvest.meta.modified = self.harvest.meta.modified.strip()
             d = _rfc822(self.harvest.meta.modified.strip())
-            if d:
+            if isinstance(d, datetime.datetime):
                 self.harvest.meta.modified_parsed = d
             else:
                 self.harvest.bozo = 1
@@ -245,7 +245,7 @@ def _mkfile(obj, agent, etag, modified):
     if hasattr(obj, 'read') and hasattr(obj, 'close'):
         # It's file-like
         return obj, SuperDict()
-    elif not isinstance(obj, (str, unicode)):
+    elif not isinstance(obj, basestring):
         # This isn't a known-parsable object
         return None, SuperDict({'bozo': 1, 'bozo_exception': 'unparsable object'})
     if obj.find('\n') != -1 or not obj.find('://') in (3, 4, 5):
@@ -253,14 +253,13 @@ def _mkfile(obj, agent, etag, modified):
         return StringIO.StringIO(obj), SuperDict()
     # It's a URL
     headers = {'User-Agent': agent}
-    if etag:
+    if isinstance(etag, basestring):
         headers['If-None-Match'] = etag
-    if modified:
-        if type(modified) in (str, unicode):
-            headers['If-Modified-Since'] = modified
-        elif type(modified) is datetime.datetime:
-            # It is assumed that `modified` is in UTC time
-            headers['If-Modified-Since'] = modified.strftime('%a, %d %b %Y %H:%M:%S GMT')
+    if isinstance(modified, basestring):
+        headers['If-Modified-Since'] = modified
+    elif isinstance(modified, datetime.datetime):
+        # It is assumed that `modified` is in UTC time
+        headers['If-Modified-Since'] = modified.strftime('%a, %d %b %Y %H:%M:%S GMT')
     try:
         request = urllib2.Request(obj, headers=headers)
         opener = urllib2.build_opener(HTTPRedirectHandler, HTTPErrorHandler)
