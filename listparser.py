@@ -93,6 +93,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             self.harvest.bozo = 1
             self.harvest.bozo_exception = "<opml> MUST have a version attribute"
     def _start_outline(self, attrs):
+        url = title = None
         # Find an appropriate title in @text or @title
         if attrs.has_key('text') and attrs.get('text', '').strip():
             title = attrs['text'].strip()
@@ -101,10 +102,11 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             self.harvest.bozo_exception = "An <outline> has a missing or empty `text` attribute"
             if attrs.has_key('title') and attrs.get('title', '').strip():
                 title = attrs['title'].strip()
-            else:
-                title = None
+
+        # Determine whether the outline is a feed or subscription list
         if 'xmlurl' in (i.lower() for i in attrs.keys()):
-            feed = SuperDict()
+            # It's a feed
+            append_to = self.harvest.feeds
             if not attrs.has_key('type'):
                 self.harvest.bozo = 1
                 self.harvest.bozo_exception = "<outline> MUST have a `type` attribute"
@@ -115,62 +117,59 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.harvest.bozo = 1
                 self.harvest.bozo_exception = "Only `xmlUrl` EXACTLY is valid"
             # This generator expression selects the `xmlUrl` attribute no matter its case
-            feed.url = (v.strip() for k, v in attrs.items() if k.lower() == "xmlurl").next()
-            if not feed.url:
-                self.harvest.bozo = 1
-                self.harvest.bozo_exception = "`xmlUrl` is empty!"
-                self.hierarchy.append('')
-                return
-            if title is not None:
-                feed.title = title
-            # Handle feed categories and tags
-            if attrs.has_key('category'):
-                def or_strip(x, y):
-                    return x.strip() or y.strip()
-                tags = [x.strip() for x in attrs['category'].split(',') if x.strip() and '/' not in x]
-                cats = (x.strip() for x in attrs['category'].split(',') if '/' in x)
-                cats = (x.split('/') for x in cats if reduce(or_strip, x.split('/')))
-                cats = (xlist for xlist in cats if reduce(or_strip, xlist))
-                cats = [[y.strip() for y in xlist if y.strip()] for xlist in cats]
-                if tags:
-                    feed.tags = tags
-                if cats:
-                    feed.categories = cats
-            # Copy the current hierarchy into `categories`
-            if self.hierarchy and self.hierarchy not in feed.get('categories', []):
-                feed.setdefault('categories', []).append(copy.copy(self.hierarchy))
-            # Copy all single-element `categories` into `tags`
-            tags = [i[0] for i in feed.get('categories', []) if len(i) == 1 and i[0] not in feed.get('tags', [])]
-            if tags:
-                feed.setdefault('tags', []).extend(tags)
-            # Fill feed.claims up with information that is *purported* to
-            # be duplicated from the feed itself.
-            for k in ('htmlUrl', 'title', 'description'):
-                if attrs.has_key(k):
-                    feed.setdefault('claims', SuperDict())[k] = attrs[k].strip()
-            self.harvest.feeds.append(feed)
-        # Subscription lists
-        elif attrs.has_key('type') and attrs['type'].lower() in ('link', 'include'):
-            if not attrs.has_key('url'):
-                self.harvest.bozo = 1
-                self.harvest.bozo_exception = "`link` and `include` types MUST has a `url` attribute"
-                self.hierarchy.append('')
-                return
-            sublist = SuperDict({'url': attrs['url'].strip()})
-            if attrs['type'].lower() == 'link' and not sublist['url'].endswith('.opml'):
+            url = (v.strip() for k, v in attrs.items() if k.lower() == "xmlurl").next()
+        elif attrs.has_key('url') and attrs.get('type', '').lower() in ('link', 'include'):
+            # It's a subscription list
+            append_to = self.harvest.lists
+            url = attrs['url'].strip()
+            if attrs['type'].lower() == 'link' and not url.endswith('.opml'):
                 self.harvest.bozo = 1
                 self.harvest.bozo_exception = "`link` types' `url` attribute MUST end with '.opml'"
-            if title is not None:
-                sublist.title = title
-            self.harvest.lists.append(sublist)
-        elif attrs.has_key('type') and attrs['type'].lower() == 'rss':
-            # @type='rss' but there's no xmlUrl!
+        elif attrs.get('type', '').strip().lower() in ('rss', 'link', 'include'):
+            # It *should* be a feed or subscription list, but it has no URL
             self.harvest.bozo = 1
-            self.harvest.bozo_exception = "an rss outline node is missing an xmlUrl attribute"
+            self.harvest.bozo_exception = "no URL found for rss, link, or include type"
+            self.hierarchy.append('')
+            return
         elif title is not None:
             # Assume that this is a grouping node
             self.hierarchy.append(title)
             return
+        if not url:
+            self.harvest.bozo = 1
+            self.harvest.bozo_exception = "no URL found"
+            self.hierarchy.append('')
+            return
+        obj = SuperDict({'url': url})
+        if title is not None:
+            obj.title = title
+
+        # Handle categories and tags
+        if attrs.has_key('category'):
+            def or_strip(x, y):
+                return x.strip() or y.strip()
+            tags = [x.strip() for x in attrs['category'].split(',') if x.strip() and '/' not in x]
+            cats = (x.strip() for x in attrs['category'].split(',') if '/' in x)
+            cats = (x.split('/') for x in cats if reduce(or_strip, x.split('/')))
+            cats = (xlist for xlist in cats if reduce(or_strip, xlist))
+            cats = [[y.strip() for y in xlist if y.strip()] for xlist in cats]
+            if tags:
+                obj.tags = tags
+            if cats:
+                obj.categories = cats
+        # Copy the current hierarchy into `categories`
+        if self.hierarchy and self.hierarchy not in obj.get('categories', []):
+            obj.setdefault('categories', []).append(copy.copy(self.hierarchy))
+        # Copy all single-element `categories` into `tags`
+        tags = [i[0] for i in obj.get('categories', []) if len(i) == 1 and i[0] not in obj.get('tags', [])]
+        if tags:
+            obj.setdefault('tags', []).extend(tags)
+        # Fill obj.claims up with information that is *purported* to
+        # be duplicated from the feed itself.
+        for k in ('htmlUrl', 'title', 'description'):
+            if attrs.has_key(k):
+                obj.setdefault('claims', SuperDict())[k] = attrs[k].strip()
+        append_to.append(obj)
         self.hierarchy.append('')
     def _end_outline(self):
         self.hierarchy.pop()
