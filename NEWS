@@ -1,3 +1,12 @@
+v0.7 (28 Aug 2009) "The Codex"
+    * Added documentation!
+    * Unified feed and subscription list code
+    * Extended category and tag support to subscription lists
+    * Result dictionary keys are now also attributes
+        (i.e. result['meta']['title'] -> result.meta.title)
+    * Feed and list titles are no longer filled with the
+        associated URL if the title is not found
+
 v0.6 (7 Aug 2009) "Hatchet Hotel"
     * Certain return result elements are now guaranteed
     * `bozo_detail` has been renamed `bozo_exception`
