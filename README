@@ -2,8 +2,9 @@ listparser.py - Parse OPML subscription lists into a negotiable format.
 Copyright (C) 2009 Kurt McKee <contactme@kurtmckee.org>
 
 listparser.py is currently designed to tear through subscription lists
-and return all of the feeds that it finds. It only supports OPML, but
-will one day support other subscription list formats.
+and return all of the feeds and subscription lists that it finds. It
+only supports OPML, but will eventually support other subscription
+list formats.
 
 
 Usage
@@ -23,12 +24,14 @@ A dictionary will be returned with several keys:
 
 Continuing the example:
 
->>> result['meta']['title']
+>>> result.meta.title
 u'listparser project feeds'
->>> len(result['feeds'])
+>>> len(result.feeds)
 3
->>> result['feeds'][0].keys()
+>>> result.feeds[0].keys()
 ['url', 'title']
+
+More extensive documentation is available in the docs/ directory.
 
 
 Todo
