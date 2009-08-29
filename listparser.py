@@ -167,11 +167,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         tags = [i[0] for i in obj.get('categories', []) if len(i) == 1 and i[0] not in obj.get('tags', [])]
         if tags:
             obj.setdefault('tags', []).extend(tags)
-        # Fill obj.claims up with information that is *purported* to
-        # be duplicated from the feed itself.
-        for k in ('htmlUrl', 'title', 'description'):
-            if attrs.has_key(k):
-                obj.setdefault('claims', SuperDict())[k] = attrs[k].strip()
+
         append_to.append(obj)
         self.hierarchy.append('')
     def _end_outline(self):
