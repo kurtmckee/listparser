@@ -31,7 +31,7 @@ def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
         'feeds': [],
         'lists': [],
         'meta': SuperDict(),
-        'version': None,
+        'version': '',
     })
     fileobj, info = _mkfile(filename_or_url, agent, etag, modified)
     guarantees.update(info)
