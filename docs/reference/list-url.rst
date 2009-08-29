@@ -8,3 +8,4 @@ This key is guaranteed to exist.
 ..  rubric:: Comes from
 
 *   ``/opml/body//outline[type=subscription]/@url``
+*   ``/opml/body//outline[type="source"]/@xmlUrl``

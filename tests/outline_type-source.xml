@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+    Liferea uses type="source" when referring to a subscription list.
+    The `sourceType` attribute is included in the test in case it proves
+    useful for differentiation between feeds and subscription lists.
+
+    Description: //outline[type="source"] indicates a subscription list
+    Eval: result.bozo == 0
+    Eval: len(result.feeds) == 0
+    Eval: result.lists[0].url == "http://localhost/list"
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline text="sublist" type="source" sourceType="fl_opml" xmlUrl="http://localhost/list" />
+    </body>
+</opml>

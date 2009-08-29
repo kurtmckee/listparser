@@ -107,10 +107,13 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         if 'xmlurl' in (i.lower() for i in attrs.keys()):
             # It's a feed
             append_to = self.harvest.feeds
+            if attrs.get('type', '').strip().lower() == 'source':
+                # Actually, it's a subscription list!
+                append_to = self.harvest.lists
             if not attrs.has_key('type'):
                 self.harvest.bozo = 1
                 self.harvest.bozo_exception = "<outline> MUST have a `type` attribute"
-            elif attrs['type'].lower() != 'rss':
+            elif attrs['type'].lower() not in ('rss', 'source'):
                 self.harvest.bozo = 1
                 self.harvest.bozo_exception = "//outline/@type is not recognized"
             if not attrs.has_key('xmlUrl'):
