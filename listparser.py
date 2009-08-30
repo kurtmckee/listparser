@@ -179,7 +179,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def _end_dateCreated(self):
         if self.harvest.meta.get('created', '').strip():
             self.harvest.meta.created = self.harvest.meta.created.strip()
-            d = _rfc822(self.harvest.meta.created.strip())
+            d = _rfc822(self.harvest.meta.created)
             if isinstance(d, datetime.datetime):
                 self.harvest.meta.created_parsed = d
             else:
@@ -190,7 +190,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def _end_dateModified(self):
         if self.harvest.meta.get('modified', '').strip():
             self.harvest.meta.modified = self.harvest.meta.modified.strip()
-            d = _rfc822(self.harvest.meta.modified.strip())
+            d = _rfc822(self.harvest.meta.modified)
             if isinstance(d, datetime.datetime):
                 self.harvest.meta.modified_parsed = d
             else:
