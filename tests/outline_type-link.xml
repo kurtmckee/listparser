@@ -3,8 +3,8 @@
     Wordpress uses type="link" when referring to feeds.
     Luckily, @xmlUrl tips off that this is a feed.
 
-    Description: //outline[@type='link'] (but @xmlUrl is included to mean it's a feed)
-    Eval: result['bozo'] == 1
+    Description: //outline[@type='link'] (but @xmlUrl implies it's a feed)
+    Eval: result['bozo'] == 0
     Eval: len(result['feeds']) == 1
 -->
 <opml version="2.0">

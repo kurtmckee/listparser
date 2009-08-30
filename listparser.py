@@ -55,10 +55,16 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self.expect = ''
         self.hierarchy = []
 
+    def raise_bozo(self, err):
+        self.harvest.bozo = 1
+        if isinstance(err, basestring):
+            self.harvest.bozo_exception = ListError(err)
+        else:
+            self.harvest.bozo_exception = err
+
     # ErrorHandler functions
     def warning(self, exception):
-        self.harvest.bozo = 1
-        self.harvest.bozo_exception = repr(exception)
+        self.raise_bozo(exception)
         return
     error = warning
     fatalError = warning
@@ -81,25 +87,16 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         node[self.expect.split('_')[-1]] = node.setdefault(self.expect.split('_')[-1], '') + content
     def _start_opml(self, attrs):
         self.harvest.version = "opml"
-        if attrs.has_key('version'):
-            if attrs['version'] in ("1.0", "1.1"):
-                self.harvest.version = "opml1"
-            elif attrs['version'] == "2.0":
-                self.harvest.version = "opml2"
-            else:
-                self.harvest.bozo = 1
-                self.harvest.bozo_exception = "Unknown OPML version"
-        else:
-            self.harvest.bozo = 1
-            self.harvest.bozo_exception = "<opml> MUST have a version attribute"
+        if attrs.get('version') in ("1.0", "1.1"):
+            self.harvest.version = "opml1"
+        elif attrs.get('version') == "2.0":
+            self.harvest.version = "opml2"
     def _start_outline(self, attrs):
         url = title = None
         # Find an appropriate title in @text or @title
         if attrs.has_key('text') and attrs.get('text', '').strip():
             title = attrs['text'].strip()
         else:
-            self.harvest.bozo = 1
-            self.harvest.bozo_exception = "An <outline> has a missing or empty `text` attribute"
             if attrs.has_key('title') and attrs.get('title', '').strip():
                 title = attrs['title'].strip()
 
@@ -110,37 +107,18 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             if attrs.get('type', '').strip().lower() == 'source':
                 # Actually, it's a subscription list!
                 append_to = self.harvest.lists
-            if not attrs.has_key('type'):
-                self.harvest.bozo = 1
-                self.harvest.bozo_exception = "<outline> MUST have a `type` attribute"
-            elif attrs['type'].lower() not in ('rss', 'source'):
-                self.harvest.bozo = 1
-                self.harvest.bozo_exception = "//outline/@type is not recognized"
-            if not attrs.has_key('xmlUrl'):
-                self.harvest.bozo = 1
-                self.harvest.bozo_exception = "Only `xmlUrl` EXACTLY is valid"
             # This generator expression selects the `xmlUrl` attribute no matter its case
             url = (v.strip() for k, v in attrs.items() if k.lower() == "xmlurl").next()
         elif attrs.has_key('url') and attrs.get('type', '').lower() in ('link', 'include'):
             # It's a subscription list
             append_to = self.harvest.lists
             url = attrs['url'].strip()
-            if attrs['type'].lower() == 'link' and not url.endswith('.opml'):
-                self.harvest.bozo = 1
-                self.harvest.bozo_exception = "`link` types' `url` attribute MUST end with '.opml'"
-        elif attrs.get('type', '').strip().lower() in ('rss', 'link', 'include'):
-            # It *should* be a feed or subscription list, but it has no URL
-            self.harvest.bozo = 1
-            self.harvest.bozo_exception = "no URL found for rss, link, or include type"
-            self.hierarchy.append('')
-            return
         elif title is not None:
             # Assume that this is a grouping node
             self.hierarchy.append(title)
             return
         if not url:
-            self.harvest.bozo = 1
-            self.harvest.bozo_exception = "no URL found"
+            # Maintain the hierarchy
             self.hierarchy.append('')
             return
         obj = SuperDict({'url': url})
@@ -205,8 +183,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             if isinstance(d, datetime.datetime):
                 self.harvest.meta.created_parsed = d
             else:
-                self.harvest.bozo = 1
-                self.harvest.bozo_exception = "dateCreated is not a valid datetime"
+                self.raise_bozo('dateCreated is not an RFC 822 datetime')
         self.expect = ''
     def _start_dateModified(self, attrs):
         self.expect = 'meta_modified'
@@ -217,8 +194,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             if isinstance(d, datetime.datetime):
                 self.harvest.meta.modified_parsed = d
             else:
-                self.harvest.bozo = 1
-                self.harvest.bozo_exception = "dateModified is not a valid datetime"
+                self.raise_bozo('dateModified is not an RFC 822 datetime')
         self.expect = ''
 
 class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):
@@ -245,7 +221,8 @@ def _mkfile(obj, agent, etag, modified):
         return obj, SuperDict()
     elif not isinstance(obj, basestring):
         # This isn't a known-parsable object
-        return None, SuperDict({'bozo': 1, 'bozo_exception': 'unparsable object'})
+        err = ListError('parse() called with unparsable object')
+        return None, SuperDict({'bozo': 1, 'bozo_exception': err})
     if obj.find('\n') != -1 or not obj.find('://') in (3, 4, 5):
         # It's not a URL; make the string a file
         return StringIO.StringIO(obj), SuperDict()
@@ -345,3 +322,7 @@ class SuperDict(dict):
     def __setattr__(self, name, value):
         self[name] = value
         return value
+
+class ListError(Exception):
+    """Used when a specification deviation is encountered in an XML file"""
+    pass
