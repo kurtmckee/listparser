@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!--
+    Description: iGoogle: Detect a feed
+    Eval: result.bozo == 0
+    Eval: result.feeds[0].url == 'http://localhost/feed'
+-->
+<GadgetTabML xmlns="http://schemas.google.com/GadgetTabML/2008">
+    <Module type="RSS" xmlns="http://www.google.com/ig">
+        <ModulePrefs xmlUrl="http://localhost/feed" />
+    </Module>
+</GadgetTabML>

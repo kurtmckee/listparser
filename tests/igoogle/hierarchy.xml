@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+    Description: iGoogle: Detect categories and tags
+    Eval: result.bozo == 0
+    Eval: 'news' in result.feeds[0].tags
+    Eval: ['news'] in result.feeds[0].categories
+-->
+<GadgetTabML xmlns="http://schemas.google.com/GadgetTabML/2008">
+    <Tab title="news">
+        <Module type="RSS" xmlns="http://www.google.com/ig">
+            <ModulePrefs xmlUrl="http://localhost/feed" />
+        </Module>
+    </Tab>
+</GadgetTabML>

@@ -22,6 +22,7 @@ In this example, there are three tags: "sports", "baseball", and "golf".
 *   ``/opml/body//outline[type=feed]/@category`` [#noslashes]_
 *   ``/opml/body/outline/outline[type=feed]/parent::outline/@text``
 *   ``/opml/body/outline/outline[type=feed]/parent::outline/@title``
+*   ``/gtml:GadgetTabML//gtml:Tab/@title``
 
 ..  rubric:: Footnotes
 

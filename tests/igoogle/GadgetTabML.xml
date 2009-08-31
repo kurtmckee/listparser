@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<!--
+    Description: iGoogle: Detect iGoogle format
+    Eval: result.bozo == 0
+    Eval: result.version == 'igoogle'
+-->
+<GadgetTabML xmlns="http://schemas.google.com/GadgetTabML/2008">
+</GadgetTabML>

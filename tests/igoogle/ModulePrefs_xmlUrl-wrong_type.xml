@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!--
+    Description: iGoogle: Ignore @xmlUrl when @type!="rss"
+    Eval: result.bozo == 0
+    Eval: not result.feeds
+-->
+<GadgetTabML xmlns="http://schemas.google.com/GadgetTabML/2008">
+    <Module type="RUSH_HOUR_TRAFFIC" xmlns="http://www.google.com/ig">
+        <ModulePrefs xmlUrl="http://rush-hour-traffic.com/zipcode/xml" />
+    </Module>
+</GadgetTabML>

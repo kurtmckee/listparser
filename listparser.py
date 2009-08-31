@@ -27,6 +27,8 @@ USER_AGENT = "listparser/%s +http://freshmeat.net/projects/listparser" % (__vers
 
 namespaces = {
     'http://opml.org/spec2': 'opml',
+    'http://www.google.com/ig': 'iGoogle',
+    'http://schemas.google.com/GadgetTabML/2008': 'gtml',
 }
 
 def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
@@ -59,6 +61,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self.harvest = SuperDict()
         self.expect = ''
         self.hierarchy = []
+        self.flag_feed = False
 
     def raise_bozo(self, err):
         self.harvest.bozo = 1
@@ -211,6 +214,33 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             else:
                 self.raise_bozo('dateModified is not an RFC 822 datetime')
         self.expect = ''
+
+    # iGoogle/GadgetTabML support
+    #----------------------------
+
+    def _start_gtml_GadgetTabML(self, attrs):
+        self.harvest.version = 'igoogle'
+
+    def _start_gtml_Tab(self, attrs):
+        if attrs.get((None, 'title'), '').strip():
+            self.hierarchy.append(attrs[(None, 'title')].strip())
+    def _end_gtml_Tab(self):
+        self.hierarchy.pop()
+
+    def _start_iGoogle_Module(self, attrs):
+        if attrs.get((None, 'type'), '').strip().lower() == 'rss':
+            self.flag_feed = True
+    def _end_iGoogle_Module(self):
+        self.flag_feed = False
+
+    def _start_iGoogle_ModulePrefs(self, attrs):
+        if self.flag_feed and attrs.get((None, 'xmlUrl'), '').strip():
+            obj = SuperDict({'url': attrs[(None, 'xmlUrl')].strip()})
+            if self.hierarchy:
+                obj.categories = [copy.copy(self.hierarchy)]
+            if len(self.hierarchy) == 1:
+                obj.tags = copy.copy(self.hierarchy)
+            self.harvest.feeds.append(obj)
 
 class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):
     def http_error_301(self, req, fp, code, msg, hdrs):

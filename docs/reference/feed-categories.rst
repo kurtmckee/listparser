@@ -3,7 +3,7 @@ feeds[i].categories
 
 A list of all of the categories associated with the feed.
 
-Categories are hierarchical, and are represented as lists of strings. Although categories can be specified in the ``category`` attribute of an ``outline`` element, listparser will also use the ``outline`` element hierarchy as a source of categorization information. As an example:
+Categories are hierarchical, and are represented as lists of strings. Although categories can be specified in the ``category`` attribute of an ``opml:outline`` element, listparser will also use the ``opml:outline`` element hierarchy as a source of categorization information. As an example:
 
 ..  highlight:: xml
 
@@ -28,6 +28,7 @@ In this example, there are three categories:
 *   ``/opml/body//outline[type=feed]/@category`` [#slashes]_
 *   ``/opml/body//outline[type=feed]/ancestor::outline/@text``
 *   ``/opml/body//outline[type=feed]/ancestor::outline/@title``
+*   ``/gtml:GadgetTabML//gtml:Tab/@title``
 
 ..  rubric:: Footnotes
 

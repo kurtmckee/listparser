@@ -8,3 +8,4 @@ This key is guaranteed to exist.
 ..  rubric:: Comes from
 
 *   ``/opml/body//outline/@xmlUrl``
+*   ``/gtml:GadgetTabML//iGoogle:Module[@type="RSS"]/iGoogle:ModulePrefs/@xmlUrl``
