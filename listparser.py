@@ -25,6 +25,10 @@ import xml.sax
 
 USER_AGENT = "listparser/%s +http://freshmeat.net/projects/listparser" % (__version__)
 
+namespaces = {
+    'http://opml.org/spec2': 'opml',
+}
+
 def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
     guarantees = SuperDict({
         'bozo': 0,
@@ -41,6 +45,7 @@ def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
     handler = Handler()
     handler.harvest.update(guarantees)
     parser = xml.sax.make_parser()
+    parser.setFeature(xml.sax.handler.feature_namespaces, True)
     parser.setContentHandler(handler)
     parser.setErrorHandler(handler)
     parser.parse(fileobj)
@@ -70,12 +75,22 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     fatalError = warning
 
     # ContentHandler functions
-    def startElement(self, name, attrs):
-        if hasattr(self, '_start_%s' % name):
-            getattr(self, '_start_%s' % name)(attrs)
-    def endElement(self, name):
-        if hasattr(self, '_end_%s' % name):
-            getattr(self, '_end_%s' % name)()
+    def startElementNS(self, name, qname, attrs):
+        fn = ''
+        if name[0] in namespaces:
+            fn = '_start_%s_%s' % (namespaces[name[0]], name[1])
+        elif name[0] is None:
+            fn = '_start_opml_%s' % (name[1])
+        if callable(getattr(self, fn, None)):
+            getattr(self, fn)(attrs)
+    def endElementNS(self, name, qname):
+        fn = ''
+        if name[0] in namespaces:
+            fn = '_end_%s_%s' % (namespaces[name[0]], name[1])
+        elif name[0] is None:
+            fn = '_end_opml_%s' % (name[1])
+        if callable(getattr(self, fn, None)):
+            getattr(self, fn)()
     def characters(self, content):
         if not self.expect:
             return
@@ -85,34 +100,34 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         # `...['email']['domain']` will be filled with `content`.
         node = reduce(lambda x, y: x.setdefault(y, SuperDict()), self.expect.split('_')[:-1], self.harvest)
         node[self.expect.split('_')[-1]] = node.setdefault(self.expect.split('_')[-1], '') + content
-    def _start_opml(self, attrs):
+    def _start_opml_opml(self, attrs):
         self.harvest.version = "opml"
-        if attrs.get('version') in ("1.0", "1.1"):
+        if attrs.get((None, 'version')) in ("1.0", "1.1"):
             self.harvest.version = "opml1"
-        elif attrs.get('version') == "2.0":
+        elif attrs.get((None, 'version')) == "2.0":
             self.harvest.version = "opml2"
-    def _start_outline(self, attrs):
+    def _start_opml_outline(self, attrs):
         url = title = None
         # Find an appropriate title in @text or @title
-        if attrs.has_key('text') and attrs.get('text', '').strip():
-            title = attrs['text'].strip()
+        if attrs.get((None, 'text'), '').strip():
+            title = attrs[(None, 'text')].strip()
         else:
-            if attrs.has_key('title') and attrs.get('title', '').strip():
-                title = attrs['title'].strip()
+            if attrs.get((None, 'title'), '').strip():
+                title = attrs[(None, 'title')].strip()
 
         # Determine whether the outline is a feed or subscription list
-        if 'xmlurl' in (i.lower() for i in attrs.keys()):
+        if 'xmlurl' in (i[1].lower() for i in attrs.keys()):
             # It's a feed
             append_to = self.harvest.feeds
-            if attrs.get('type', '').strip().lower() == 'source':
+            if attrs.get((None, 'type'), '').strip().lower() == 'source':
                 # Actually, it's a subscription list!
                 append_to = self.harvest.lists
             # This generator expression selects the `xmlUrl` attribute no matter its case
-            url = (v.strip() for k, v in attrs.items() if k.lower() == "xmlurl").next()
-        elif attrs.has_key('url') and attrs.get('type', '').lower() in ('link', 'include'):
+            url = (v.strip() for k, v in attrs.items() if k[1].lower() == "xmlurl").next()
+        elif attrs.get((None, 'type'), '').lower() in ('link', 'include'):
             # It's a subscription list
             append_to = self.harvest.lists
-            url = attrs['url'].strip()
+            url = attrs[(None, 'url')].strip()
         elif title is not None:
             # Assume that this is a grouping node
             self.hierarchy.append(title)
@@ -126,11 +141,11 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             obj.title = title
 
         # Handle categories and tags
-        if attrs.has_key('category'):
+        if attrs.has_key((None, 'category')):
             def or_strip(x, y):
                 return x.strip() or y.strip()
-            tags = [x.strip() for x in attrs['category'].split(',') if x.strip() and '/' not in x]
-            cats = (x.strip() for x in attrs['category'].split(',') if '/' in x)
+            tags = [x.strip() for x in attrs[(None, 'category')].split(',') if x.strip() and '/' not in x]
+            cats = (x.strip() for x in attrs[(None, 'category')].split(',') if '/' in x)
             cats = (x.split('/') for x in cats if reduce(or_strip, x.split('/')))
             cats = (xlist for xlist in cats if reduce(or_strip, xlist))
             cats = [[y.strip() for y in xlist if y.strip()] for xlist in cats]
@@ -148,35 +163,35 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
 
         append_to.append(obj)
         self.hierarchy.append('')
-    def _end_outline(self):
+    def _end_opml_outline(self):
         self.hierarchy.pop()
-    def _start_title(self, attrs):
+    def _start_opml_title(self, attrs):
         self.expect = 'meta_title'
-    def _end_title(self):
+    def _end_opml_title(self):
         if self.harvest.meta.get('title', False):
             self.harvest.meta.title = self.harvest.meta.title.strip()
         self.expect = ''
-    def _start_ownerId(self, attrs):
+    def _start_opml_ownerId(self, attrs):
         self.expect = 'meta_author_url'
-    def _end_ownerId(self):
+    def _end_opml_ownerId(self):
         if self.harvest.meta.get('author', SuperDict()).get('url', False):
             self.harvest.meta.author.url = self.harvest.meta.author.url.strip()
         self.expect = ''
-    def _start_ownerEmail(self, attrs):
+    def _start_opml_ownerEmail(self, attrs):
         self.expect = 'meta_author_email'
-    def _end_ownerEmail(self):
+    def _end_opml_ownerEmail(self):
         if self.harvest.meta.get('author', SuperDict()).get('email', False):
             self.harvest.meta.author.email = self.harvest.meta.author.email.strip()
         self.expect = ''
-    def _start_ownerName(self, attrs):
+    def _start_opml_ownerName(self, attrs):
         self.expect = 'meta_author_name'
-    def _end_ownerName(self):
+    def _end_opml_ownerName(self):
         if self.harvest.meta.get('author', SuperDict()).get('name', False):
             self.harvest.meta.author.name = self.harvest.meta.author.name.strip()
         self.expect = ''
-    def _start_dateCreated(self, attrs):
+    def _start_opml_dateCreated(self, attrs):
         self.expect = 'meta_created'
-    def _end_dateCreated(self):
+    def _end_opml_dateCreated(self):
         if self.harvest.meta.get('created', '').strip():
             self.harvest.meta.created = self.harvest.meta.created.strip()
             d = _rfc822(self.harvest.meta.created)
@@ -185,9 +200,9 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             else:
                 self.raise_bozo('dateCreated is not an RFC 822 datetime')
         self.expect = ''
-    def _start_dateModified(self, attrs):
+    def _start_opml_dateModified(self, attrs):
         self.expect = 'meta_modified'
-    def _end_dateModified(self):
+    def _end_opml_dateModified(self):
         if self.harvest.meta.get('modified', '').strip():
             self.harvest.meta.modified = self.harvest.meta.modified.strip()
             d = _rfc822(self.harvest.meta.modified)
