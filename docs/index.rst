@@ -1,7 +1,7 @@
 Welcome to listparser's documentation!
 ======================================
 
-listparser is a Python library that parses OPML subscription lists (also called reading lists) and returns a sanitized, standardized result.
+listparser is a Python library that parses subscription lists (also called reading lists) and returns all of the feeds and subscription lists that it finds. It currently supports OPML and the iGoogle exported settings format.
 
 Contents
 --------

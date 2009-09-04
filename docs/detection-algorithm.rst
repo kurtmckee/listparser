@@ -1,6 +1,10 @@
 Feed and subscription list detection algorithm
 ==============================================
 
+..  note::
+
+    The iGoogle exported settings format doesn't support embedded subscription lists. The detection algorithm only applies to OPML documents.
+
 Many services and softwares output OPML files with slight variations. listparser attempts to correctly determine whether an ``outline`` element is attempting to reference a feed or subscription list. As an example, although feeds should be indicated using ``type="rss"`` (no matter the format), some services refer to feeds using ``type="link"``, others indicate that the feed is Atom-formatted using ``type="pie"``, and still others fail to include a ``type`` attribute at all! Therefore it is necessary to make educated guesses.
 
 
@@ -9,7 +13,7 @@ Feed detection
 
 If the ``outline`` element contains an ``xmlUrl`` attribute, the ``outline`` is assumed to represent a feed. listparser will also accept ``xmlurl``, or ``xmlURL``, or indeed any capitalization combination.
 
-The ``type`` is ignored entirely in making the decision, with one notable exception (see below)
+The ``type`` is ignored entirely in making the decision, with one notable exception (see below).
 
 
 Subscription list detection

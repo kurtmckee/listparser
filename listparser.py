@@ -1,4 +1,4 @@
-# listparser.py - Parse OPML subscription lists into a negotiable format.
+# listparser.py - Parse subscription lists into a consistent format.
 # Copyright (C) 2009 Kurt McKee <contactme@kurtmckee.org>
 # 
 # This program is free software: you can redistribute it and/or modify
