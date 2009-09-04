@@ -1,3 +1,9 @@
+v0.8 (3 Sep 2009) "Three day weekend"
+    * Support the iGoogle exported settings format!
+    * Support Liferea's version of subscription lists in OPML 
+    * Removed feeds[i].claims
+    * Removed almost all of listparser's bozo warnings
+
 v0.7 (28 Aug 2009) "The Codex"
     * Added documentation!
     * Unified feed and subscription list code
