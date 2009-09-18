@@ -1,0 +1,8 @@
+include COPYING
+include COPYING.LESSER
+include NEWS
+include README
+include lptest.py
+include project.opml
+recursive-include docs *.rst conf.py
+recursive-include tests *.xml
