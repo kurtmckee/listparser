@@ -87,6 +87,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             fn = '_start_opml_%s' % (name[1])
         if callable(getattr(self, fn, None)):
             getattr(self, fn)(attrs)
+
     def endElementNS(self, name, qname):
         fn = ''
         if name[0] in namespaces:
@@ -99,9 +100,13 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             # reduce code duplication in the _end_opml_* functions
             self.expect = False
             self._characters = unicode()
+
     def characters(self, content):
         if self.expect:
             self._characters += content
+
+    # OPML support
+    #--------------
 
     def _start_opml_opml(self, attrs):
         self.harvest.version = "opml"
@@ -109,6 +114,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             self.harvest.version = "opml1"
         elif attrs.get((None, 'version')) == "2.0":
             self.harvest.version = "opml2"
+
     def _start_opml_outline(self, attrs):
         url = title = None
         # Find an appropriate title in @text or @title
@@ -216,7 +222,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.raise_bozo('dateModified is not an RFC 822 datetime')
 
     # iGoogle/GadgetTabML support
-    #----------------------------
+    #-----------------------------
 
     def _start_gtml_GadgetTabML(self, attrs):
         self.harvest.version = 'igoogle'
