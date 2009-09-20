@@ -131,8 +131,11 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             if attrs.get((None, 'type'), '').strip().lower() == 'source':
                 # Actually, it's a subscription list!
                 append_to = self.harvest.lists
-            # This generator expression selects the `xmlUrl` attribute no matter its case
-            url = (v.strip() for k, v in attrs.items() if k[1].lower() == "xmlurl").next()
+            # Get the URL regardless of xmlUrl's case
+            for k, v in attrs.items():
+                if k[1].lower() == 'xmlurl':
+                    url = v.strip()
+                    break
         elif attrs.get((None, 'type'), '').lower() in ('link', 'include'):
             # It's a subscription list
             append_to = self.harvest.lists
