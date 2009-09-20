@@ -59,7 +59,8 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def __init__(self):
         xml.sax.handler.ContentHandler.__init__(self)
         self.harvest = SuperDict()
-        self.expect = ''
+        self.expect = False
+        self._characters = unicode()
         self.hierarchy = []
         self.flag_feed = False
 
@@ -94,15 +95,14 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             fn = '_end_opml_%s' % (name[1])
         if callable(getattr(self, fn, None)):
             getattr(self, fn)()
+            # Always disable and reset character capture in order to
+            # reduce code duplication in the _end_opml_* functions
+            self.expect = False
+            self._characters = unicode()
     def characters(self, content):
-        if not self.expect:
-            return
-        # If `expect` contains something like "userinfo_contact_email_domain",
-        # then after these next lines, node will point to the nested dictionary
-        # `self.harvest['userinfo']['contact']['email']`, and
-        # `...['email']['domain']` will be filled with `content`.
-        node = reduce(lambda x, y: x.setdefault(y, SuperDict()), self.expect.split('_')[:-1], self.harvest)
-        node[self.expect.split('_')[-1]] = node.setdefault(self.expect.split('_')[-1], '') + content
+        if self.expect:
+            self._characters += content
+
     def _start_opml_opml(self, attrs):
         self.harvest.version = "opml"
         if attrs.get((None, 'version')) in ("1.0", "1.1"):
@@ -168,52 +168,52 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self.hierarchy.append('')
     def _end_opml_outline(self):
         self.hierarchy.pop()
-    def _start_opml_title(self, attrs):
-        self.expect = 'meta_title'
+
+    def _expect_characters(self, attrs):
+        # Most _start_opml_* functions only need to set these two variables,
+        # so this function exists to reduce significant code duplication
+        self.expect = True
+        self._characters = unicode()
+
+    _start_opml_title = _expect_characters
     def _end_opml_title(self):
-        if self.harvest.meta.get('title', False):
-            self.harvest.meta.title = self.harvest.meta.title.strip()
-        self.expect = ''
-    def _start_opml_ownerId(self, attrs):
-        self.expect = 'meta_author_url'
+        if self._characters.strip():
+            self.harvest.setdefault('meta', SuperDict()).title = self._characters.strip()
+
+    _start_opml_ownerId = _expect_characters
     def _end_opml_ownerId(self):
-        if self.harvest.meta.get('author', SuperDict()).get('url', False):
-            self.harvest.meta.author.url = self.harvest.meta.author.url.strip()
-        self.expect = ''
-    def _start_opml_ownerEmail(self, attrs):
-        self.expect = 'meta_author_email'
+        if self._characters.strip():
+            self.harvest.setdefault('meta', SuperDict()).setdefault('author', SuperDict()).url = self._characters.strip()
+
+    _start_opml_ownerEmail = _expect_characters
     def _end_opml_ownerEmail(self):
-        if self.harvest.meta.get('author', SuperDict()).get('email', False):
-            self.harvest.meta.author.email = self.harvest.meta.author.email.strip()
-        self.expect = ''
-    def _start_opml_ownerName(self, attrs):
-        self.expect = 'meta_author_name'
+        if self._characters.strip():
+            self.harvest.setdefault('meta', SuperDict()).setdefault('author', SuperDict()).email = self._characters.strip()
+
+    _start_opml_ownerName = _expect_characters
     def _end_opml_ownerName(self):
-        if self.harvest.meta.get('author', SuperDict()).get('name', False):
-            self.harvest.meta.author.name = self.harvest.meta.author.name.strip()
-        self.expect = ''
-    def _start_opml_dateCreated(self, attrs):
-        self.expect = 'meta_created'
+        if self._characters.strip():
+            self.harvest.setdefault('meta', SuperDict()).setdefault('author', SuperDict()).name = self._characters.strip()
+
+    _start_opml_dateCreated = _expect_characters
     def _end_opml_dateCreated(self):
-        if self.harvest.meta.get('created', '').strip():
-            self.harvest.meta.created = self.harvest.meta.created.strip()
+        if self._characters.strip():
+            self.harvest.setdefault('meta', SuperDict()).created = self._characters.strip()
             d = _rfc822(self.harvest.meta.created)
             if isinstance(d, datetime.datetime):
                 self.harvest.meta.created_parsed = d
             else:
                 self.raise_bozo('dateCreated is not an RFC 822 datetime')
-        self.expect = ''
-    def _start_opml_dateModified(self, attrs):
-        self.expect = 'meta_modified'
+
+    _start_opml_dateModified = _expect_characters
     def _end_opml_dateModified(self):
-        if self.harvest.meta.get('modified', '').strip():
-            self.harvest.meta.modified = self.harvest.meta.modified.strip()
+        if self._characters.strip():
+            self.harvest.setdefault('meta', SuperDict()).modified = self._characters.strip()
             d = _rfc822(self.harvest.meta.modified)
             if isinstance(d, datetime.datetime):
                 self.harvest.meta.modified_parsed = d
             else:
                 self.raise_bozo('dateModified is not an RFC 822 datetime')
-        self.expect = ''
 
     # iGoogle/GadgetTabML support
     #----------------------------
