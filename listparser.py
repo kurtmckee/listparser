@@ -153,25 +153,26 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             obj.title = title
 
         # Handle categories and tags
+        tags = []
+        cats = []
         if attrs.has_key((None, 'category')):
-            def or_strip(x, y):
-                return x.strip() or y.strip()
-            tags = [x.strip() for x in attrs[(None, 'category')].split(',') if x.strip() and '/' not in x]
-            cats = (x.strip() for x in attrs[(None, 'category')].split(',') if '/' in x)
-            cats = (x.split('/') for x in cats if reduce(or_strip, x.split('/')))
-            cats = (xlist for xlist in cats if reduce(or_strip, xlist))
-            cats = [[y.strip() for y in xlist if y.strip()] for xlist in cats]
-            if tags:
-                obj.tags = tags
-            if cats:
-                obj.categories = cats
+            for i in attrs[(None, 'category')].split(','):
+                if '/' not in i and i.strip():
+                    tags.append(i.strip())
+                elif '/' in i:
+                    tmp = [j.strip() for j in i.split('/') if j.strip()]
+                    if tmp and tmp not in cats:
+                        cats.append(tmp)
         # Copy the current hierarchy into `categories`
-        if self.hierarchy and self.hierarchy not in obj.get('categories', []):
-            obj.setdefault('categories', []).append(copy.copy(self.hierarchy))
+        if self.hierarchy and self.hierarchy not in cats:
+            cats.append(copy.copy(self.hierarchy))
         # Copy all single-element `categories` into `tags`
-        tags = [i[0] for i in obj.get('categories', []) if len(i) == 1 and i[0] not in obj.get('tags', [])]
+        tags.extend([i[0] for i in cats if len(i) == 1])
+
         if tags:
-            obj.setdefault('tags', []).extend(tags)
+            obj.tags = list(set(tags))
+        if cats:
+            obj.categories = cats
 
         append_to.append(obj)
         self.hierarchy.append('')
