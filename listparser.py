@@ -298,7 +298,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             else:
                 obj.tags = []
             self.harvest.feeds.append(obj)
-    endDocument = _end_foaf_Group
+    _end_rdf_RDF = _end_foaf_Group
 
     _start_foaf_name = _expect_characters
     def _end_foaf_name(self):
