@@ -11,7 +11,7 @@
     <head></head>
     <body>
         <outline text="dupe">
-            <outline category="dupe,/dupe" text="feedname" type="rss" xmlUrl="http://domain/feed" />
+            <outline category="dupe,dupe,/dupe,/dupe" text="feedname" type="rss" xmlUrl="http://domain/feed" />
         </outline>
     </body>
 </opml>
