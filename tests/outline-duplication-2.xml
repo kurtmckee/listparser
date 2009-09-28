@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+    Description: OPML | Handle duplicate outlines (consolidate cats/tags)
+    Eval: result.bozo == 0
+    Eval: len(result.feeds) == 1
+    Eval: "hier1" in result.feeds[0].tags
+    Eval: "hier2" in result.feeds[0].tags
+    Eval: ["hier1"] in result.feeds[0].categories
+    Eval: ["hier2"] in result.feeds[0].categories
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline text="hier1">
+            <outline text="feedname" type="rss" xmlUrl="http://domain/feed" />
+        </outline>
+        <outline text="hier2">
+            <outline text="feedname" type="rss" xmlUrl="http://domain/feed" />
+        </outline>
+    </body>
+</opml>

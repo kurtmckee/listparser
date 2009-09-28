@@ -72,6 +72,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self.hierarchy = []
         self.flag_feed = False
         self.flag_group = False
+        self.found_urls = []
         self.objs = []
         self.tempurls = []
         self.temptitle = unicode()
@@ -82,6 +83,18 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             self.harvest.bozo_exception = ListError(err)
         else:
             self.harvest.bozo_exception = err
+
+    def finditem(self, url):
+        "Find and return a feed or list item by URL"
+        if self.harvest.has_key('feeds'):
+            for obj in self.harvest.feeds:
+                if obj.url == url:
+                    return obj
+        if self.harvest.has_key('lists'):
+            for obj in self.harvest.lists:
+                if obj.url == url:
+                    return obj
+        return None
 
     # ErrorHandler functions
     def warning(self, exception):
@@ -160,9 +173,15 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             # Maintain the hierarchy
             self.hierarchy.append('')
             return
-        obj = SuperDict({'url': url})
-        if title is not None:
-            obj.title = title
+        if url not in self.found_urls:
+            # This is a brand new URL
+            self.found_urls.append(url)
+            obj = SuperDict({'url': url})
+            if title is not None:
+                obj.title = title
+            append_to.append(obj)
+        else:
+            obj = self.finditem(url)
 
         # Handle categories and tags
         tags = []
@@ -182,11 +201,14 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         tags.extend([i[0] for i in cats if len(i) == 1])
 
         if tags:
-            obj.tags = list(set(tags))
+            obj.setdefault('tags', []).extend(tags)
+            obj.tags = list(set(obj.tags))
         if cats:
-            obj.categories = cats
+            obj.setdefault('categories', [])
+            for cat in cats:
+                if cat not in obj.categories:
+                    obj.categories.append(cat)
 
-        append_to.append(obj)
         self.hierarchy.append('')
     def _end_opml_outline(self):
         self.hierarchy.pop()
@@ -289,15 +311,22 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def _end_foaf_Group(self):
         self.flag_group = False
         for obj in self.objs:
+            # Check for duplicate feeds
+            if obj.url in self.found_urls:
+                obj = self.finditem(obj.url)
+            else:
+                self.found_urls.append(obj.url)
+                self.harvest.feeds.append(obj)
+            # Create or consolidate categories and tags
+            obj.setdefault('categories', [])
+            obj.setdefault('tags', [])
+            if self.hierarchy and self.hierarchy not in obj.categories:
+                obj.categories.append(copy.copy(self.hierarchy))
+            if len(self.hierarchy) == 1 and self.hierarchy[0] not in obj.tags:
+                obj.tags.extend(copy.copy(self.hierarchy))
+            # Maintain the hierarchy
             if self.hierarchy:
-                obj.categories = [copy.copy(self.hierarchy)]
-            else:
-                obj.categories = []
-            if len(self.hierarchy) == 1:
-                obj.tags = copy.copy(self.hierarchy)
-            else:
-                obj.tags = []
-            self.harvest.feeds.append(obj)
+                self.hierarchy.pop()
     _end_rdf_RDF = _end_foaf_Group
 
     _start_foaf_name = _expect_characters
