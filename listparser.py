@@ -29,7 +29,15 @@ namespaces = {
     'http://opml.org/spec2': 'opml',
     'http://www.google.com/ig': 'iGoogle',
     'http://schemas.google.com/GadgetTabML/2008': 'gtml',
+    'http://www.w3.org/1999/02/22-rdf-syntax-ns#': 'rdf',
+    'http://www.w3.org/2000/01/rdf-schema#': 'rdfs',
+    'http://xmlns.com/foaf/0.1/': 'foaf',
+    'http://purl.org/dc/elements/1.1/': 'dc',
+    'http://purl.org/rss/1.0/': 'rss',
 }
+
+def _ns(ns):
+    return dict(zip(namespaces.values(), namespaces.keys())).get(ns, None)
 
 def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
     guarantees = SuperDict({
@@ -63,6 +71,10 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self._characters = unicode()
         self.hierarchy = []
         self.flag_feed = False
+        self.flag_group = False
+        self.objs = []
+        self.tempurls = []
+        self.temptitle = unicode()
 
     def raise_bozo(self, err):
         self.harvest.bozo = 1
@@ -251,6 +263,50 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             if len(self.hierarchy) == 1:
                 obj.tags = copy.copy(self.hierarchy)
             self.harvest.feeds.append(obj)
+
+    # RDF+FOAF support
+    #------------------
+
+    def _start_rdf_RDF(self, attrs):
+        self.harvest.version = 'rdf'
+
+    def _start_rss_channel(self, attrs):
+        if attrs.get((_ns('rdf'), 'about'), '').strip():
+            self.tempurls.append(attrs.get((_ns('rdf'), 'about')).strip())
+
+    def _start_foaf_Agent(self, attrs):
+        self.flag_feed = True
+    def _end_foaf_Agent(self):
+        for url in self.tempurls:
+            obj = SuperDict({'url': url, 'title': self.temptitle})
+            self.objs.append(obj)
+        self.temptitle = ''
+        self.tempurls = []
+        self.flag_feed = False
+
+    def _start_foaf_Group(self, attrs):
+        self.flag_group = True
+    def _end_foaf_Group(self):
+        self.flag_group = False
+        for obj in self.objs:
+            if self.hierarchy:
+                obj.categories = [copy.copy(self.hierarchy)]
+            else:
+                obj.categories = []
+            if len(self.hierarchy) == 1:
+                obj.tags = copy.copy(self.hierarchy)
+            else:
+                obj.tags = []
+            self.harvest.feeds.append(obj)
+    endDocument = _end_foaf_Group
+
+    _start_foaf_name = _expect_characters
+    def _end_foaf_name(self):
+        if self.flag_feed:
+            self.temptitle = self._characters.strip()
+        elif self.flag_group and self._characters.strip():
+            self.hierarchy.append(self._characters.strip())
+            self.flag_group = False
 
 class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):
     def http_error_301(self, req, fp, code, msg, hdrs):

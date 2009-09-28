@@ -29,6 +29,7 @@ In this example, there are three categories:
 *   ``/opml/body//outline[type=feed]/ancestor::outline/@text``
 *   ``/opml/body//outline[type=feed]/ancestor::outline/@title``
 *   ``/gtml:GadgetTabML//gtml:Tab/@title``
+*   ``/rdf:RDF/foaf:Group/foaf:name``
 
 ..  rubric:: Footnotes
 

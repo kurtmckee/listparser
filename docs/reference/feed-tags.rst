@@ -23,6 +23,7 @@ In this example, there are three tags: "sports", "baseball", and "golf".
 *   ``/opml/body/outline/outline[type=feed]/parent::outline/@text``
 *   ``/opml/body/outline/outline[type=feed]/parent::outline/@title``
 *   ``/gtml:GadgetTabML//gtml:Tab/@title``
+*   ``/rdf:RDF/foaf:Group/foaf:name``
 
 ..  rubric:: Footnotes
 

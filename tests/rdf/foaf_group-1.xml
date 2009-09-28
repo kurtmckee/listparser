@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Description: RDF | Use foaf:Group as category and tag (1)
+    Eval: result.bozo == 0
+    Eval: "Planet X" in result.feeds[0].tags
+    Eval: ["Planet X"] in result.feeds[0].categories
+    Eval: result.feeds[0].title == "User"
+-->
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:foaf="http://xmlns.com/foaf/0.1/"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:rss="http://purl.org/rss/1.0/"
+>
+
+<foaf:Group>
+    <foaf:name>Planet X</foaf:name>
+    <foaf:member>
+        <foaf:Agent> 
+            <foaf:name>User</foaf:name>
+            <foaf:weblog> 
+                <foaf:Document rdf:about="http://domain/"> 
+                    <rdfs:seeAlso> 
+                        <rss:channel rdf:about="http://domain/feed" /> 
+                    </rdfs:seeAlso> 
+                </foaf:Document> 
+            </foaf:weblog> 
+        </foaf:Agent> 
+    </foaf:member>
+</foaf:Group>
+
+</rdf:RDF> 

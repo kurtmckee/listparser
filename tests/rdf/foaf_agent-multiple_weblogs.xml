@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Description: RDF | foaf:Agent with multiple weblogs
+    Eval: result.bozo == 0
+    Eval: len(result.feeds) == 3
+    Eval: "http://domain/work/feed" in (result.feeds[0].url, result.feeds[1].url, result.feeds[2].url)
+    Eval: "http://domain/play/feed" in (result.feeds[0].url, result.feeds[1].url, result.feeds[2].url)
+    Eval: "http://domain/misc/feed" in (result.feeds[0].url, result.feeds[1].url, result.feeds[2].url)
+    Eval: result.feeds[0].title == "User"
+    Eval: result.feeds[1].title == "User"
+    Eval: result.feeds[2].title == "User"
+-->
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:foaf="http://xmlns.com/foaf/0.1/"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:rss="http://purl.org/rss/1.0/"
+>
+
+<foaf:Agent> 
+    <foaf:weblog> 
+        <foaf:Document rdf:about="http://domain/work"> 
+            <rdfs:seeAlso> 
+                <rss:channel rdf:about="http://domain/work/feed" /> 
+            </rdfs:seeAlso> 
+        </foaf:Document> 
+    </foaf:weblog> 
+    <foaf:weblog> 
+        <foaf:Document rdf:about="http://domain/play"> 
+            <rdfs:seeAlso> 
+                <rss:channel rdf:about="http://domain/play/feed" /> 
+            </rdfs:seeAlso> 
+        </foaf:Document> 
+    </foaf:weblog> 
+    <foaf:name>User</foaf:name>
+    <foaf:weblog> 
+        <foaf:Document rdf:about="http://domain/play"> 
+            <rdfs:seeAlso> 
+                <rss:channel rdf:about="http://domain/misc/feed" /> 
+            </rdfs:seeAlso> 
+        </foaf:Document> 
+    </foaf:weblog> 
+</foaf:Agent> 
+
+</rdf:RDF> 

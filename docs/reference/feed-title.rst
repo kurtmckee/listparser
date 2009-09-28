@@ -29,3 +29,4 @@ The title of the feed. It is not normalized except for the stripping of whitespa
 
 *   ``/opml/body//outline[type=feed]/@text``
 *   ``/opml/body//outline[type=feed]/@title``
+*   ``/rdf:RDF//foaf:Agent/foaf:name``
