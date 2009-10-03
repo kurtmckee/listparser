@@ -9,4 +9,4 @@ This key is guaranteed to exist.
 
 *   ``/opml/body//outline/@xmlUrl``
 *   ``/gtml:GadgetTabML//iGoogle:Module[@type="RSS"]/iGoogle:ModulePrefs/@xmlUrl``
-*   ``/rdf:RDF//foaf:Agent//rss:channel/@rdf:about
+*   ``/rdf:RDF//foaf:Agent//rss:channel/@rdf:about``
