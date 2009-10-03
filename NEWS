@@ -1,3 +1,9 @@
+v0.9 (3 Oct 2009) "Celery wolves"
+    * Support RDF+FOAF!
+    * Capture opportunity URLs
+    * Added duplicate URL detection
+    * Added distutils support for easier distribution
+
 v0.8 (3 Sep 2009) "Three day weekend"
     * Support the iGoogle exported settings format!
     * Support Liferea's version of subscription lists in OPML 
