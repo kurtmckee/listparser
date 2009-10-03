@@ -15,7 +15,7 @@ opml
     An OPML file with an unknown or unspecified version
 
 rdf
-    `RDF + FOAF <http://www.ibm.com/developerworks/xml/library/x-pblog/>`_
+    `RDF+FOAF <http://www.ibm.com/developerworks/xml/library/x-pblog/>`_
 
 igoogle
     iGoogle exported settings format [#igoog_export]_

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+    Description: OPML - Detect an opportunity when @htmlUrl is miscapitalized
+    Eval: result.bozo == 0
+    Eval: len(result.opportunities) == 1
+    Eval: result.opportunities[0].url == "http://domain/"
+    Eval: result.opportunities[0].title == "opportunity"
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline text="opportunity" type="rss" xmlUrl="" HTMLurl="http://domain/" />
+    </body>
+</opml>

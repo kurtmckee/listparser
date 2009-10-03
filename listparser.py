@@ -44,6 +44,7 @@ def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
         'bozo': 0,
         'feeds': [],
         'lists': [],
+        'opportunities': [],
         'meta': SuperDict(),
         'version': '',
     })
@@ -71,10 +72,15 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self._characters = unicode()
         self.hierarchy = []
         self.flag_feed = False
+        self.flag_opportunity = False
         self.flag_group = False
         self.found_urls = []
-        self.objs = []
+        self.objs = SuperDict({
+            'feeds': [],
+            'opportunities': [],
+        })
         self.tempurls = []
+        self.tempopps = []
         self.temptitle = unicode()
 
     def raise_bozo(self, err):
@@ -85,7 +91,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             self.harvest.bozo_exception = err
 
     def finditem(self, url):
-        "Find and return a feed or list item by URL"
+        "Find and return a feed, list, or opportunity item by URL"
         if self.harvest.has_key('feeds'):
             for obj in self.harvest.feeds:
                 if obj.url == url:
@@ -94,6 +100,9 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             for obj in self.harvest.lists:
                 if obj.url == url:
                     return obj
+        for obj in self.harvest.opportunities:
+            if obj.url == url:
+                return obj
         return None
 
     # ErrorHandler functions
@@ -169,6 +178,12 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             # Assume that this is a grouping node
             self.hierarchy.append(title)
             return
+        # Look for an opportunity URL
+        if not url and 'htmlurl' in (k[1].lower() for k in attrs.keys()):
+            for k, v in attrs.items():
+                if k[1].lower() == 'htmlurl':
+                    url = v.strip()
+            append_to = self.harvest.opportunities
         if not url:
             # Maintain the hierarchy
             self.hierarchy.append('')
@@ -294,6 +309,10 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
 
     def _start_rss_channel(self, attrs):
         if attrs.get((_ns('rdf'), 'about'), '').strip():
+            # We now have a feed URL, so forget about any opportunity URL
+            if self.flag_opportunity:
+                self.flag_opportunity = False
+                self.tempopps.pop()
             self.tempurls.append(attrs.get((_ns('rdf'), 'about')).strip())
 
     def _start_foaf_Agent(self, attrs):
@@ -301,32 +320,40 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def _end_foaf_Agent(self):
         for url in self.tempurls:
             obj = SuperDict({'url': url, 'title': self.temptitle})
-            self.objs.append(obj)
+            self.objs.feeds.append(obj)
+        for url in self.tempopps:
+            obj = SuperDict({'url': url, 'title': self.temptitle})
+            self.objs.opportunities.append(obj)
         self.temptitle = ''
         self.tempurls = []
         self.flag_feed = False
+        self.flag_opportunity = False
 
     def _start_foaf_Group(self, attrs):
         self.flag_group = True
     def _end_foaf_Group(self):
         self.flag_group = False
-        for obj in self.objs:
-            # Check for duplicate feeds
-            if obj.url in self.found_urls:
-                obj = self.finditem(obj.url)
-            else:
-                self.found_urls.append(obj.url)
-                self.harvest.feeds.append(obj)
-            # Create or consolidate categories and tags
-            obj.setdefault('categories', [])
-            obj.setdefault('tags', [])
-            if self.hierarchy and self.hierarchy not in obj.categories:
-                obj.categories.append(copy.copy(self.hierarchy))
-            if len(self.hierarchy) == 1 and self.hierarchy[0] not in obj.tags:
-                obj.tags.extend(copy.copy(self.hierarchy))
-            # Maintain the hierarchy
-            if self.hierarchy:
-                self.hierarchy.pop()
+        for key in ('feeds', 'opportunities'):
+            for obj in self.objs.get(key):
+                # Check for duplicate feeds
+                if obj.url in self.found_urls:
+                    obj = self.finditem(obj.url)
+                else:
+                    self.found_urls.append(obj.url)
+                    if key == 'feeds':
+                        self.harvest.feeds.append(obj)
+                    else:
+                        self.harvest.opportunities.append(obj)
+                # Create or consolidate categories and tags
+                obj.setdefault('categories', [])
+                obj.setdefault('tags', [])
+                if self.hierarchy and self.hierarchy not in obj.categories:
+                    obj.categories.append(copy.copy(self.hierarchy))
+                if len(self.hierarchy) == 1 and self.hierarchy[0] not in obj.tags:
+                    obj.tags.extend(copy.copy(self.hierarchy))
+        # Maintain the hierarchy
+        if self.hierarchy:
+            self.hierarchy.pop()
     _end_rdf_RDF = _end_foaf_Group
 
     _start_foaf_name = _expect_characters
@@ -336,6 +363,12 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         elif self.flag_group and self._characters.strip():
             self.hierarchy.append(self._characters.strip())
             self.flag_group = False
+
+    def _start_foaf_Document(self, attrs):
+        if attrs.get((_ns('rdf'), 'about'), '').strip():
+            # Flag this as an opportunity (but ignore if a feed URL is found)
+            self.flag_opportunity = True
+            self.tempopps.append(attrs.get((_ns('rdf'), 'about')).strip())
 
 class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):
     def http_error_301(self, req, fp, code, msg, hdrs):

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Description: RDF | Detect opportunity URL in foaf:Document
+    Eval: result.bozo == 0
+    Eval: len(result.opportunities) == 1
+    Eval: result.opportunities[0].url == "http://domain/"
+    Eval: result.opportunities[0].title == "opportunity"
+-->
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:foaf="http://xmlns.com/foaf/0.1/"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:rss="http://purl.org/rss/1.0/"
+>
+
+<foaf:Agent> 
+    <foaf:name>opportunity</foaf:name>
+    <foaf:weblog> 
+        <foaf:Document rdf:about="http://domain/"> 
+            <rdfs:seeAlso> 
+                <rss:channel rdf:about="" /> 
+            </rdfs:seeAlso> 
+        </foaf:Document> 
+    </foaf:weblog> 
+</foaf:Agent> 
+
+</rdf:RDF> 

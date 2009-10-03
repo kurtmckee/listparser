@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!--
+    Description: OPML - Ignore if @htmlUrl is empty
+    Eval: result.bozo == 0
+    Eval: len(result.opportunities) == 0
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline text="feedname" type="rss" xmlUrl="" htmlUrl=" " />
+    </body>
+</opml>

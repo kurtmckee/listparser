@@ -1,7 +1,7 @@
 Welcome to listparser's documentation!
 ======================================
 
-listparser is a Python library that parses subscription lists (also called reading lists) and returns all of the feeds and subscription lists that it finds. It currently supports OPML, RDF+FOAF, and the iGoogle exported settings format.
+listparser is a Python library that parses subscription lists (also called reading lists) and returns all of the feeds, subscription lists, and "opportunity" URLs that it finds. It currently supports OPML, RDF+FOAF, and the iGoogle exported settings format.
 
 Contents
 --------
@@ -26,5 +26,6 @@ Reference
     reference/meta
     reference/modified
     reference/modified_parsed
+    reference/opportunities
     reference/status
     reference/version
