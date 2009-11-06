@@ -112,7 +112,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             fn = '_start_%s_%s' % (namespaces[name[0]], name[1])
         elif name[0] is None:
             fn = '_start_opml_%s' % (name[1])
-        if callable(getattr(self, fn, None)):
+        if hasattr(getattr(self, fn, None), '__call__'):
             getattr(self, fn)(attrs)
 
     def endElementNS(self, name, qname):
@@ -121,7 +121,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             fn = '_end_%s_%s' % (namespaces[name[0]], name[1])
         elif name[0] is None:
             fn = '_end_opml_%s' % (name[1])
-        if callable(getattr(self, fn, None)):
+        if hasattr(getattr(self, fn, None), '__call__'):
             getattr(self, fn)()
             # Always disable and reset character capture in order to
             # reduce code duplication in the _end_opml_* functions
