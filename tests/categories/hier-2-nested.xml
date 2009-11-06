@@ -2,7 +2,7 @@
 <!--
     Description: Hierarchy 2 (nested groupings)
     Eval: result['bozo'] == 0
-    Eval: not result['feeds'][0].has_key('tags')
+    Eval: 'tags' not in result['feeds'][0]
     Eval: len(result['feeds'][0]['categories']) == 1
     Eval: result['feeds'][0]['categories'][0] == ['grouping1', 'grouping2']
 -->

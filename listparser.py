@@ -92,17 +92,10 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
 
     def finditem(self, url):
         "Find and return a feed, list, or opportunity item by URL"
-        if self.harvest.has_key('feeds'):
-            for obj in self.harvest.feeds:
+        for k in ('feeds', 'lists', 'opportunities'):
+            for obj in self.harvest[k]:
                 if obj.url == url:
                     return obj
-        if self.harvest.has_key('lists'):
-            for obj in self.harvest.lists:
-                if obj.url == url:
-                    return obj
-        for obj in self.harvest.opportunities:
-            if obj.url == url:
-                return obj
         return None
 
     # ErrorHandler functions
@@ -487,8 +480,8 @@ class SuperDict(dict):
     """
 
     def __getattribute__(self, name):
-        if dict.has_key(self, name):
-            return dict.get(self, name)
+        if name in self:
+            return self[name]
         else:
             return dict.__getattribute__(self, name)
 
