@@ -2,7 +2,7 @@
 <!--
     Description: /opml/head/title stripped of whitespace
     Eval: result['bozo'] == 0
-    Eval: result['meta']['title'] == u'listtitle'
+    Eval: result['meta']['title'] == 'listtitle'
 -->
 <opml version="2.0">
     <head>
