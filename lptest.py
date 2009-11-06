@@ -25,6 +25,15 @@ import StringIO
 
 import listparser
 
+def bytestr(reply):
+    # HACK: force `reply` to the type expected by the webserver's `write()` function
+    # Python 2 expects type(basestring)
+    # Python 3 expects type(bytes)
+    try:
+        return bytes(reply, 'utf8')
+    except (TypeError, NameError):
+        return reply
+
 class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_GET(self):
         status = 200
@@ -59,7 +68,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.send_header('Last-Modified', modified)
         self.send_header('Content-type', 'text/xml')
         self.end_headers()
-        self.wfile.write(reply)
+        self.wfile.write(bytestr(reply))
     def log_request(self, *arg, **karg):
         pass
 
