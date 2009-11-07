@@ -411,10 +411,11 @@ def _mkfile(obj, agent, etag, modified):
     info = SuperDict({'status': getattr(ret, 'status', 200)})
     info.href = getattr(ret, 'newurl', obj)
     info.headers = SuperDict(getattr(ret, 'headers', {}))
-    if info.headers.get('etag'):
-        info.etag = info.headers.get('etag')
-    if info.headers.get('last-modified'):
-        info.modified = info.headers['last-modified']
+    # Python 3 doesn't normalize tag names; Python 2 does
+    if info.headers.get('ETag') or info.headers.get('etag'):
+        info.etag = info.headers.get('ETag') or info.headers.get('etag')
+    if info.headers.get('Last-Modified') or info.headers.get('last-modified'):
+        info.modified = info.headers.get('Last-Modified') or info.headers.get('last-modified')
         if isinstance(_rfc822(info.modified), datetime.datetime):
             info.modified_parsed = _rfc822(info.modified)
     return ret, info
