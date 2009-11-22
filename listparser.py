@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+__author__ = "Kurt McKee <contactme@kurtmckee.org>"
+__url__ = "http://freshmeat.net/projects/listparser"
 __version__ = "0.9"
 
 import copy
@@ -23,7 +25,7 @@ import StringIO
 import urllib2
 import xml.sax
 
-USER_AGENT = "listparser/%s +http://freshmeat.net/projects/listparser" % (__version__)
+USER_AGENT = "listparser/%s +%s" % (__version__, __url__)
 
 namespaces = {
     'http://opml.org/spec2': 'opml',
@@ -230,27 +232,35 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     _start_opml_title = _expect_characters
     def _end_opml_title(self):
         if self._characters.strip():
-            self.harvest.setdefault('meta', SuperDict()).title = self._characters.strip()
+            self.harvest.setdefault('meta', SuperDict())
+            self.harvest.meta.title = self._characters.strip()
 
     _start_opml_ownerId = _expect_characters
     def _end_opml_ownerId(self):
         if self._characters.strip():
-            self.harvest.setdefault('meta', SuperDict()).setdefault('author', SuperDict()).url = self._characters.strip()
+            self.harvest.setdefault('meta', SuperDict())
+            self.harvest.meta.setdefault('author', SuperDict())
+            self.harvest.meta.author.url = self._characters.strip()
 
     _start_opml_ownerEmail = _expect_characters
     def _end_opml_ownerEmail(self):
         if self._characters.strip():
-            self.harvest.setdefault('meta', SuperDict()).setdefault('author', SuperDict()).email = self._characters.strip()
+            self.harvest.setdefault('meta', SuperDict())
+            self.harvest.meta.setdefault('author', SuperDict())
+            self.harvest.meta.author.email = self._characters.strip()
 
     _start_opml_ownerName = _expect_characters
     def _end_opml_ownerName(self):
         if self._characters.strip():
-            self.harvest.setdefault('meta', SuperDict()).setdefault('author', SuperDict()).name = self._characters.strip()
+            self.harvest.setdefault('meta', SuperDict())
+            self.harvest.meta.setdefault('author', SuperDict())
+            self.harvest.meta.author.name = self._characters.strip()
 
     _start_opml_dateCreated = _expect_characters
     def _end_opml_dateCreated(self):
         if self._characters.strip():
-            self.harvest.setdefault('meta', SuperDict()).created = self._characters.strip()
+            self.harvest.setdefault('meta', SuperDict())
+            self.harvest.meta.created = self._characters.strip()
             d = _rfc822(self.harvest.meta.created)
             if isinstance(d, datetime.datetime):
                 self.harvest.meta.created_parsed = d
@@ -260,7 +270,8 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     _start_opml_dateModified = _expect_characters
     def _end_opml_dateModified(self):
         if self._characters.strip():
-            self.harvest.setdefault('meta', SuperDict()).modified = self._characters.strip()
+            self.harvest.setdefault('meta', SuperDict())
+            self.harvest.meta.modified = self._characters.strip()
             d = _rfc822(self.harvest.meta.modified)
             if isinstance(d, datetime.datetime):
                 self.harvest.meta.modified_parsed = d
@@ -342,7 +353,8 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 obj.setdefault('tags', [])
                 if self.hierarchy and self.hierarchy not in obj.categories:
                     obj.categories.append(copy.copy(self.hierarchy))
-                if len(self.hierarchy) == 1 and self.hierarchy[0] not in obj.tags:
+                if len(self.hierarchy) == 1 and \
+                   self.hierarchy[0] not in obj.tags:
                     obj.tags.extend(copy.copy(self.hierarchy))
         # Maintain the hierarchy
         if self.hierarchy:
@@ -365,7 +377,8 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
 
 class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):
     def http_error_301(self, req, fp, code, msg, hdrs):
-        result = urllib2.HTTPRedirectHandler.http_error_301(self, req, fp, code, msg, hdrs)
+        result = urllib2.HTTPRedirectHandler.http_error_301(self, req, fp,
+                                                            code, msg, hdrs)
         result.status = code
         result.newurl = result.geturl()
         return result
@@ -415,7 +428,8 @@ def _mkfile(obj, agent, etag, modified):
     if info.headers.get('ETag') or info.headers.get('etag'):
         info.etag = info.headers.get('ETag') or info.headers.get('etag')
     if info.headers.get('Last-Modified') or info.headers.get('last-modified'):
-        info.modified = info.headers.get('Last-Modified') or info.headers.get('last-modified')
+        info.modified = info.headers.get('Last-Modified') or \
+                        info.headers.get('last-modified')
         if isinstance(_rfc822(info.modified), datetime.datetime):
             info.modified_parsed = _rfc822(info.modified)
     return ret, info
