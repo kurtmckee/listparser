@@ -136,6 +136,11 @@ for testfile in files:
         # http_304-last_modified.xml must be called twice:
         # once with `modified` as a string, and again as a datetime
         numtests += 2
+    elif 'injection' in testfile:
+        # The injection tests require two calls; the first fails due to
+        # an undeclared entity reference, and so the URL is requested
+        # a second time and its content is injected with a DOCTYPE
+        numtests += 2
     else:
         numtests += 1
     description = ''

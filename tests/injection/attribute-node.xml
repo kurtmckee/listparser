@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+    Description: Undefined entity reference (attribute node)
+    Eval: result.bozo == 1
+    Eval: result.feeds[0].title == result.feeds[1].title
+-->
+<opml version="2.0">
+    <head>
+    </head>
+    <body>
+        <outline type="rss" text="arch&aelig;ology" xmlUrl="http://domain1/feed" />
+        <outline type="rss" text="arch&#230;ology" xmlUrl="http://domain2/feed" />
+    </body>
+</opml>

@@ -41,7 +41,7 @@ namespaces = {
 def _ns(ns):
     return dict(zip(namespaces.values(), namespaces.keys())).get(ns, None)
 
-def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
+def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None, inject=False):
     guarantees = SuperDict({
         'bozo': 0,
         'feeds': [],
@@ -61,9 +61,22 @@ def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None):
     parser.setFeature(xml.sax.handler.feature_namespaces, True)
     parser.setContentHandler(handler)
     parser.setErrorHandler(handler)
-    parser.parse(fileobj)
+    if inject:
+        parser.parse(Injector(fileobj))
+    else:
+        parser.parse(fileobj)
     fileobj.close()
 
+    # Test if a DOCTYPE injection is needed
+    if hasattr(handler.harvest, 'bozo_exception'):
+        if "undefined entity" in handler.harvest.bozo_exception.args:
+            if not inject:
+                return parse(filename_or_url, agent, etag, modified, True)
+    # Make it clear that the XML file is broken
+    # (if no other exception has been assigned)
+    if inject and not handler.harvest.bozo:
+        handler.harvest.bozo = 1
+        handler.harvest.bozo_exception = ListError("undefined entity found")
     return handler.harvest
 
 class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
@@ -515,6 +528,46 @@ class SuperDict(dict):
         self[name] = value
         return value
 
+class Injector(object):
+    """
+    Injector buffers the first read() call to a file-like object in
+    order to inject a DOCTYPE containing entity definitions immediately
+    following the XML declaration.
+    """
+    def __init__(self, obj):
+        self.obj = obj
+        self.injected = False
+    def read(self, size=None):
+        if size is not None:
+            read = self.obj.read(size)
+        else:
+            read = self.obj.read()
+        if self.injected:
+            return read
+        # Inject ENTITY references at the start of the document
+        import htmlentitydefs
+        entities = unicode()
+        for k, v in htmlentitydefs.name2codepoint.items():
+            entities += '<!ENTITY %s "&#%s;">' % (k, v)
+        doctype = "<!DOCTYPE anyroot [%s]>" % (entities, )
+        lines = read.splitlines()
+        lines.insert(1, bytestr(doctype))
+        self.injected = True
+        return bytestr('\n').join(lines)
+    def __getattr__(self, name):
+        return getattr(self.obj, name)
+    def __hasattr__(self, name):
+        return hasattr(self.obj, name)
+
 class ListError(Exception):
     """Used when a specification deviation is encountered in an XML file"""
     pass
+
+def bytestr(text):
+    # HACK: force `text` to the type expected by Python 2 and Python 3
+    # Python 2 expects type(basestring)
+    # Python 3 expects type(bytes)
+    try:
+        return bytes(text, 'utf8')
+    except (TypeError, NameError):
+        return text
