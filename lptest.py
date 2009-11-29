@@ -104,6 +104,10 @@ class TestCases(unittest.TestCase):
         result = listparser.parse(url, agent="CustomAgent")
         self.assertFalse(result.bozo)
         self.assert_(result.headers.get('x-agent') == "CustomAgent")
+    def testBadURL(self):
+        url = "xxx://badurl.com/"
+        result = listparser.parse(url)
+        self.assert_(result.bozo)
     def testStringInput(self):
         t = """<?xml version="1.0"?><opml version="2.0"><head><title>
         String Input Test</title></head><body><outline text="node" />

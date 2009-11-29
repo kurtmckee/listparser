@@ -416,12 +416,12 @@ def _mkfile(obj, agent, etag, modified):
     elif isinstance(modified, datetime.datetime):
         # It is assumed that `modified` is in UTC time
         headers['If-Modified-Since'] = modified.strftime('%a, %d %b %Y %H:%M:%S GMT')
+    request = urllib2.Request(obj, headers=headers)
+    opener = urllib2.build_opener(HTTPRedirectHandler, HTTPErrorHandler)
     try:
-        request = urllib2.Request(obj, headers=headers)
-        opener = urllib2.build_opener(HTTPRedirectHandler, HTTPErrorHandler)
         ret = opener.open(request)
-    except:
-        return None, SuperDict()
+    except urllib2.URLError, err:
+        return None, SuperDict({'bozo': 1, 'bozo_exception': err})
 
     info = SuperDict({'status': getattr(ret, 'status', 200)})
     info.href = getattr(ret, 'newurl', obj)
