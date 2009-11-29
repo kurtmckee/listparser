@@ -89,11 +89,10 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self.flag_feed = False
         self.flag_opportunity = False
         self.flag_group = False
-        self.found_urls = []
-        self.objs = SuperDict({
-            'feeds': [],
-            'opportunities': [],
-        })
+        # found_urls = {url: (append_to_key, obj)}
+        self.found_urls = SuperDict()
+        # group_objs = [(append_to_key, obj)]
+        self.group_objs = []
         self.agent_feeds = []
         self.agent_opps = []
         self.foaf_name = unicode()
@@ -104,14 +103,6 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             self.harvest.bozo_exception = ListError(err)
         else:
             self.harvest.bozo_exception = err
-
-    def finditem(self, url):
-        "Find and return a feed, list, or opportunity item by URL"
-        for k in ('feeds', 'lists', 'opportunities'):
-            for obj in self.harvest[k]:
-                if obj.url == url:
-                    return obj
-        return None
 
     # ErrorHandler functions
     def warning(self, exception):
@@ -169,10 +160,10 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         # Determine whether the outline is a feed or subscription list
         if 'xmlurl' in (i[1].lower() for i in attrs.keys()):
             # It's a feed
-            append_to = self.harvest.feeds
+            append_to = 'feeds'
             if attrs.get((None, 'type'), '').strip().lower() == 'source':
                 # Actually, it's a subscription list!
-                append_to = self.harvest.lists
+                append_to = 'lists'
             # Get the URL regardless of xmlUrl's case
             for k, v in attrs.items():
                 if k[1].lower() == 'xmlurl':
@@ -180,7 +171,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                     break
         elif attrs.get((None, 'type'), '').lower() in ('link', 'include'):
             # It's a subscription list
-            append_to = self.harvest.lists
+            append_to = 'lists'
             url = attrs[(None, 'url')].strip()
         elif title is not None:
             # Assume that this is a grouping node
@@ -191,20 +182,20 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             for k, v in attrs.items():
                 if k[1].lower() == 'htmlurl':
                     url = v.strip()
-            append_to = self.harvest.opportunities
+            append_to = 'opportunities'
         if not url:
             # Maintain the hierarchy
             self.hierarchy.append('')
             return
         if url not in self.found_urls:
             # This is a brand new URL
-            self.found_urls.append(url)
             obj = SuperDict({'url': url})
             if title is not None:
                 obj.title = title
-            append_to.append(obj)
+            self.found_urls[url] = (append_to, obj)
+            self.harvest[append_to].append(obj)
         else:
-            obj = self.finditem(url)
+            obj = self.found_urls[url][1]
 
         # Handle categories and tags
         tags = []
@@ -337,12 +328,13 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def _end_foaf_Agent(self):
         for url in self.agent_feeds:
             obj = SuperDict({'url': url, 'title': self.foaf_name})
-            self.objs.feeds.append(obj)
+            self.group_objs.append(('feeds', obj))
         for url in self.agent_opps:
             obj = SuperDict({'url': url, 'title': self.foaf_name})
-            self.objs.opportunities.append(obj)
+            self.group_objs.append(('opportunities', obj))
         self.foaf_name = ''
         self.agent_feeds = []
+        self.agent_opps = []
         self.flag_feed = False
         self.flag_opportunity = False
 
@@ -350,25 +342,22 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self.flag_group = True
     def _end_foaf_Group(self):
         self.flag_group = False
-        for key in ('feeds', 'opportunities'):
-            for obj in self.objs.get(key):
-                # Check for duplicate feeds
-                if obj.url in self.found_urls:
-                    obj = self.finditem(obj.url)
-                else:
-                    self.found_urls.append(obj.url)
-                    if key == 'feeds':
-                        self.harvest.feeds.append(obj)
-                    else:
-                        self.harvest.opportunities.append(obj)
-                # Create or consolidate categories and tags
-                obj.setdefault('categories', [])
-                obj.setdefault('tags', [])
-                if self.hierarchy and self.hierarchy not in obj.categories:
-                    obj.categories.append(copy.copy(self.hierarchy))
-                if len(self.hierarchy) == 1 and \
-                   self.hierarchy[0] not in obj.tags:
-                    obj.tags.extend(copy.copy(self.hierarchy))
+        for key, obj in self.group_objs:
+            # Check for duplicates
+            if obj.url in self.found_urls:
+                obj = self.found_urls[obj.url][1]
+            else:
+                self.found_urls[obj.url] = (key, obj)
+                self.harvest[key].append(obj)
+            # Create or consolidate categories and tags
+            obj.setdefault('categories', [])
+            obj.setdefault('tags', [])
+            if self.hierarchy and self.hierarchy not in obj.categories:
+                obj.categories.append(copy.copy(self.hierarchy))
+            if len(self.hierarchy) == 1 and \
+               self.hierarchy[0] not in obj.tags:
+                obj.tags.extend(copy.copy(self.hierarchy))
+        self.group_objs = []
         # Maintain the hierarchy
         if self.hierarchy:
             self.hierarchy.pop()
