@@ -94,8 +94,8 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             'feeds': [],
             'opportunities': [],
         })
-        self.tempurls = []
-        self.tempopps = []
+        self.agent_feeds = []
+        self.agent_opps = []
         self.foaf_name = unicode()
 
     def raise_bozo(self, err):
@@ -329,20 +329,20 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             # We now have a feed URL, so forget about any opportunity URL
             if self.flag_opportunity:
                 self.flag_opportunity = False
-                self.tempopps.pop()
-            self.tempurls.append(attrs.get((_ns('rdf'), 'about')).strip())
+                self.agent_opps.pop()
+            self.agent_feeds.append(attrs.get((_ns('rdf'), 'about')).strip())
 
     def _start_foaf_Agent(self, attrs):
         self.flag_feed = True
     def _end_foaf_Agent(self):
-        for url in self.tempurls:
+        for url in self.agent_feeds:
             obj = SuperDict({'url': url, 'title': self.foaf_name})
             self.objs.feeds.append(obj)
-        for url in self.tempopps:
+        for url in self.agent_opps:
             obj = SuperDict({'url': url, 'title': self.foaf_name})
             self.objs.opportunities.append(obj)
         self.foaf_name = ''
-        self.tempurls = []
+        self.agent_feeds = []
         self.flag_feed = False
         self.flag_opportunity = False
 
@@ -386,7 +386,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         if attrs.get((_ns('rdf'), 'about'), '').strip():
             # Flag this as an opportunity (but ignore if a feed URL is found)
             self.flag_opportunity = True
-            self.tempopps.append(attrs.get((_ns('rdf'), 'about')).strip())
+            self.agent_opps.append(attrs.get((_ns('rdf'), 'about')).strip())
 
 class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):
     def http_error_301(self, req, fp, code, msg, hdrs):
