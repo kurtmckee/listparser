@@ -96,7 +96,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         })
         self.tempurls = []
         self.tempopps = []
-        self.temptitle = unicode()
+        self.foaf_name = unicode()
 
     def raise_bozo(self, err):
         self.harvest.bozo = 1
@@ -336,12 +336,12 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self.flag_feed = True
     def _end_foaf_Agent(self):
         for url in self.tempurls:
-            obj = SuperDict({'url': url, 'title': self.temptitle})
+            obj = SuperDict({'url': url, 'title': self.foaf_name})
             self.objs.feeds.append(obj)
         for url in self.tempopps:
-            obj = SuperDict({'url': url, 'title': self.temptitle})
+            obj = SuperDict({'url': url, 'title': self.foaf_name})
             self.objs.opportunities.append(obj)
-        self.temptitle = ''
+        self.foaf_name = ''
         self.tempurls = []
         self.flag_feed = False
         self.flag_opportunity = False
@@ -377,7 +377,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     _start_foaf_name = _expect_characters
     def _end_foaf_name(self):
         if self.flag_feed:
-            self.temptitle = self._characters.strip()
+            self.foaf_name = self._characters.strip()
         elif self.flag_group and self._characters.strip():
             self.hierarchy.append(self._characters.strip())
             self.flag_group = False
