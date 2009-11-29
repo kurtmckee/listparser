@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!--
+    Description: User-Agent
+-->
+<opml version="2.0">
+    <head>
+        <title>Test customized User-Agent</title>
+    </head>
+    <body>
+        <outline text="node" />
+    </body>
+</opml>

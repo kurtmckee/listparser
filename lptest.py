@@ -67,6 +67,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         if modified:
             self.send_header('Last-Modified', modified)
         self.send_header('Content-type', 'text/xml')
+        self.send_header('x-agent', self.headers.get('user-agent'))
         self.end_headers()
         self.wfile.write(bytestr(reply))
     def log_request(self, *arg, **karg):
@@ -93,6 +94,16 @@ class TestCases(unittest.TestCase):
     def testUnparsableObject(self):
         result = listparser.parse(True)
         self.assert_(result['bozo'] == 1)
+    def testUserAgent(self):
+        url = 'http://localhost:8091/tests/http/useragent.xml'
+        # Test the standard User-Agent
+        result = listparser.parse(url)
+        self.assertFalse(result.bozo)
+        self.assert_(result.headers.get('x-agent') == listparser.USER_AGENT)
+        # Test sending a custom User-Agent
+        result = listparser.parse(url, agent="CustomAgent")
+        self.assertFalse(result.bozo)
+        self.assert_(result.headers.get('x-agent') == "CustomAgent")
     def testStringInput(self):
         t = """<?xml version="1.0"?><opml version="2.0"><head><title>
         String Input Test</title></head><body><outline text="node" />
@@ -131,6 +142,10 @@ for testfile in files:
     if 'http/destination' in testfile:
         # destination.xml is the target of four redirect requests
         numtests += 4
+        continue
+    if 'useragent' in testfile:
+        # useragent.xml is the target of a hardcoded test above, twice
+        numtests += 2
         continue
     elif 'http/http_304-last_modified' in testfile:
         # http_304-last_modified.xml must be called twice:
