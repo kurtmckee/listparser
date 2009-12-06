@@ -415,7 +415,7 @@ def _mkfile(obj, agent, etag, modified):
         headers['If-Modified-Since'] = modified
     elif isinstance(modified, datetime.datetime):
         # It is assumed that `modified` is in UTC time
-        headers['If-Modified-Since'] = modified.strftime('%a, %d %b %Y %H:%M:%S GMT')
+        headers['If-Modified-Since'] = _to_rfc822(modified)
     request = urllib2.Request(obj, headers=headers)
     opener = urllib2.build_opener(HTTPRedirectHandler, HTTPErrorHandler)
     try:
@@ -496,6 +496,24 @@ def _rfc822(date):
 
     # Return the date and timestamp in UTC
     return stamp - delta
+
+def _to_rfc822(date):
+    """_to_rfc822(datetime.datetime) -> str
+    The datetime `strftime` method is subject to locale-specific
+    day and month names, so this function hardcodes the conversion."""
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    fmt = '%(day)s, %(d)02i %(month)s %(y)04i %(h)02i:%(m)02i:%(s)02i GMT'
+    return fmt % {
+                    'day': days[date.weekday()],
+                    'd': date.day,
+                    'month': months[date.month - 1],
+                    'y': date.year,
+                    'h': date.hour,
+                    'm': date.minute,
+                    's': date.second,
+                 }
 
 class SuperDict(dict):
     """
