@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+    Description: Undefined entity reference (even after injection)
+    Eval: result.bozo == 1
+-->
+<opml version="2.0">
+    <head>
+        <title>arch&egregiouslyundefined;ology</title>
+    </head>
+    <body>
+        <outline text="node" />
+    </body>
+</opml>
