@@ -469,8 +469,11 @@ def _rfc822(date):
     # If the year is 2 digits, assume everything in the 90's is the 1990's
     if m['year'] < 100:
         m['year'] += (1900, 2000)[m['year'] < 90]
-    stamp = datetime.datetime(*[m[i] for i in ('year', 'month', 'day',
-                                               'hour', 'minute', 'second')])
+    try:
+        stamp = datetime.datetime(*[m[i] for i in 
+                    ('year', 'month', 'day', 'hour', 'minute', 'second')])
+    except ValueError:
+        return None
 
     # Use the timezone information to calculate the difference between
     # the given date and timestamp and Universal Coordinated Time
@@ -495,7 +498,10 @@ def _rfc822(date):
     delta = datetime.timedelta(0, 0, 0, 0, tzmin, tzhour)
 
     # Return the date and timestamp in UTC
-    return stamp - delta
+    try:
+        return stamp - delta
+    except OverflowError:
+        return None
 
 def _to_rfc822(date):
     """_to_rfc822(datetime.datetime) -> str

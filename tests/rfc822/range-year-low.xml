@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+    This will actually work simply because the integer year 0
+    will be interpreted as the year 2000.
+    Description: RFC 822: Out-of-range: Year (low)
+    Eval: result['bozo'] == 0
+-->
+<opml version="2.0">
+    <head>
+        <dateCreated>Sun, 01 Jan 0000 00:00:00 +9999</dateCreated>
+    </head>
+    <body>
+        <outline text="node" />
+    </body>
+</opml>
