@@ -236,34 +236,29 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     _start_opml_title = _expect_characters
     def _end_opml_title(self):
         if self._characters.strip():
-            self.harvest.setdefault('meta', SuperDict())
             self.harvest.meta.title = self._characters.strip()
 
     _start_opml_ownerId = _expect_characters
     def _end_opml_ownerId(self):
         if self._characters.strip():
-            self.harvest.setdefault('meta', SuperDict())
             self.harvest.meta.setdefault('author', SuperDict())
             self.harvest.meta.author.url = self._characters.strip()
 
     _start_opml_ownerEmail = _expect_characters
     def _end_opml_ownerEmail(self):
         if self._characters.strip():
-            self.harvest.setdefault('meta', SuperDict())
             self.harvest.meta.setdefault('author', SuperDict())
             self.harvest.meta.author.email = self._characters.strip()
 
     _start_opml_ownerName = _expect_characters
     def _end_opml_ownerName(self):
         if self._characters.strip():
-            self.harvest.setdefault('meta', SuperDict())
             self.harvest.meta.setdefault('author', SuperDict())
             self.harvest.meta.author.name = self._characters.strip()
 
     _start_opml_dateCreated = _expect_characters
     def _end_opml_dateCreated(self):
         if self._characters.strip():
-            self.harvest.setdefault('meta', SuperDict())
             self.harvest.meta.created = self._characters.strip()
             d = _rfc822(self.harvest.meta.created)
             if isinstance(d, datetime.datetime):
@@ -274,7 +269,6 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     _start_opml_dateModified = _expect_characters
     def _end_opml_dateModified(self):
         if self._characters.strip():
-            self.harvest.setdefault('meta', SuperDict())
             self.harvest.meta.modified = self._characters.strip()
             d = _rfc822(self.harvest.meta.modified)
             if isinstance(d, datetime.datetime):
