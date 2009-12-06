@@ -459,7 +459,7 @@ def _rfc822(date):
 
     try:
         m = re.match(dt_, date.lower()).groupdict(0)
-    except:
+    except AttributeError:
         return None
 
     # Calculate a date and timestamp
