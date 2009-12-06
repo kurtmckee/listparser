@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+    Description: /opml/head/: empty tags
+    Eval: result.bozo == 0
+    Eval: 'title' not in result.meta
+    Eval: 'author' not in result.meta
+    Eval: 'created' not in result.meta
+    Eval: 'modified' not in result.meta
+-->
+<opml version="2.0">
+    <head>
+        <title> </title>
+        <ownerName> </ownerName>
+        <ownerId> </ownerId>
+        <ownerEmail> </ownerEmail>
+        <dateCreated> </dateCreated>
+        <dateModified> </dateModified>
+    </head>
+    <body>
+        <outline text="node" />
+    </body>
+</opml>
