@@ -48,7 +48,7 @@ def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None, inject=Fa
         'lists': [],
         'opportunities': [],
         'meta': SuperDict(),
-        'version': '',
+        'version': u'',
     })
     fileobj, info = _mkfile(filename_or_url, agent, etag, modified)
     guarantees.update(info)
@@ -142,11 +142,11 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     #--------------
 
     def _start_opml_opml(self, attrs):
-        self.harvest.version = "opml"
+        self.harvest.version = u'opml'
         if attrs.get((None, 'version')) in ("1.0", "1.1"):
-            self.harvest.version = "opml1"
+            self.harvest.version = u'opml1'
         elif attrs.get((None, 'version')) == "2.0":
-            self.harvest.version = "opml2"
+            self.harvest.version = u'opml2'
 
     def _start_opml_outline(self, attrs):
         url = None
@@ -171,7 +171,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         elif attrs.get((None, 'type'), '').lower() in ('link', 'include'):
             # It's a subscription list
             append_to = 'lists'
-            url = attrs.get((None, 'url'), '').strip()
+            url = attrs.get((None, 'url'), u'').strip()
         elif title:
             # Assume that this is a grouping node
             self.hierarchy.append(title)
@@ -277,7 +277,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     #-----------------------------
 
     def _start_gtml_GadgetTabML(self, attrs):
-        self.harvest.version = 'igoogle'
+        self.harvest.version = u'igoogle'
 
     def _start_gtml_Tab(self, attrs):
         if attrs.get((None, 'title'), '').strip():
@@ -306,7 +306,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     #------------------
 
     def _start_rdf_RDF(self, attrs):
-        self.harvest.version = 'rdf'
+        self.harvest.version = u'rdf'
 
     def _start_rss_channel(self, attrs):
         if attrs.get((_ns('rdf'), 'about'), '').strip():
