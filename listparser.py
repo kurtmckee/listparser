@@ -195,30 +195,17 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             obj = self.found_urls[url][1]
 
         # Handle categories and tags
-        tags = []
-        cats = []
+        obj.setdefault('categories', [])
         if attrs.has_key((None, 'category')):
             for i in attrs[(None, 'category')].split(','):
-                if '/' not in i and i.strip():
-                    tags.append(i.strip())
-                elif '/' in i:
-                    tmp = [j.strip() for j in i.split('/') if j.strip()]
-                    if tmp and tmp not in cats:
-                        cats.append(tmp)
+                tmp = [j.strip() for j in i.split('/') if j.strip()]
+                if tmp and tmp not in obj.categories:
+                    obj.categories.append(tmp)
         # Copy the current hierarchy into `categories`
-        if self.hierarchy and self.hierarchy not in cats:
-            cats.append(copy.copy(self.hierarchy))
+        if self.hierarchy and self.hierarchy not in obj.categories:
+            obj.categories.append(copy.copy(self.hierarchy))
         # Copy all single-element `categories` into `tags`
-        tags.extend([i[0] for i in cats if len(i) == 1])
-
-        if tags:
-            obj.setdefault('tags', []).extend(tags)
-            obj.tags = list(set(obj.tags))
-        if cats:
-            obj.setdefault('categories', [])
-            for cat in cats:
-                if cat not in obj.categories:
-                    obj.categories.append(cat)
+        obj.tags = [i[0] for i in obj.categories if len(i) == 1]
 
         self.hierarchy.append('')
     def _end_opml_outline(self):
