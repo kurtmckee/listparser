@@ -172,7 +172,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         elif attrs.get((None, 'type'), '').lower() in ('link', 'include'):
             # It's a subscription list
             append_to = 'lists'
-            url = attrs[(None, 'url')].strip()
+            url = attrs.get((None, 'url'), '').strip()
         elif title is not None:
             # Assume that this is a grouping node
             self.hierarchy.append(title)

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!--
+    Description: //outline[@type='link'], no @url
+    Eval: result['bozo'] == 0
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline type="link" />
+    </body>
+</opml>
