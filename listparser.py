@@ -149,13 +149,12 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             self.harvest.version = "opml2"
 
     def _start_opml_outline(self, attrs):
-        url = title = None
-        # Find an appropriate title in @text or @title
+        url = None
+        # Find an appropriate title in @text or @title (else empty)
         if attrs.get((None, 'text'), '').strip():
             title = attrs[(None, 'text')].strip()
         else:
-            if attrs.get((None, 'title'), '').strip():
-                title = attrs[(None, 'title')].strip()
+            title = attrs.get((None, 'title'), u'').strip()
 
         # Determine whether the outline is a feed or subscription list
         if 'xmlurl' in (i[1].lower() for i in attrs.keys()):
@@ -173,7 +172,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             # It's a subscription list
             append_to = 'lists'
             url = attrs.get((None, 'url'), '').strip()
-        elif title is not None:
+        elif title:
             # Assume that this is a grouping node
             self.hierarchy.append(title)
             return
@@ -189,9 +188,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             return
         if url not in self.found_urls:
             # This is a brand new URL
-            obj = SuperDict({'url': url})
-            if title is not None:
-                obj.title = title
+            obj = SuperDict({'url': url, 'title': title})
             self.found_urls[url] = (append_to, obj)
             self.harvest[append_to].append(obj)
         else:
@@ -298,6 +295,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def _start_iGoogle_ModulePrefs(self, attrs):
         if self.flag_feed and attrs.get((None, 'xmlUrl'), '').strip():
             obj = SuperDict({'url': attrs[(None, 'xmlUrl')].strip()})
+            obj.title = u''
             if self.hierarchy:
                 obj.categories = [copy.copy(self.hierarchy)]
             if len(self.hierarchy) == 1:
@@ -327,7 +325,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         for url in self.agent_opps:
             obj = SuperDict({'url': url, 'title': self.foaf_name})
             self.group_objs.append(('opportunities', obj))
-        self.foaf_name = ''
+        self.foaf_name = u''
         self.agent_feeds = []
         self.agent_opps = []
         self.flag_feed = False
