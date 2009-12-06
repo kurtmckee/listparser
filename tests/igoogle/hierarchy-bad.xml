@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+    Description: iGoogle: Maintain the hierarchy
+    Eval: result.bozo == 0
+    Eval: 'tags' not in result.feeds[0]
+    Eval: 'categories' not in result.feeds[0]
+-->
+<GadgetTabML xmlns="http://schemas.google.com/GadgetTabML/2008">
+    <Tab title=" ">
+        <Module type="RSS" xmlns="http://www.google.com/ig">
+            <ModulePrefs xmlUrl="http://localhost/feed" />
+        </Module>
+    </Tab>
+</GadgetTabML>

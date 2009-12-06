@@ -292,7 +292,8 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         if attrs.get((None, 'title'), '').strip():
             self.hierarchy.append(attrs[(None, 'title')].strip())
     def _end_gtml_Tab(self):
-        self.hierarchy.pop()
+        if self.hierarchy:
+            self.hierarchy.pop()
 
     def _start_iGoogle_Module(self, attrs):
         if attrs.get((None, 'type'), '').strip().lower() == 'rss':
