@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Description: Unknown namespace
+    Eval: result.bozo == 0
+-->
+<weirdo:namespac xmlns:weirdo="http://www.weirdo.INVALID/namespace">
+</weirdo:namespac>
