@@ -3,6 +3,8 @@ opportunities[i].tags
 
 A list of all of the tags associated with the opportunity URL.
 
+For a full explanation of tags in listparser, see `feeds[i].tags <feed-tags.html>`_.
+
 ..  seealso:: `opportunities[i].categories <opportunity-categories.html>`_
 
 ..  rubric:: Comes from
@@ -14,4 +16,4 @@ A list of all of the tags associated with the opportunity URL.
 
 ..  rubric:: Footnotes
 
-.. [#noslashes] The ``category`` attribute is a comma-separated string; any values not containing slashes are considered to be tags.
+.. [#noslashes] The ``category`` attribute is a comma-separated string.

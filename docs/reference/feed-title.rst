@@ -5,7 +5,7 @@ The title of the feed. It is not normalized except for the stripping of whitespa
 
 ..  note::
 
-    The ``outline`` element's ``text`` and ``title`` attributes differ in function. Many feed readers keep track of the feed's original title while allowing users to change the feed title that they see. When this subscription list is exported, the ``outline`` element's ``text`` attribute should contain the user's preferred title, and the ``title`` attribute should contain the original title.
+    The ``opml:outline`` element's ``text`` and ``title`` attributes differ in function. Many feed readers keep track of the feed's original title while allowing users to change the title that they see. When their subscription list is exported, the ``opml:outline`` element's ``text`` attribute should contain the user's preferred title, and the ``title`` attribute should contain the original title.
 
     In practice, however, some softwares don't use the ``text`` attribute at all. Therefore, ``feeds[i].title`` is filled from the ``text`` attribute or, if that isn't available, the ``title`` attribute. For example:
 

@@ -1,19 +1,17 @@
 feeds[i].tags
 =============
 
-A list of all of the tags associated with the feed.
-
-Although tags can be specified in the ``category`` attribute of an ``outline`` element, listparser will also copy over any categories that are only one level deep, and will additionally copy in the text of a parent ``outline`` element if the hierarchy is only one level deep. As an example:
+A list of all of the tags associated with the feed. They are copied from the ``categories`` key if the category is one level deep. As an example:
 
 ..  highlight:: xml
 
 ::
 
     <outline text="sports">
-        <outline category="baseball,/golf" text="ESPN" type="rss" xmlUrl="http://espn.com/feed" />
+        <outline type="rss" text="ESPN" xmlUrl="http://espn.com/feed" />
     </outline>
 
-In this example, there are three tags: "sports", "baseball", and "golf".
+In this example, there is one tag: ``sports``.
 
 ..  seealso:: `feeds[i].categories <feed-categories.html>`_
 
@@ -27,4 +25,4 @@ In this example, there are three tags: "sports", "baseball", and "golf".
 
 ..  rubric:: Footnotes
 
-.. [#noslashes] The ``category`` attribute is a comma-separated string; any values not containing slashes are considered to be tags.
+.. [#noslashes] The ``category`` attribute is a comma-separated string.

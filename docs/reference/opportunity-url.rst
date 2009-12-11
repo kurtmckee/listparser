@@ -3,8 +3,6 @@ opportunities[i].url
 
 The URL of the opportunity. There is currently no normalization of the subscription list URL beyond the stripping of whitespace.
 
-This key is guaranteed to exist.
-
 ..  rubric:: Comes from
 
 *   ``/opml/body//outline/@htmlUrl``

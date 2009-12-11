@@ -3,9 +3,9 @@ Feed and subscription list detection algorithm
 
 ..  note::
 
-    The iGoogle exported settings format doesn't support embedded subscription lists. The detection algorithm only applies to OPML documents.
+    Neither RDF+FOAF nor the iGoogle exported settings formats support embedded subscription lists. This detection algorithm only applies to OPML subscription lists.
 
-Many services and softwares output OPML files with slight variations. listparser attempts to correctly determine whether an ``outline`` element is attempting to reference a feed or subscription list. As an example, although feeds should be indicated using ``type="rss"`` (no matter the format), some services refer to feeds using ``type="link"``, others indicate that the feed is Atom-formatted using ``type="pie"``, and still others fail to include a ``type`` attribute at all! Therefore it is necessary to make educated guesses.
+Many services and softwares output OPML subscription lists with slight variations. listparser attempts to correctly determine whether an ``outline`` element is attempting to reference a feed or subscription list. As an example, although feeds should be indicated using ``type="rss"`` (no matter the format), some services refer to feeds using ``type="link"``, others indicate that the feed is Atom-formatted using ``type="pie"``, and still others fail to include a ``type`` attribute at all! Therefore it is necessary to make educated guesses.
 
 
 Feed detection

@@ -1,9 +1,7 @@
 lists[i].url
 ============
 
-The URL of the subscription list. There is currently no normalization of the subscription list URL beyond the stripping of whitespace.
-
-This key is guaranteed to exist.
+The URL of the subscription list. There is no normalization of the subscription list URL beyond the stripping of whitespace.
 
 ..  rubric:: Comes from
 

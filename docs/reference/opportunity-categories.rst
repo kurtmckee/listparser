@@ -16,4 +16,4 @@ For a full explanation of categories in listparser, see `feeds[i].categories <fe
 
 ..  rubric:: Footnotes
 
-.. [#slashes] The ``category`` attribute is a comma-separated string; any values containing slashes are considered to be categories.
+.. [#slashes] The ``category`` attribute is a comma-separated string.

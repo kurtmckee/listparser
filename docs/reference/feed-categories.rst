@@ -3,7 +3,7 @@ feeds[i].categories
 
 A list of all of the categories associated with the feed.
 
-Categories are hierarchical, and are represented as lists of strings. Although categories can be specified in the ``category`` attribute of an ``opml:outline`` element, listparser will also use the ``opml:outline`` element hierarchy as a source of categorization information. As an example:
+Categories are hierarchical, and are represented as lists of strings. listparser uses the hierarchical groupings in the subscription list in order to assign categories. Here is an example in OPML:
 
 ..  highlight:: xml
 
@@ -11,15 +11,11 @@ Categories are hierarchical, and are represented as lists of strings. Although c
 
     <outline text="news">
         <outline text="sports">
-            <outline category="/tv/golf,/tv/baseball" text="ESPN" type="rss" xmlUrl="http://espn.com/feed" />
+            <outline type="rss" text="ESPN" xmlUrl="http://espn.com/feed" />
         </outline>
     </outline>
 
-In this example, there are three categories:
-
-*   ["news", "sports"]
-*   ["tv", "golf"]
-*   ["tv", "baseball"]
+In this example, the category hierarchy is ``["news", "sports"]``. In the OPML format, listparser will also use the ``category`` attribute of the ``opml:outline`` element as a source of categorization information. 
 
 ..  seealso:: `feeds[i].tags <feed-tags.html>`_
 
@@ -33,4 +29,4 @@ In this example, there are three categories:
 
 ..  rubric:: Footnotes
 
-.. [#slashes] The ``category`` attribute is a comma-separated string; any values containing slashes are considered to be categories.
+.. [#slashes] The ``category`` attribute is a comma-separated string.

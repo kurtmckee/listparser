@@ -5,7 +5,7 @@ A string returned by the webserver representing the date and time at which the s
 
 ..  note::
 
-    ``modified`` represents the date and time at which the **server** claims the file was last updated. ``meta.modified`` represents the date and time at which the **subscription list** claims to have last been updated.
+    ``modified`` represents the date and time at which the **webserver** claims the file was last updated. ``meta.modified`` represents the date and time at which the **subscription list** claims to have last been updated.
 
 ..  seealso::
 
