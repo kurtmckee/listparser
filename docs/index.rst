@@ -21,6 +21,7 @@ Reference
 
     reference/etag
     reference/feeds
+    reference/headers
     reference/href
     reference/lists
     reference/meta
