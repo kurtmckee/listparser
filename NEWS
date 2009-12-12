@@ -1,3 +1,13 @@
+v0.10 (12 Dec 2009) "Internet-ready"
+    * Python 3 is now supported!
+    * Correctly interpret undeclared HTML character entities
+    * Significantly sped up large RDF+FOAF document parsing
+    * Fixed RFC 822 date and time creation bug
+    * Fixed RFC 822 crasher bugs
+    * Fixed iGoogle-related crasher bug
+    * Refreshed and added to documentation
+    * Added many more tests
+
 v0.9 (3 Oct 2009) "Celery wolves"
     * Support RDF+FOAF!
     * Capture opportunity URLs
