@@ -19,6 +19,13 @@ Reference
 ..  toctree::
     :maxdepth: 2
 
+    reference/parse
+
+..  toctree::
+    :maxdepth: 2
+
+    reference/bozo
+    reference/bozo_exception
     reference/etag
     reference/feeds
     reference/headers
