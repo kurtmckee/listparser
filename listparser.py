@@ -41,6 +41,23 @@ namespaces = {
 def _ns(ns):
     return dict(zip(namespaces.values(), namespaces.keys())).get(ns, None)
 
+# HACK: platform.python_implementation() would be ideal here, but
+# Jython 2.5.1 doesn't have it yet, and neither do CPythons < 2.6
+jython = True
+try:
+    from org.xml.sax import SAXParseException
+except ImportError:
+    SAXParseException = xml.sax.SAXParseException
+    jython = False
+
+# http://bugs.jython.org/issue1375
+# Jython throws an exception when using attrs[(None, 'attr')];
+# use attrs[('', 'attr')] instead to get desired behavior
+if jython:
+    NONS = ''
+else:
+    NONS = None
+
 def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None, inject=False):
     guarantees = SuperDict({
         'bozo': 0,
@@ -62,14 +79,18 @@ def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None, inject=Fa
     parser.setContentHandler(handler)
     parser.setErrorHandler(handler)
     if inject:
-        parser.parse(Injector(fileobj))
-    else:
+        fileobj = Injector(fileobj)
+    try:
         parser.parse(fileobj)
+    except SAXParseException, err:
+        # Jython propagates the exception past the ErrorHandler
+        handler.harvest.bozo = 1
+        handler.harvest.bozo_exception = err
     fileobj.close()
 
     # Test if a DOCTYPE injection is needed
     if hasattr(handler.harvest, 'bozo_exception'):
-        if "undefined entity" in handler.harvest.bozo_exception.args:
+        if "entity" in handler.harvest.bozo_exception.__str__():
             if not inject:
                 return parse(filename_or_url, agent, etag, modified, True)
     # Make it clear that the XML file is broken
@@ -143,24 +164,24 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
 
     def _start_opml_opml(self, attrs):
         self.harvest.version = u'opml'
-        if attrs.get((None, 'version')) in ("1.0", "1.1"):
+        if attrs.get((NONS, 'version')) in ("1.0", "1.1"):
             self.harvest.version = u'opml1'
-        elif attrs.get((None, 'version')) == "2.0":
+        elif attrs.get((NONS, 'version')) == "2.0":
             self.harvest.version = u'opml2'
 
     def _start_opml_outline(self, attrs):
         url = None
         # Find an appropriate title in @text or @title (else empty)
-        if attrs.get((None, 'text'), '').strip():
-            title = attrs[(None, 'text')].strip()
+        if attrs.get((NONS, 'text'), '').strip():
+            title = attrs[(NONS, 'text')].strip()
         else:
-            title = attrs.get((None, 'title'), u'').strip()
+            title = attrs.get((NONS, 'title'), u'').strip()
 
         # Determine whether the outline is a feed or subscription list
         if 'xmlurl' in (i[1].lower() for i in attrs.keys()):
             # It's a feed
             append_to = 'feeds'
-            if attrs.get((None, 'type'), '').strip().lower() == 'source':
+            if attrs.get((NONS, 'type'), '').strip().lower() == 'source':
                 # Actually, it's a subscription list!
                 append_to = 'lists'
             # Get the URL regardless of xmlUrl's case
@@ -168,10 +189,10 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 if k[1].lower() == 'xmlurl':
                     url = v.strip()
                     break
-        elif attrs.get((None, 'type'), '').lower() in ('link', 'include'):
+        elif attrs.get((NONS, 'type'), '').lower() in ('link', 'include'):
             # It's a subscription list
             append_to = 'lists'
-            url = attrs.get((None, 'url'), u'').strip()
+            url = attrs.get((NONS, 'url'), u'').strip()
         elif title:
             # Assume that this is a grouping node
             self.hierarchy.append(title)
@@ -196,8 +217,8 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
 
         # Handle categories and tags
         obj.setdefault('categories', [])
-        if attrs.has_key((None, 'category')):
-            for i in attrs[(None, 'category')].split(','):
+        if attrs.has_key((NONS, 'category')):
+            for i in attrs[(NONS, 'category')].split(','):
                 tmp = [j.strip() for j in i.split('/') if j.strip()]
                 if tmp and tmp not in obj.categories:
                     obj.categories.append(tmp)
@@ -267,21 +288,21 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self.harvest.version = u'igoogle'
 
     def _start_gtml_Tab(self, attrs):
-        if attrs.get((None, 'title'), '').strip():
-            self.hierarchy.append(attrs[(None, 'title')].strip())
+        if attrs.get((NONS, 'title'), '').strip():
+            self.hierarchy.append(attrs[(NONS, 'title')].strip())
     def _end_gtml_Tab(self):
         if self.hierarchy:
             self.hierarchy.pop()
 
     def _start_iGoogle_Module(self, attrs):
-        if attrs.get((None, 'type'), '').strip().lower() == 'rss':
+        if attrs.get((NONS, 'type'), '').strip().lower() == 'rss':
             self.flag_feed = True
     def _end_iGoogle_Module(self):
         self.flag_feed = False
 
     def _start_iGoogle_ModulePrefs(self, attrs):
-        if self.flag_feed and attrs.get((None, 'xmlUrl'), '').strip():
-            obj = SuperDict({'url': attrs[(None, 'xmlUrl')].strip()})
+        if self.flag_feed and attrs.get((NONS, 'xmlUrl'), '').strip():
+            obj = SuperDict({'url': attrs[(NONS, 'xmlUrl')].strip()})
             obj.title = u''
             if self.hierarchy:
                 obj.categories = [copy.copy(self.hierarchy)]
