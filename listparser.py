@@ -20,6 +20,7 @@ __version__ = "0.10"
 
 import copy
 import datetime
+import htmlentitydefs
 import re
 import StringIO
 import urllib2
@@ -105,7 +106,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         xml.sax.handler.ContentHandler.__init__(self)
         self.harvest = SuperDict()
         self.expect = False
-        self._characters = unicode()
+        self._characters = str()
         self.hierarchy = []
         self.flag_feed = False
         self.flag_opportunity = False
@@ -153,7 +154,13 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             # Always disable and reset character capture in order to
             # reduce code duplication in the _end_opml_* functions
             self.expect = False
-            self._characters = unicode()
+            self._characters = str()
+
+    def normchars(self):
+        # Jython parsers split characters() calls between the bytes of
+        # multibyte characters. Thus, decoding has to be put off until
+        # all of the bytes are collected and the text node has ended.
+        return self._characters.encode('utf8').decode('utf8').strip()
 
     def characters(self, content):
         if self.expect:
@@ -236,35 +243,35 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         # Most _start_opml_* functions only need to set these two variables,
         # so this function exists to reduce significant code duplication
         self.expect = True
-        self._characters = unicode()
+        self._characters = str()
 
     _start_opml_title = _expect_characters
     def _end_opml_title(self):
-        if self._characters.strip():
-            self.harvest.meta.title = self._characters.strip()
+        if self.normchars():
+            self.harvest.meta.title = self.normchars()
 
     _start_opml_ownerId = _expect_characters
     def _end_opml_ownerId(self):
-        if self._characters.strip():
+        if self.normchars():
             self.harvest.meta.setdefault('author', SuperDict())
-            self.harvest.meta.author.url = self._characters.strip()
+            self.harvest.meta.author.url = self.normchars()
 
     _start_opml_ownerEmail = _expect_characters
     def _end_opml_ownerEmail(self):
-        if self._characters.strip():
+        if self.normchars():
             self.harvest.meta.setdefault('author', SuperDict())
-            self.harvest.meta.author.email = self._characters.strip()
+            self.harvest.meta.author.email = self.normchars()
 
     _start_opml_ownerName = _expect_characters
     def _end_opml_ownerName(self):
-        if self._characters.strip():
+        if self.normchars():
             self.harvest.meta.setdefault('author', SuperDict())
-            self.harvest.meta.author.name = self._characters.strip()
+            self.harvest.meta.author.name = self.normchars()
 
     _start_opml_dateCreated = _expect_characters
     def _end_opml_dateCreated(self):
-        if self._characters.strip():
-            self.harvest.meta.created = self._characters.strip()
+        if self.normchars():
+            self.harvest.meta.created = self.normchars()
             d = _rfc822(self.harvest.meta.created)
             if isinstance(d, datetime.datetime):
                 self.harvest.meta.created_parsed = d
@@ -273,8 +280,8 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
 
     _start_opml_dateModified = _expect_characters
     def _end_opml_dateModified(self):
-        if self._characters.strip():
-            self.harvest.meta.modified = self._characters.strip()
+        if self.normchars():
+            self.harvest.meta.modified = self.normchars()
             d = _rfc822(self.harvest.meta.modified)
             if isinstance(d, datetime.datetime):
                 self.harvest.meta.modified_parsed = d
@@ -367,9 +374,9 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     _start_foaf_name = _expect_characters
     def _end_foaf_name(self):
         if self.flag_feed:
-            self.foaf_name = self._characters.strip()
-        elif self.flag_group and self._characters.strip():
-            self.hierarchy.append(self._characters.strip())
+            self.foaf_name = self.normchars()
+        elif self.flag_group and self.normchars():
+            self.hierarchy.append(self.normchars())
             self.flag_group = False
 
     def _start_foaf_Document(self, attrs):
@@ -544,30 +551,42 @@ class SuperDict(dict):
 
 class Injector(object):
     """
-    Injector buffers the first read() call to a file-like object in
-    order to inject a DOCTYPE containing entity definitions immediately
+    Injector buffers read() calls to a file-like object in order to
+    inject a DOCTYPE containing HTML entity definitions immediately
     following the XML declaration.
     """
     def __init__(self, obj):
         self.obj = obj
         self.injected = False
-    def read(self, size=None):
-        if size is not None:
-            read = self.obj.read(size)
+        self.cache = bytestr('')
+    def read(self, size):
+        if self.cache:
+            if len(self.cache) >= size:
+                # Pull content from the cache
+                read = self.cache[:size]
+                self.cache = self.cache[size:]
+            else:
+                # Pull content from both the cache and the obj
+                read = self.cache + self.obj.read(size - len(self.cache))
         else:
-            read = self.obj.read()
-        if self.injected:
+            # Pull content from the obj
+            read = self.obj.read(size)
+
+        # Inject the entity declarations into the cache
+        if self.injected or bytestr('\n') not in read:
             return read
-        # Inject ENTITY references at the start of the document
-        import htmlentitydefs
-        entities = unicode()
+        entities = str()
         for k, v in htmlentitydefs.name2codepoint.items():
             entities += '<!ENTITY %s "&#%s;">' % (k, v)
         doctype = "<!DOCTYPE anyroot [%s]>" % (entities, )
         lines = read.splitlines()
         lines.insert(1, bytestr(doctype))
+        self.cache = bytestr('\n').join(lines)
         self.injected = True
-        return bytestr('\n').join(lines)
+
+        ret = self.cache[:size]
+        self.cache = self.cache[size:]
+        return ret
     def __getattr__(self, name):
         return getattr(self.obj, name)
     def __hasattr__(self, name):

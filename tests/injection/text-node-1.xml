@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+    Description: Undefined entity reference (text node 1)
+    Eval: result.bozo == 1
+    Eval: result.meta.title == result.meta.author.name
+-->
+<opml version="2.0">
+    <head>
+        <title>arch&aelig;ology</title>
+        <ownerName>arch&#230;ology</ownerName>
+    </head>
+    <body>
+        <outline text="node" />
+    </body>
+</opml>
