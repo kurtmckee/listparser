@@ -122,6 +122,20 @@ class TestCases(unittest.TestCase):
         result = listparser.parse(StringIO.StringIO(t))
         self.assert_(result['bozo'] == 0)
         self.assert_(result['meta']['title'] == u'Fileish Input Test')
+    def testRelativeFilename(self):
+        f = os.path.join('tests', 'filename.xml')
+        result = listparser.parse(f)
+        self.assert_(result.bozo == 0)
+        self.assert_(result.meta.title == u'filename')
+    def testAbsoluteFilename(self):
+        f = os.path.abspath(os.path.join('tests', 'filename.xml'))
+        result = listparser.parse(f)
+        self.assert_(result.bozo == 0)
+        self.assert_(result.meta.title == u'filename')
+    def testBogusFilename(self):
+        f = 'totally made up and bogus /\:'
+        result = listparser.parse(f)
+        self.assert_(result.bozo == 1)
     def worker(self, evals, testfile, etag, modified):
         result = listparser.parse('http://localhost:8091/tests/' + testfile,
             etag=etag, modified=modified)

@@ -412,9 +412,16 @@ def _mkfile(obj, agent, etag, modified):
         # This isn't a known-parsable object
         err = ListError('parse() called with unparsable object')
         return None, SuperDict({'bozo': 1, 'bozo_exception': err})
-    if obj.find('\n') != -1 or not obj.find('://') in (3, 4, 5):
-        # It's not a URL; make the string a file
-        return StringIO.StringIO(obj), SuperDict()
+    elif not (obj.startswith('http://') or obj.startswith('https://') or
+              obj.startswith('ftp://') or obj.startswith('file://')):
+        # It's not a URL; test if it's an XML document
+        if obj.lstrip().startswith('<'):
+            return StringIO.StringIO(obj), SuperDict()
+        # Try dealing with it as a file
+        try:
+            return open(obj), SuperDict()
+        except IOError, err:
+            return None, SuperDict({'bozo': 1, 'bozo_exception': err})
     # It's a URL
     headers = {'User-Agent': agent}
     if isinstance(etag, basestring):
