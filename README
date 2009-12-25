@@ -2,9 +2,9 @@ listparser.py - Parse subscription lists into a consistent format.
 Copyright (C) 2009 Kurt McKee <contactme@kurtmckee.org>
 
 listparser is a Python library that parses subscription lists (also
-called reading lists) and returns all of the feeds and subscription
-lists that it finds. It supports OPML, RDF+FOAF, and the iGoogle
-exported settings format.
+called reading lists) and returns all of the feeds, subscription lists,
+and "opportunity" URLs that it finds. It supports OPML, RDF+FOAF, and
+the iGoogle exported settings format.
 
 
 Usage
@@ -31,7 +31,8 @@ u'listparser project feeds'
 >>> result.feeds[0].keys()
 ['url', 'title']
 
-More extensive documentation is available in the docs/ directory.
+More extensive documentation is available in the docs/ directory,
+or online at <http://packages.python.org/listparser/>.
 
 
 Bugs
@@ -42,6 +43,6 @@ isolate the simplest possible document that susses out the bug, add
 that document as a test case, and then find and fix the problem.
 
 ...you can also just report the bug and leave it to someone else
-to fix the problem, but that won't be as much fun for you.
+to fix the problem, but that won't be as much fun for you!
 
-Bugs can be reported at <http://github.com/kurtmckee/listparser/issues>
+Bugs can be reported at <http://github.com/kurtmckee/listparser/issues>.

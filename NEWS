@@ -1,3 +1,7 @@
+v0.11 (25 Dec 2009) "Floodgates"
+    * Jython 2.5.1 is now supported!
+    * Added support for opening relative and absolute filenames
+
 v0.10 (12 Dec 2009) "Internet-ready"
     * Python 3 is now supported!
     * Correctly interpret undeclared HTML character entities
