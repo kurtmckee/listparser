@@ -59,7 +59,7 @@ if jython:
 else:
     NONS = None
 
-def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None, inject=False):
+def parse(filename_or_url, agent=None, etag=None, modified=None, inject=False):
     guarantees = SuperDict({
         'bozo': 0,
         'feeds': [],
@@ -68,7 +68,7 @@ def parse(filename_or_url, agent=USER_AGENT, etag=None, modified=None, inject=Fa
         'meta': SuperDict(),
         'version': u'',
     })
-    fileobj, info = _mkfile(filename_or_url, agent, etag, modified)
+    fileobj, info = _mkfile(filename_or_url, (agent or USER_AGENT), etag, modified)
     guarantees.update(info)
     if not fileobj:
         return guarantees

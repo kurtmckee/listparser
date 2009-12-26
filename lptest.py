@@ -104,6 +104,13 @@ class TestCases(unittest.TestCase):
         result = listparser.parse(url, agent="CustomAgent")
         self.assertFalse(result.bozo)
         self.assert_(result.headers.get('x-agent') == "CustomAgent")
+        # Test overriding the global USER_AGENT
+        tmp = listparser.USER_AGENT
+        listparser.USER_AGENT = "NewGlobalAgent"
+        result = listparser.parse(url)
+        self.assertFalse(result.bozo)
+        self.assert_(result.headers.get('x-agent') == "NewGlobalAgent")
+        listparser.USER_AGENT = tmp
     def testBadURL(self):
         url = "xxx://badurl.com/"
         result = listparser.parse(url)
@@ -162,8 +169,8 @@ for testfile in files:
         numtests += 4
         continue
     if 'useragent' in testfile:
-        # useragent.xml is the target of a hardcoded test above, twice
-        numtests += 2
+        # useragent.xml is the target of a hardcoded test above, thrice
+        numtests += 3
         continue
     elif 'http/http_304-last_modified' in testfile:
         # http_304-last_modified.xml must be called twice:
