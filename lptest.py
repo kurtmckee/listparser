@@ -116,6 +116,10 @@ class TestCases(unittest.TestCase):
         url = "xxx://badurl.com/"
         result = listparser.parse(url)
         self.assert_(result.bozo)
+    def testBadURLUnreachable(self):
+        url = "http://badurl.com.INVALID/"
+        result = listparser.parse(url)
+        self.assert_(result.bozo)
     def testStringInput(self):
         t = """<?xml version="1.0"?><opml version="2.0"><head><title>
         String Input Test</title></head><body><outline text="node" />
