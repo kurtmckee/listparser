@@ -151,7 +151,8 @@ class TestCases(unittest.TestCase):
     def worker(self, evals, testfile, etag, modified):
         result = listparser.parse('http://localhost:8091/tests/' + testfile,
             etag=etag, modified=modified)
-        map(self.assert_, map(eval, evals))
+        for ev in evals:
+            self.assert_(eval(ev))
 
 def make_testcase(evals, testfile, etag, modified):
     # HACK: Only necessary in order to ensure that `evals` is evaluated
