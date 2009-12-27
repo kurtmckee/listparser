@@ -26,7 +26,7 @@ import StringIO
 import listparser
 
 def bytestr(reply):
-    # HACK: force `reply` to the type expected by the webserver's `write()` function
+    # HACK: force the type expected by the webserver's `write()` function
     # Python 2 expects type(basestring)
     # Python 3 expects type(bytes)
     try:
@@ -218,7 +218,8 @@ for testfile in files:
         testcase = make_testcase(evals, testfile, etag, modified)
         testcase.__doc__ = '%s: %s [string]' % (testfile, description)
         setattr(TestCases, 'test_%s_1' % splitext(testfile)[0], testcase)
-        testcase = make_testcase(evals, testfile, etag, listparser._rfc822(modified))
+        testcase = make_testcase(evals, testfile, etag,
+                                 listparser._rfc822(modified))
         testcase.__doc__ = '%s: %s [datetime]' % (testfile, description)
         setattr(TestCases, 'test_%s_2' % splitext(testfile)[0], testcase)
     else:

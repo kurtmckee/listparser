@@ -59,7 +59,7 @@ if jython:
 else:
     NONS = None
 
-def parse(filename_or_url, agent=None, etag=None, modified=None, inject=False):
+def parse(parse_obj, agent=None, etag=None, modified=None, inject=False):
     guarantees = SuperDict({
         'bozo': 0,
         'feeds': [],
@@ -68,7 +68,7 @@ def parse(filename_or_url, agent=None, etag=None, modified=None, inject=False):
         'meta': SuperDict(),
         'version': u'',
     })
-    fileobj, info = _mkfile(filename_or_url, (agent or USER_AGENT), etag, modified)
+    fileobj, info = _mkfile(parse_obj, (agent or USER_AGENT), etag, modified)
     guarantees.update(info)
     if not fileobj:
         return guarantees
@@ -93,7 +93,7 @@ def parse(filename_or_url, agent=None, etag=None, modified=None, inject=False):
     if hasattr(handler.harvest, 'bozo_exception'):
         if "entity" in handler.harvest.bozo_exception.__str__():
             if not inject:
-                return parse(filename_or_url, agent, etag, modified, True)
+                return parse(parse_obj, agent, etag, modified, True)
     # Make it clear that the XML file is broken
     # (if no other exception has been assigned)
     if inject and not handler.harvest.bozo:
