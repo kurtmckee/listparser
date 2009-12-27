@@ -94,24 +94,25 @@ class TestCases(unittest.TestCase):
     def testUnparsableObject(self):
         result = listparser.parse(True)
         self.assert_(result['bozo'] == 1)
-    def testUserAgent(self):
+    def testUserAgentDefault(self):
         url = 'http://localhost:8091/tests/http/useragent.xml'
-        # Test the standard User-Agent
         result = listparser.parse(url)
         self.assertFalse(result.bozo)
         self.assert_(result.headers.get('x-agent') == listparser.USER_AGENT)
-        # Test sending a custom User-Agent
+    def testUserAgentCustomArg(self):
+        url = 'http://localhost:8091/tests/http/useragent.xml'
         result = listparser.parse(url, agent="CustomAgent")
         self.assertFalse(result.bozo)
         self.assert_(result.headers.get('x-agent') == "CustomAgent")
-        # Test overriding the global USER_AGENT
+    def testUserAgentGlobalOverride(self):
+        url = 'http://localhost:8091/tests/http/useragent.xml'
         tmp = listparser.USER_AGENT
         listparser.USER_AGENT = "NewGlobalAgent"
         result = listparser.parse(url)
         self.assertFalse(result.bozo)
         self.assert_(result.headers.get('x-agent') == "NewGlobalAgent")
         listparser.USER_AGENT = tmp
-    def testBadURL(self):
+    def testBadURLProtocol(self):
         url = "xxx://badurl.com/"
         result = listparser.parse(url)
         self.assert_(result.bozo)
@@ -171,6 +172,9 @@ for testfile in files:
     if 'useragent' in testfile:
         # useragent.xml is the target of a hardcoded test above, thrice
         numtests += 3
+        continue
+    if 'filename' in testfile:
+        # filename.xml isn't requested over HTTP
         continue
     elif 'http/http_304-last_modified' in testfile:
         # http_304-last_modified.xml must be called twice:
