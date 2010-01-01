@@ -38,7 +38,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_GET(self):
         status = 200
         location = etag = modified = None
-        reply = u''
+        reply = ''
         end_directives = False
         f = open(dirname(abspath(__file__)) + self.path, 'r')
         for line in f:
