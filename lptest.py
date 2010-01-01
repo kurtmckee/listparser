@@ -19,6 +19,7 @@ import os
 from os.path import abspath, dirname, join, splitext
 import threading
 import unittest
+import sys
 import BaseHTTPServer
 import SimpleHTTPServer
 import StringIO
@@ -236,4 +237,7 @@ server = ServerThread(numtests)
 server.start()
 
 testsuite = unittest.TestLoader().loadTestsFromTestCase(TestCases)
-unittest.TextTestRunner(verbosity=1).run(testsuite)
+testresults = unittest.TextTestRunner(verbosity=1).run(testsuite)
+
+# Return 0 if successful, 1 if there was a failure
+sys.exit(not testresults.wasSuccessful())
