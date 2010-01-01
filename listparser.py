@@ -21,6 +21,7 @@ __version__ = "0.11"
 import copy
 import datetime
 import htmlentitydefs
+import httplib
 import re
 import StringIO
 import urllib2
@@ -435,7 +436,7 @@ def _mkfile(obj, agent, etag, modified):
     opener = urllib2.build_opener(HTTPRedirectHandler, HTTPErrorHandler)
     try:
         ret = opener.open(request)
-    except urllib2.URLError, err:
+    except (urllib2.URLError, httplib.HTTPException), err:
         return None, SuperDict({'bozo': 1, 'bozo_exception': err})
 
     info = SuperDict({'status': getattr(ret, 'status', 200)})
