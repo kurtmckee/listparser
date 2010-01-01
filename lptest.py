@@ -38,11 +38,12 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_GET(self):
         status = 200
         location = etag = modified = None
-        reply = ''
+        reply = bytestr('')
         end_directives = False
-        f = open(dirname(abspath(__file__)) + self.path, 'r')
+        f = open(dirname(abspath(__file__)) + self.path, 'rb')
         for line in f:
             reply += line
+            line = line.decode('utf8', 'replace')
             if not end_directives:
                 if line.strip() == '-->':
                     end_directives = True
@@ -69,7 +70,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         self.send_header('Content-type', 'text/xml')
         self.send_header('x-agent', self.headers.get('user-agent'))
         self.end_headers()
-        self.wfile.write(bytestr(reply))
+        self.wfile.write(reply)
     def log_request(self, *arg, **karg):
         pass
 
@@ -195,9 +196,9 @@ for testfile in files:
     description = ''
     etag = modified = None
     evals = []
-    openfile = open(join(testpath, testfile))
+    openfile = open(join(testpath, testfile), 'rb')
     for line in openfile:
-        line = line.strip()
+        line = line.decode('utf8', 'replace').strip()
         if '-->' in line:
             break
         if 'Description:' in line:

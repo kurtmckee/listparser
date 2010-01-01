@@ -48,8 +48,11 @@ def _ns(ns):
 jython = True
 try:
     from org.xml.sax import SAXParseException
+    from com.sun.org.apache.xerces.internal.impl.io import \
+            MalformedByteSequenceException
 except ImportError:
     SAXParseException = xml.sax.SAXParseException
+    MalformedByteSequenceException = IOError
     jython = False
 
 # http://bugs.jython.org/issue1375
@@ -84,8 +87,8 @@ def parse(parse_obj, agent=None, etag=None, modified=None, inject=False):
         fileobj = Injector(fileobj)
     try:
         parser.parse(fileobj)
-    except SAXParseException, err:
-        # Jython propagates the exception past the ErrorHandler
+    except (SAXParseException, MalformedByteSequenceException), err:
+        # Jython propagates exceptions past the ErrorHandler
         handler.harvest.bozo = 1
         handler.harvest.bozo_exception = err
     fileobj.close()
