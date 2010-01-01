@@ -87,8 +87,11 @@ def parse(parse_obj, agent=None, etag=None, modified=None, inject=False):
         fileobj = Injector(fileobj)
     try:
         parser.parse(fileobj)
-    except (SAXParseException, MalformedByteSequenceException), err:
+    except (SAXParseException, MalformedByteSequenceException,
+            UnicodeDecodeError), err:
         # Jython propagates exceptions past the ErrorHandler
+        # Python 3 chokes if a file not opened in binary mode
+        # contains non-Unicode byte sequences
         handler.harvest.bozo = 1
         handler.harvest.bozo_exception = err
     fileobj.close()
@@ -423,7 +426,7 @@ def _mkfile(obj, agent, etag, modified):
             return StringIO.StringIO(obj), SuperDict()
         # Try dealing with it as a file
         try:
-            return open(obj), SuperDict()
+            return open(obj, 'rb'), SuperDict()
         except IOError, err:
             return None, SuperDict({'bozo': 1, 'bozo_exception': err})
     # It's a URL

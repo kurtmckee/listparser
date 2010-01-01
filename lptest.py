@@ -149,6 +149,10 @@ class TestCases(unittest.TestCase):
         f = 'totally made up and bogus /\:'
         result = listparser.parse(f)
         self.assert_(result.bozo == 1)
+    def testImage(self):
+        f = os.path.abspath(os.path.join('tests', '1x1.gif'))
+        result = listparser.parse(f)
+        self.assert_(result.bozo == 1)
     def worker(self, evals, testfile, etag, modified):
         result = listparser.parse('http://localhost:8091/tests/' + testfile,
             etag=etag, modified=modified)
