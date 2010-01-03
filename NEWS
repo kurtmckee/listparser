@@ -1,3 +1,9 @@
+v0.12 (3 Jan 2010) "Safety net"
+    * Fixed global USER_AGENT behavior
+    * Fixed several crasher bugs
+    * Fixed a 2to3 tool warning in lptest.py
+    * Made lptest.py return a status code to the shell
+
 v0.11 (25 Dec 2009) "Floodgates"
     * Jython 2.5.1 is now supported!
     * Added support for opening relative and absolute filenames

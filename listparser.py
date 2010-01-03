@@ -1,5 +1,5 @@
 # listparser.py - Parse subscription lists into a consistent format.
-# Copyright (C) 2009 Kurt McKee <contactme@kurtmckee.org>
+# Copyright (C) 2009-2010 Kurt McKee <contactme@kurtmckee.org>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -16,7 +16,7 @@
 
 __author__ = "Kurt McKee <contactme@kurtmckee.org>"
 __url__ = "http://freshmeat.net/projects/listparser"
-__version__ = "0.11"
+__version__ = "0.12"
 
 import copy
 import datetime
