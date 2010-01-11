@@ -582,6 +582,7 @@ class Injector(object):
             else:
                 # Pull content from both the cache and the obj
                 read = self.cache + self.obj.read(size - len(self.cache))
+                self.cache = bytestr('')
         else:
             # Pull content from the obj
             read = self.obj.read(size)

@@ -150,6 +150,24 @@ class TestCases(unittest.TestCase):
         f = 'totally made up and bogus /\:'
         result = listparser.parse(f)
         self.assert_(result.bozo == 1)
+    def testBigInjector(self):
+        docl = ["""<?xml version="1.0"?>\n<rdf:RDF
+                xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                xmlns:foaf="http://xmlns.com/foaf/0.1/"
+                xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+                xmlns:rss="http://purl.org/rss/1.0/">"""]
+        agent = """<foaf:Agent><foaf:weblog><foaf:Document
+                rdf:about="http://d%i/"><rdfs:seeAlso><rss:channel
+                rdf:about="http://d%i/feed" /></rdfs:seeAlso>
+                </foaf:Document></foaf:weblog></foaf:Agent>"""
+        for i in range(500):
+            docl.append(agent % (i, i))
+        # Guarantee injection
+        docl.append("""<p>&aacute;</p></rdf:RDF>""")
+        doc = ''.join(docl)
+        result = listparser.parse(doc)
+        self.assert_(result.bozo == 1)
+        self.assert_(len(result.feeds) == 500)
     def testImage(self):
         f = os.path.abspath(os.path.join('tests', '1x1.gif'))
         result = listparser.parse(f)
