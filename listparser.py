@@ -23,9 +23,15 @@ import datetime
 import htmlentitydefs
 import httplib
 import re
-import StringIO
 import urllib2
 import xml.sax
+
+try:
+    # Python 3: Use a bytes-compatible stream implementation
+    from io import BytesIO as BytesStrIO
+except ImportError:
+    # Python 2: Use a basestring-compatible stream implementation
+    from StringIO import StringIO as BytesStrIO
 
 USER_AGENT = "listparser/%s +%s" % (__version__, __url__)
 
@@ -423,7 +429,7 @@ def _mkfile(obj, agent, etag, modified):
               obj.startswith('ftp://') or obj.startswith('file://')):
         # It's not a URL; test if it's an XML document
         if obj.lstrip().startswith('<'):
-            return StringIO.StringIO(obj), SuperDict()
+            return BytesStrIO(bytestr(obj)), SuperDict()
         # Try dealing with it as a file
         try:
             return open(obj, 'rb'), SuperDict()
