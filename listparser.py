@@ -33,6 +33,15 @@ except ImportError:
     # Python 2: Use a basestring-compatible stream implementation
     from StringIO import StringIO as BytesStrIO
 
+def bytestr(text):
+    # Force `text` to the type expected by Python 2 and Python 3
+    # Python 3 expects type(bytes)
+    # Python 2 expects type(basestring)
+    try:
+        return bytes(text, 'utf8')
+    except (TypeError, NameError):
+        return text
+
 USER_AGENT = "listparser/%s +%s" % (__version__, __url__)
 
 namespaces = {
@@ -616,12 +625,3 @@ class Injector(object):
 class ListError(Exception):
     """Used when a specification deviation is encountered in an XML file"""
     pass
-
-def bytestr(text):
-    # HACK: force `text` to the type expected by Python 2 and Python 3
-    # Python 2 expects type(basestring)
-    # Python 3 expects type(bytes)
-    try:
-        return bytes(text, 'utf8')
-    except (TypeError, NameError):
-        return text
