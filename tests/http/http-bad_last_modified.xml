@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+    Description: Bad HTTP Last-Modified
+    Modified: Earlier today...like before lunch
+    Eval: result['bozo'] == 0
+    Eval: result['modified'] == 'Earlier today...like before lunch'
+    Eval: not hasattr(result, 'modified_parsed')
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline text="node" />
+    </body>
+</opml>
