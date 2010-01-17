@@ -115,9 +115,9 @@ class TestCases(unittest.TestCase):
         tmp = listparser.USER_AGENT
         listparser.USER_AGENT = "NewGlobalAgent"
         result = listparser.parse(url)
+        listparser.USER_AGENT = tmp
         self.assertFalse(result.bozo)
         self.assert_(result.headers.get('x-agent') == "NewGlobalAgent")
-        listparser.USER_AGENT = tmp
     def testBadURLProtocol(self):
         url = "xxx://badurl.com/"
         result = listparser.parse(url)
