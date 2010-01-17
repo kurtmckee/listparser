@@ -97,10 +97,6 @@ class ServerThread(threading.Thread):
             self.numtests -= 1
 
 class TestCases(unittest.TestCase):
-    def setUp(self):
-        pass
-    def tearDown(self):
-        pass
     def testUnparsableObject(self):
         result = listparser.parse(True)
         self.assert_(result['bozo'] == 1)
