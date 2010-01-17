@@ -100,6 +100,11 @@ class TestCases(unittest.TestCase):
     def testUnparsableObject(self):
         result = listparser.parse(True)
         self.assert_(result['bozo'] == 1)
+    def testUserAgentInvalid(self):
+        url = 'http://localhost:8091/tests/http/useragent.xml'
+        obj, sdict = listparser._mkfile(url, True, None, None)
+        obj.close()
+        self.assertEqual(sdict.status, 200)
     def testUserAgentDefault(self):
         url = 'http://localhost:8091/tests/http/useragent.xml'
         result = listparser.parse(url)
@@ -312,7 +317,7 @@ for testfile in files:
         continue
     if 'useragent' in testfile:
         # useragent.xml is the target of a hardcoded test above, thrice
-        numtests += 3
+        numtests += 4
         continue
     if 'filename' in testfile:
         # filename.xml isn't requested over HTTP

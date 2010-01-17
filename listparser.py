@@ -445,7 +445,9 @@ def _mkfile(obj, agent, etag, modified):
         except IOError, err:
             return None, SuperDict({'bozo': 1, 'bozo_exception': err})
     # It's a URL
-    headers = {'User-Agent': agent}
+    headers = {}
+    if isinstance(agent, basestring):
+        headers['User-Agent'] = agent
     if isinstance(etag, basestring):
         headers['If-None-Match'] = etag
     if isinstance(modified, basestring):
