@@ -26,6 +26,14 @@ import StringIO
 
 import listparser
 
+def _to_str(obj):
+    try:
+        if isinstance(obj, bytes) and bytes is not str:
+            return obj.decode('utf8')
+        return obj
+    except NameError:
+        return obj
+
 def bytestr(reply):
     # HACK: force the type expected by the webserver's `write()` function
     # Python 2 expects type(basestring)
@@ -150,24 +158,6 @@ class TestCases(unittest.TestCase):
         f = 'totally made up and bogus /\:'
         result = listparser.parse(f)
         self.assert_(result.bozo == 1)
-    def testBigInjector(self):
-        docl = ["""<?xml version="1.0"?>\n<rdf:RDF
-                xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-                xmlns:foaf="http://xmlns.com/foaf/0.1/"
-                xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-                xmlns:rss="http://purl.org/rss/1.0/">"""]
-        agent = """<foaf:Agent><foaf:weblog><foaf:Document
-                rdf:about="http://d%i/"><rdfs:seeAlso><rss:channel
-                rdf:about="http://d%i/feed" /></rdfs:seeAlso>
-                </foaf:Document></foaf:weblog></foaf:Agent>"""
-        for i in range(500):
-            docl.append(agent % (i, i))
-        # Guarantee injection
-        docl.append("""<p>&aacute;</p></rdf:RDF>""")
-        doc = ''.join(docl)
-        result = listparser.parse(doc)
-        self.assert_(result.bozo == 1)
-        self.assert_(len(result.feeds) == 500)
     def testImage(self):
         f = os.path.abspath(os.path.join('tests', '1x1.gif'))
         result = listparser.parse(f)
@@ -177,6 +167,39 @@ class TestCases(unittest.TestCase):
             etag=etag, modified=modified)
         for ev in evals:
             self.assert_(eval(ev))
+
+class TestInjection(unittest.TestCase):
+    def _read_size(size):
+        # Return a TestCase function that will manually feed the subscription
+        # list through the Injector, calling read() using the given size
+        def fn(self):
+            doc = listparser.bytestr("""<?xml version="1.0"?>\n<rdf:RDF
+                    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                    xmlns:foaf="http://xmlns.com/foaf/0.1/"
+                    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+                    xmlns:rss="http://purl.org/rss/1.0/">
+                    <foaf:Agent><foaf:name>&aacute;</foaf:name><foaf:weblog>
+                    <foaf:Document rdf:about="http://domain/"><rdfs:seeAlso>
+                    <rss:channel rdf:about="http://domain/feed" />
+                    </rdfs:seeAlso></foaf:Document></foaf:weblog></foaf:Agent>
+                    </rdf:RDF>""")
+            idoc = listparser.Injector(listparser.BytesStrIO(doc))
+            tmp = []
+            while 1:
+                i = idoc.read(size)
+                if i:
+                    tmp.append(i)
+                else:
+                    idoc.close()
+                    break
+            xml = _to_str(bytestr('').join(tmp))
+            result = listparser.parse(xml)
+            self.assertFalse(result.bozo)
+            self.assert_(len(result.feeds) == 1)
+            self.assert_(result.feeds[0].title == u'\u00e1')
+        return fn
+    testRead1by1 = _read_size(1)
+    testReadChunks = _read_size(20)
 
 def make_testcase(evals, testfile, etag, modified):
     # HACK: Only necessary in order to ensure that `evals` is evaluated
@@ -254,7 +277,10 @@ for testfile in files:
 server = ServerThread(numtests)
 server.start()
 
-testsuite = unittest.TestLoader().loadTestsFromTestCase(TestCases)
+testsuite = unittest.TestSuite()
+testloader = unittest.TestLoader()
+testsuite.addTest(testloader.loadTestsFromTestCase(TestCases))
+testsuite.addTest(testloader.loadTestsFromTestCase(TestInjection))
 testresults = unittest.TextTestRunner(verbosity=1).run(testsuite)
 
 # Return 0 if successful, 1 if there was a failure
