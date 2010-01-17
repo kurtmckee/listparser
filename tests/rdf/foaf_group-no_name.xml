@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Description: RDF | Test empty foaf:name for foaf:Group
+    Eval: result.bozo == 0
+    Eval: len(result.feeds[0].tags) == 0
+    Eval: len(result.feeds[0].categories) == 0
+    Eval: result.feeds[0].title == "User"
+-->
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:foaf="http://xmlns.com/foaf/0.1/"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:rss="http://purl.org/rss/1.0/"
+>
+
+<foaf:Group>
+    <foaf:name> </foaf:name>
+    <foaf:member>
+        <foaf:Agent> 
+            <foaf:name>User</foaf:name>
+            <foaf:weblog> 
+                <foaf:Document rdf:about="http://domain/"> 
+                    <rdfs:seeAlso> 
+                        <rss:channel rdf:about="http://domain/feed" /> 
+                    </rdfs:seeAlso> 
+                </foaf:Document> 
+            </foaf:weblog> 
+        </foaf:Agent> 
+    </foaf:member>
+</foaf:Group>
+
+</rdf:RDF> 
