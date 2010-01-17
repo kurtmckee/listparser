@@ -201,6 +201,99 @@ class TestInjection(unittest.TestCase):
     testRead1by1 = _read_size(1)
     testReadChunks = _read_size(20)
 
+class TestRFC822(unittest.TestCase):
+    def testGeneral(self):
+        dt = listparser._rfc822('Sun, 14 Jun 2009 11:47:32 GMT')
+        self.assertEqual(dt.day, 14)
+        self.assertEqual(dt.year, 2009)
+        self.assertEqual(dt.hour, 11)
+        self.assertEqual(dt.minute, 47)
+        self.assertEqual(dt.second, 32)
+    def testSecondMissing(self):
+        dt = listparser._rfc822('Sun, 21 Jun 2009 12:00 GMT')
+        self.assertEqual(dt.second, 0)
+    def testInvalidDateTime(self):
+        dt = listparser._rfc822('Earlier today...wait, no, yesterday')
+        self.assert_(dt is None)
+
+    def _month_test(s, m):
+        # Take an RFC822 datetime string and a month integer (1-12) and
+        # return a TestCase function that tests that datetime.month == m
+        def fn(self):
+            dt = listparser._rfc822(s)
+            self.assertEqual(dt.month, m)
+        return fn
+    testMonth01 = _month_test('21 Jan 2009 12:00:00 GMT', 1)
+    testMonth02 = _month_test('21 Feb 2009 12:00:00 GMT', 2)
+    testMonth03 = _month_test('21 Mar 2009 12:00:00 GMT', 3)
+    testMonth04 = _month_test('21 Apr 2009 12:00:00 GMT', 4)
+    testMonth05 = _month_test('21 May 2009 12:00:00 GMT', 5)
+    testMonth06 = _month_test('21 Jun 2009 12:00:00 GMT', 6)
+    testMonth07 = _month_test('21 Jul 2009 12:00:00 GMT', 7)
+    testMonth08 = _month_test('21 Aug 2009 12:00:00 GMT', 8)
+    testMonth09 = _month_test('21 Sep 2009 12:00:00 GMT', 9)
+    testMonth10 = _month_test('21 Oct 2009 12:00:00 GMT', 10)
+    testMonth11 = _month_test('21 Nov 2009 12:00:00 GMT', 11)
+    testMonth12 = _month_test('21 Dec 2009 12:00:00 GMT', 12)
+
+    def _tz_test(s, h, m=15, d=22):
+        # Take an RFC822 datetime string, and hour, minute, and day
+        # integers, and return a TestCase function that tests that:
+        # dt.hour == h, dt.minute == m, dt.day == d
+        def fn(self):
+            dt = listparser._rfc822(s)
+            self.assertEqual(dt.hour, h)
+            self.assertEqual(dt.minute, m)
+            self.assertEqual(dt.day, d)
+        return fn
+    testTZ_Z = _tz_test('Mon, 22 Jun 2009 13:15:17 Z', 13)
+    testTZ_UT = _tz_test('Mon, 22 Jun 2009 13:15:17 UT', 13)
+    testTZ_GMT = _tz_test('Mon, 22 Jun 2009 13:15:17 GMT', 13)
+    testTZ_CDT = _tz_test('Mon, 22 Jun 2009 13:15:17 CDT', 18)
+    testTZ_CST = _tz_test('Mon, 22 Jun 2009 13:15:17 CST', 19)
+    testTZ_EDT = _tz_test('Mon, 22 Jun 2009 13:15:17 EDT', 17)
+    testTZ_EST = _tz_test('Mon, 22 Jun 2009 13:15:17 EST', 18)
+    testTZ_MDT = _tz_test('Mon, 22 Jun 2009 13:15:17 MDT', 19)
+    testTZ_MST = _tz_test('Mon, 22 Jun 2009 13:15:17 MST', 20)
+    testTZ_PDT = _tz_test('Mon, 22 Jun 2009 13:15:17 PDT', 20)
+    testTZ_PST = _tz_test('Mon, 22 Jun 2009 13:15:17 PST', 21)
+    testTZ_A = _tz_test('Mon, 22 Jun 2009 13:15:17 A', 14)
+    testTZ_N = _tz_test('Mon, 22 Jun 2009 13:15:17 N', 12)
+    testTZ_M = _tz_test('Mon, 22 Jun 2009 13:15:17 M', 1, d=23)
+    testTZ_Y = _tz_test('Mon, 22 Jun 2009 13:15:17 Y', 1, d=22)
+    testTZ_plus = _tz_test('Mon, 22 Jun 2009 13:15:17 -0430', 17, m=45)
+    testTZ_minus = _tz_test('Mon, 22 Jun 2009 13:15:17 +0545', 7, m=30)
+
+    def _year2digit_test(s, y):
+        # Take an RFC822 datetime string and a year and,
+        # return a TestCase that tests that dt.year == y
+        def fn(self):
+            dt = listparser._rfc822(s)
+            self.assertEqual(dt.year, y)
+        return fn
+    testYear2Digit00 = _year2digit_test('Wed, 21 Jun 00 12:00:00 GMT', 2000)
+    testYear2Digit89 = _year2digit_test('Wed, 21 Jun 89 12:00:00 GMT', 2089)
+    testYear2Digit90 = _year2digit_test('Thu, 21 Jun 90 12:00:00 GMT', 1990)
+    testYear2Digit99 = _year2digit_test('Mon, 21 Jun 99 12:00:00 GMT', 1999)
+
+    def _range_test(s):
+        # Test extreme date and time ranges
+        def fn(self):
+            dt = listparser._rfc822(s)
+            self.assert_(dt is None)
+        return fn
+    testRangeDayHigh = _range_test('Sun, 99 Jun 2009 12:00:00 GMT')
+    testRangeDayLow = _range_test('Sun, 00 Jun 2009 12:00:00 GMT')
+    testRangeHour = _range_test('Sun, 01 Jun 2009 99:00:00 GMT')
+    testRangeMinute = _range_test('Sun, 01 Jun 2009 00:99:00 GMT')
+    testRangeSecond = _range_test('Sun, 01 Jun 2009 00:00:99 GMT')
+    testRangeYearHigh = _range_test('Sun, 31 Dec 9999 23:59:59 -9999')
+
+    def testRangeYearLow(self):
+        dt = listparser._rfc822('Sun, 01 Jan 0000 00:00:00 +9999')
+        # This works only because 0 is interpreted as the year 2000
+        self.assert_(isinstance(dt, datetime.datetime))
+
 def make_testcase(evals, testfile, etag, modified):
     # HACK: Only necessary in order to ensure that `evals` is evaluated
     # for every testcase, not just for the last one in the loop below
@@ -281,6 +374,7 @@ testsuite = unittest.TestSuite()
 testloader = unittest.TestLoader()
 testsuite.addTest(testloader.loadTestsFromTestCase(TestCases))
 testsuite.addTest(testloader.loadTestsFromTestCase(TestInjection))
+testsuite.addTest(testloader.loadTestsFromTestCase(TestRFC822))
 testresults = unittest.TextTestRunner(verbosity=1).run(testsuite)
 
 # Return 0 if successful, 1 if there was a failure
