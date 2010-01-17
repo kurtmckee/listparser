@@ -619,8 +619,6 @@ class Injector(object):
         return ret
     def __getattr__(self, name):
         return getattr(self.obj, name)
-    def __hasattr__(self, name):
-        return hasattr(self.obj, name)
 
 class ListError(Exception):
     """Used when a specification deviation is encountered in an XML file"""
