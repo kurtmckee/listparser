@@ -206,18 +206,18 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         else:
             title = attrs.get((NONS, 'title'), u'').strip()
 
+        # Search for the URL regardless of xmlUrl's case
+        for k, v in attrs.items():
+            if k[1].lower() == 'xmlurl':
+                url = v.strip()
+                break
         # Determine whether the outline is a feed or subscription list
-        if 'xmlurl' in (i[1].lower() for i in attrs.keys()):
+        if url is not None:
             # It's a feed
             append_to = 'feeds'
             if attrs.get((NONS, 'type'), '').strip().lower() == 'source':
                 # Actually, it's a subscription list!
                 append_to = 'lists'
-            # Get the URL regardless of xmlUrl's case
-            for k, v in attrs.items():
-                if k[1].lower() == 'xmlurl':
-                    url = v.strip()
-                    break
         elif attrs.get((NONS, 'type'), '').lower() in ('link', 'include'):
             # It's a subscription list
             append_to = 'lists'
