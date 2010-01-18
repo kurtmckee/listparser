@@ -132,44 +132,52 @@ class TestCases(unittest.TestCase):
 
 class TestMkfile(unittest.TestCase):
     def testUnparsableObject(self):
-        result = listparser.parse(True)
-        self.assert_(result['bozo'] == 1)
+        obj, sdict = listparser._mkfile(True, 'agent', None, None)
+        self.assert_(obj is None)
+        self.assertEqual(sdict.bozo, 1)
     def testBadURLProtocol(self):
         url = "xxx://badurl.com/"
-        result = listparser.parse(url)
-        self.assert_(result.bozo)
+        obj, sdict = listparser._mkfile(url, 'agent', None, None)
+        self.assert_(obj is None)
+        self.assertEqual(sdict.bozo, 1)
     def testBadURLUnreachable(self):
         url = "http://badurl.com.INVALID/"
-        result = listparser.parse(url)
-        self.assert_(result.bozo)
+        obj, sdict = listparser._mkfile(url, 'agent', None, None)
+        self.assert_(obj is None)
+        self.assertEqual(sdict.bozo, 1)
     def testStringInput(self):
         t = """<?xml version="1.0"?><opml version="2.0"><head><title>
         String Input Test</title></head><body><outline text="node" />
         </body></opml>"""
-        result = listparser.parse(t)
-        self.assert_(result['bozo'] == 0)
-        self.assert_(result['meta']['title'] == u'String Input Test')
+        obj, sdict = listparser._mkfile(t, 'agent', None, None)
+        obj.close()
+        self.assert_(obj is not None)
+        self.assertFalse(sdict)
     def testFileishInput(self):
         t = """<?xml version="1.0"?><opml version="2.0"><head><title>
         Fileish Input Test</title></head><body><outline text="node" />
         </body></opml>"""
-        result = listparser.parse(StringIO.StringIO(t))
-        self.assert_(result['bozo'] == 0)
-        self.assert_(result['meta']['title'] == u'Fileish Input Test')
+        obj, sdict = listparser._mkfile(StringIO.StringIO(t), 'a', None, None)
+        obj.close()
+        self.assert_(obj is not None)
+        self.assertFalse(sdict)
     def testRelativeFilename(self):
         f = os.path.join('tests', 'filename.xml')
-        result = listparser.parse(f)
-        self.assert_(result.bozo == 0)
-        self.assert_(result.meta.title == u'filename')
+        obj, sdict = listparser._mkfile(f, 'agent', None, None)
+        obj.close()
+        self.assert_(obj is not None)
+        self.assertFalse(sdict)
     def testAbsoluteFilename(self):
         f = os.path.abspath(os.path.join('tests', 'filename.xml'))
-        result = listparser.parse(f)
-        self.assert_(result.bozo == 0)
-        self.assert_(result.meta.title == u'filename')
+        obj, sdict = listparser._mkfile(f, 'agent', None, None)
+        obj.close()
+        self.assert_(obj is not None)
+        self.assertFalse(sdict)
     def testBogusFilename(self):
         f = 'totally made up and bogus /\:'
-        result = listparser.parse(f)
-        self.assert_(result.bozo == 1)
+        obj, sdict = listparser._mkfile(f, 'agent', None, None)
+        self.assert_(obj is None)
+        self.assertEqual(sdict.bozo, 1)
 
 class TestInjection(unittest.TestCase):
     def _read_size(size):
