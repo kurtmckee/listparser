@@ -97,9 +97,6 @@ class ServerThread(threading.Thread):
             self.numtests -= 1
 
 class TestCases(unittest.TestCase):
-    def testUnparsableObject(self):
-        result = listparser.parse(True)
-        self.assert_(result['bozo'] == 1)
     def testUserAgentInvalid(self):
         url = 'http://localhost:8091/tests/http/useragent.xml'
         obj, sdict = listparser._mkfile(url, True, None, None)
@@ -123,6 +120,20 @@ class TestCases(unittest.TestCase):
         listparser.USER_AGENT = tmp
         self.assertFalse(result.bozo)
         self.assert_(result.headers.get('x-agent') == "NewGlobalAgent")
+    def testImage(self):
+        f = os.path.abspath(os.path.join('tests', '1x1.gif'))
+        result = listparser.parse(f)
+        self.assert_(result.bozo == 1)
+    def worker(self, evals, testfile, etag, modified):
+        result = listparser.parse('http://localhost:8091/tests/' + testfile,
+            etag=etag, modified=modified)
+        for ev in evals:
+            self.assert_(eval(ev))
+
+class TestMkfile(unittest.TestCase):
+    def testUnparsableObject(self):
+        result = listparser.parse(True)
+        self.assert_(result['bozo'] == 1)
     def testBadURLProtocol(self):
         url = "xxx://badurl.com/"
         result = listparser.parse(url)
@@ -159,15 +170,6 @@ class TestCases(unittest.TestCase):
         f = 'totally made up and bogus /\:'
         result = listparser.parse(f)
         self.assert_(result.bozo == 1)
-    def testImage(self):
-        f = os.path.abspath(os.path.join('tests', '1x1.gif'))
-        result = listparser.parse(f)
-        self.assert_(result.bozo == 1)
-    def worker(self, evals, testfile, etag, modified):
-        result = listparser.parse('http://localhost:8091/tests/' + testfile,
-            etag=etag, modified=modified)
-        for ev in evals:
-            self.assert_(eval(ev))
 
 class TestInjection(unittest.TestCase):
     def _read_size(size):
@@ -376,6 +378,7 @@ testloader = unittest.TestLoader()
 testsuite.addTest(testloader.loadTestsFromTestCase(TestCases))
 testsuite.addTest(testloader.loadTestsFromTestCase(TestInjection))
 testsuite.addTest(testloader.loadTestsFromTestCase(TestRFC822))
+testsuite.addTest(testloader.loadTestsFromTestCase(TestMkfile))
 testresults = unittest.TextTestRunner(verbosity=1).run(testsuite)
 
 # Return 0 if successful, 1 if there was a failure
