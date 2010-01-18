@@ -131,53 +131,34 @@ class TestCases(unittest.TestCase):
             self.assert_(eval(ev))
 
 class TestMkfile(unittest.TestCase):
-    def testUnparsableObject(self):
-        obj, sdict = listparser._mkfile(True, 'agent', None, None)
-        self.assert_(obj is None)
-        self.assertEqual(sdict.bozo, 1)
-    def testBadURLProtocol(self):
-        url = "xxx://badurl.com/"
-        obj, sdict = listparser._mkfile(url, 'agent', None, None)
-        self.assert_(obj is None)
-        self.assertEqual(sdict.bozo, 1)
-    def testBadURLUnreachable(self):
-        url = "http://badurl.com.INVALID/"
-        obj, sdict = listparser._mkfile(url, 'agent', None, None)
-        self.assert_(obj is None)
-        self.assertEqual(sdict.bozo, 1)
-    def testStringInput(self):
-        t = """<?xml version="1.0"?><opml version="2.0"><head><title>
-        String Input Test</title></head><body><outline text="node" />
-        </body></opml>"""
-        obj, sdict = listparser._mkfile(t, 'agent', None, None)
-        obj.close()
-        self.assert_(obj is not None)
-        self.assertFalse(sdict)
-    def testFileishInput(self):
-        t = """<?xml version="1.0"?><opml version="2.0"><head><title>
-        Fileish Input Test</title></head><body><outline text="node" />
-        </body></opml>"""
-        obj, sdict = listparser._mkfile(StringIO.StringIO(t), 'a', None, None)
-        obj.close()
-        self.assert_(obj is not None)
-        self.assertFalse(sdict)
-    def testRelativeFilename(self):
-        f = os.path.join('tests', 'filename.xml')
-        obj, sdict = listparser._mkfile(f, 'agent', None, None)
-        obj.close()
-        self.assert_(obj is not None)
-        self.assertFalse(sdict)
-    def testAbsoluteFilename(self):
-        f = os.path.abspath(os.path.join('tests', 'filename.xml'))
-        obj, sdict = listparser._mkfile(f, 'agent', None, None)
-        obj.close()
-        self.assert_(obj is not None)
-        self.assertFalse(sdict)
-    def testBogusFilename(self):
-        f = 'totally made up and bogus /\:'
-        obj, sdict = listparser._mkfile(f, 'agent', None, None)
-        self.assert_(obj is None)
-        self.assertEqual(sdict.bozo, 1)
+    def _bad_test(obj):
+        # A TestCase factory; its tests assume unusable return values
+        def fn(self):
+            n, sdict = listparser._mkfile(obj, 'agent', None, None)
+            self.assert_(n is None)
+            self.assertEqual(sdict.bozo, 1)
+        return fn
+    testUnparsableObject = _bad_test(True)
+    testBadURLProtocol = _bad_test("xxx://badurl.com/")
+    testBadURLUnreachable = _bad_test("http://badurl.com.INVALID/")
+    testBogusFilename = _bad_test('totally made up and bogus /\:')
+
+    def _good_test(obj):
+        # A TestCase factory; its tests expect a usable file-like or
+        # stream object and an empty SuperDict will be returned
+        def fn(self):
+            f, sdict = listparser._mkfile(obj, 'agent', None, None)
+            f.close()
+            self.assert_(f is not None)
+            self.assertFalse(sdict)
+        return fn
+    doc = """<?xml version="1.0"?><opml />"""
+    testStringInput = _good_test(doc)
+    testFileishInput = _good_test(StringIO.StringIO(doc))
+
+    testfile = os.path.join('tests', 'filename.xml')
+    testRelativeFilename = _good_test(testfile)
+    testAbsoluteFilename = _good_test(os.path.abspath(testfile))
 
 class TestInjection(unittest.TestCase):
     def _read_size(size):
