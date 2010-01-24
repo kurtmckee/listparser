@@ -92,9 +92,8 @@ class ServerThread(threading.Thread):
         bind_to = ('', 8091)
         reqhandler = Handler
         httpd = server(bind_to, reqhandler)
-        while self.numtests:
+        for i in xrange(self.numtests):
             httpd.handle_request()
-            self.numtests -= 1
 
 class TestCases(unittest.TestCase):
     def testUserAgentInvalid(self):
