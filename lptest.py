@@ -332,7 +332,7 @@ for testfile in files:
         raise ValueError("Description not found in test %s" % testfile)
     if not evals:
         raise ValueError("Eval not found in test %s" % testfile)
-    if 'http/http_304-last_modified' in testfile:
+    if modified:
         testcase = make_testcase(evals, testfile, etag, modified)
         testcase.__doc__ = '%s: %s [string]' % (testfile, description)
         setattr(TestCases, 'test_%s_1' % splitext(testfile)[0], testcase)
