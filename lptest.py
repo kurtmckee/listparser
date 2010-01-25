@@ -124,8 +124,11 @@ class TestCases(unittest.TestCase):
         result = listparser.parse(f)
         self.assert_(result.bozo == 1)
     def worker(self, evals, testfile, etag, modified):
-        result = listparser.parse('http://localhost:8091/tests/' + testfile,
-            etag=etag, modified=modified)
+        if 'http' in testfile:
+            testfile = 'http://localhost:8091/tests/' + testfile
+        else:
+            testfile = join('tests', testfile)
+        result = listparser.parse(testfile, etag=etag, modified=modified)
         for ev in evals:
             self.assert_(eval(ev))
 
@@ -301,28 +304,6 @@ files = (join(r, f).replace(testpath, '', 1)
             for r, d, files in os.walk(testpath)
             for f in files if f.endswith('.xml'))
 for testfile in files:
-    if 'http/destination' in testfile:
-        # destination.xml is the target of four redirect requests
-        numtests += 4
-        continue
-    if 'useragent' in testfile:
-        # useragent.xml is the target of a hardcoded test above, thrice
-        numtests += 4
-        continue
-    if 'filename' in testfile:
-        # filename.xml isn't requested over HTTP
-        continue
-    elif 'http/http_304-last_modified' in testfile:
-        # http_304-last_modified.xml must be called twice:
-        # once with `modified` as a string, and again as a datetime
-        numtests += 2
-    elif 'injection' in testfile:
-        # The injection tests require two calls; the first fails due to
-        # an undeclared entity reference, and so the URL is requested
-        # a second time and its content is injected with a DOCTYPE
-        numtests += 2
-    else:
-        numtests += 1
     info = {}
     evals = []
     openfile = open(join(testpath, testfile), 'rb')
@@ -330,7 +311,7 @@ for testfile in files:
         line = line.decode('utf8', 'replace').strip()
         if '-->' in line:
             break
-        if 'Eval:' in line:
+        if line.lstrip().startswith('Eval:'):
             evals.append(line.split(': ', 1)[1].strip())
         elif ': ' in line:
             info.update((map(unicode.strip, line.split(': ', 1)),))
@@ -338,7 +319,15 @@ for testfile in files:
     description = info.get('Description', '')
     etag = info.get('ETag', None)
     modified = info.get('Modified', None)
+    if 'http' in testfile:
+        numtests += int(info.get('Requests', 1))
 
+    if 'No-Eval' in info:
+        # No-Eval files are requested over HTTP (generally representing
+        # an HTTP redirection destination) and contain no testcases.
+        # They probably have a Requests directive, though, which is why
+        # the `continue` here appears after numtests is incremented.
+        continue
     if not description:
         raise ValueError("Description not found in test %s" % testfile)
     if not evals:
