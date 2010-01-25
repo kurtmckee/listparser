@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
     Description: HTTP Last-Modified
-    Modified: Fri, 31 Jul 2009 11:59:00 GMT
+    Server-Modified: Fri, 31 Jul 2009 11:59:00 GMT
     Eval: result['bozo'] == 0
     Eval: result['modified'] == 'Fri, 31 Jul 2009 11:59:00 GMT'
     Eval: type(result['modified_parsed']) is datetime.datetime

@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <!--
     Description: HTTP 304 Not Modified (ETag)
+    Server-ETag: "12345"
     ETag: "12345"
     Eval: result['status'] == 304
 -->

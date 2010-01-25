@@ -60,12 +60,12 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                     status = int(line.strip()[7:])
                 elif 'Location:' in line:
                     location = line.strip()[9:].strip()
-                elif 'ETag:' in line:
-                    etag = line.strip()[5:].strip()
+                elif 'Server-ETag:' in line:
+                    etag = line.split(': ', 1)[1].strip()
                     if self.headers.get('if-none-match') == etag:
                         status = 304
-                elif 'Modified:' in line:
-                    modified = line.strip()[10:].strip()
+                elif 'Server-Modified:' in line:
+                    modified = line.split(': ', 1)[1].strip()
                     if self.headers.get('if-modified-since') == modified:
                         status = 304
         f.close()
@@ -323,24 +323,22 @@ for testfile in files:
         numtests += 2
     else:
         numtests += 1
-    description = ''
-    etag = modified = None
+    info = {}
     evals = []
     openfile = open(join(testpath, testfile), 'rb')
     for line in openfile:
         line = line.decode('utf8', 'replace').strip()
         if '-->' in line:
             break
-        if 'Description:' in line:
-            description = line.split('Description:')[1].strip()
         if 'Eval:' in line:
-            evals.append(line.split('Eval:')[1].strip())
-        if 'http/http_304' in testfile:
-            if 'ETag:' in line:
-                etag = line.strip()[5:].strip()
-            if 'Modified:' in line:
-                modified = line.strip()[9:].strip()
+            evals.append(line.split(': ', 1)[1].strip())
+        elif ': ' in line:
+            info.update((map(unicode.strip, line.split(': ', 1)),))
     openfile.close()
+    description = info.get('Description', '')
+    etag = info.get('ETag', None)
+    modified = info.get('Modified', None)
+
     if not description:
         raise ValueError("Description not found in test %s" % testfile)
     if not evals:

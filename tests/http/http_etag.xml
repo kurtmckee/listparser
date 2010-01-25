@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
     Description: HTTP ETag
-    ETag: "12345"
+    Server-ETag: "12345"
     Eval: result['bozo'] == 0
     Eval: result['etag'] == '"12345"'
 -->

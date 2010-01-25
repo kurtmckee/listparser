@@ -4,6 +4,7 @@
     to a string, and a second time with `modified` set to a datetime.
 
     Description: HTTP 304 Not Modified (Last-Modified)
+    Server-Modified: Wed, 05 Aug 2009 12:35:00 GMT
     Modified: Wed, 05 Aug 2009 12:35:00 GMT
     Eval: result['status'] == 304
 -->
