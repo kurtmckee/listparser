@@ -346,6 +346,7 @@ for testfile in files:
         setattr(TestCases, 'test_%s' % splitext(testfile)[0], testcase)
 
 server = ServerThread(numtests)
+server.setDaemon(True)
 server.start()
 
 testsuite = unittest.TestSuite()
