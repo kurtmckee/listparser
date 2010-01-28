@@ -34,7 +34,7 @@ def _to_str(obj):
     except NameError:
         return obj
 
-def bytestr(reply):
+def _to_bytes(reply):
     # HACK: force the type expected by the webserver's `write()` function
     # Python 2 expects type(basestring)
     # Python 3 expects type(bytes)
@@ -47,7 +47,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_GET(self):
         status = 200
         location = etag = modified = None
-        reply = bytestr('')
+        reply = _to_bytes('')
         end_directives = False
         f = open(dirname(abspath(__file__)) + self.path, 'rb')
         for line in f:
@@ -167,7 +167,7 @@ class TestInjection(unittest.TestCase):
         # Return a TestCase function that will manually feed the subscription
         # list through the Injector, calling read() using the given size
         def fn(self):
-            doc = listparser.bytestr("""<?xml version="1.0"?>\n<rdf:RDF
+            doc = listparser._to_bytes("""<?xml version="1.0"?>\n<rdf:RDF
                     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
                     xmlns:foaf="http://xmlns.com/foaf/0.1/"
                     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
@@ -186,7 +186,7 @@ class TestInjection(unittest.TestCase):
                 else:
                     idoc.close()
                     break
-            xml = _to_str(bytestr('').join(tmp))
+            xml = _to_str(_to_bytes('').join(tmp))
             result = listparser.parse(xml)
             self.assertFalse(result.bozo)
             self.assert_(len(result.feeds) == 1)

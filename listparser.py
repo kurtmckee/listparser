@@ -33,7 +33,7 @@ except ImportError:
     # Python 2: Use a basestring-compatible stream implementation
     from StringIO import StringIO as BytesStrIO
 
-def bytestr(text):
+def _to_bytes(text):
     # Force `text` to the type expected by Python 2 and Python 3
     # Python 3 expects type(bytes)
     # Python 2 expects type(basestring)
@@ -438,7 +438,7 @@ def _mkfile(obj, agent, etag, modified):
               obj.startswith('ftp://') or obj.startswith('file://')):
         # It's not a URL; test if it's an XML document
         if obj.lstrip().startswith('<'):
-            return BytesStrIO(bytestr(obj)), SuperDict()
+            return BytesStrIO(_to_bytes(obj)), SuperDict()
         # Try dealing with it as a file
         try:
             return open(obj, 'rb'), SuperDict()
@@ -589,7 +589,7 @@ class Injector(object):
     def __init__(self, obj):
         self.obj = obj
         self.injected = False
-        self.cache = bytestr('')
+        self.cache = _to_bytes('')
     def read(self, size):
         if self.cache:
             if len(self.cache) >= size:
@@ -599,21 +599,21 @@ class Injector(object):
             else:
                 # Pull content from both the cache and the obj
                 read = self.cache + self.obj.read(size - len(self.cache))
-                self.cache = bytestr('')
+                self.cache = _to_bytes('')
         else:
             # Pull content from the obj
             read = self.obj.read(size)
 
         # Inject the entity declarations into the cache
-        if self.injected or bytestr('\n') not in read:
+        if self.injected or _to_bytes('\n') not in read:
             return read
         entities = str()
         for k, v in htmlentitydefs.name2codepoint.items():
             entities += '<!ENTITY %s "&#%s;">' % (k, v)
         doctype = "<!DOCTYPE anyroot [%s]>" % (entities, )
         lines = read.splitlines()
-        lines.insert(1, bytestr(doctype))
-        self.cache = bytestr('\n').join(lines)
+        lines.insert(1, _to_bytes(doctype))
+        self.cache = _to_bytes('\n').join(lines)
         self.injected = True
 
         ret = self.cache[:size]
