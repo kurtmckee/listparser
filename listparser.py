@@ -605,15 +605,16 @@ class Injector(object):
             read = self.obj.read(size)
 
         # Inject the entity declarations into the cache
-        if self.injected or _to_bytes('\n') not in read:
+        if self.injected or _to_bytes('>') not in read:
             return read
         entities = str()
         for k, v in htmlentitydefs.name2codepoint.items():
             entities += '<!ENTITY %s "&#%s;">' % (k, v)
-        doctype = "<!DOCTYPE anyroot [%s]>" % (entities, )
-        lines = read.splitlines()
-        lines.insert(1, _to_bytes(doctype))
-        self.cache = _to_bytes('\n').join(lines)
+        # The '>' is deliberately missing; it will be appended by join()
+        doctype = "<!DOCTYPE anyroot [%s]" % (entities, )
+        content = read.split(_to_bytes('>'), 1)
+        content.insert(1, _to_bytes(doctype))
+        self.cache = _to_bytes('>').join(content)
         self.injected = True
 
         ret = self.cache[:size]

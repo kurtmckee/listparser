@@ -169,7 +169,7 @@ class TestInjection(unittest.TestCase):
         # Return a TestCase function that will manually feed the subscription
         # list through the Injector, calling read() using the given size
         def fn(self):
-            doc = listparser._to_bytes("""<?xml version="1.0"?>\n<rdf:RDF
+            doc = listparser._to_bytes("""<?xml version="1.0"?><rdf:RDF
                     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
                     xmlns:foaf="http://xmlns.com/foaf/0.1/"
                     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
