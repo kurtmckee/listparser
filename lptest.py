@@ -87,11 +87,13 @@ class ServerThread(threading.Thread):
     def __init__(self, numtests):
         super(ServerThread, self).__init__()
         self.numtests = numtests
+        self.ready = threading.Event()
     def run(self):
         server = BaseHTTPServer.HTTPServer
         bind_to = ('', 8091)
         reqhandler = Handler
         httpd = server(bind_to, reqhandler)
+        self.ready.set()
         for i in xrange(self.numtests):
             httpd.handle_request()
 
@@ -348,6 +350,9 @@ for testfile in files:
 server = ServerThread(numtests)
 server.setDaemon(True)
 server.start()
+
+# Wait for the server thread to signal that it's ready
+server.ready.wait()
 
 testsuite = unittest.TestSuite()
 testloader = unittest.TestLoader()
