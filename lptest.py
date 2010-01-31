@@ -30,9 +30,9 @@ def _to_str(obj):
     try:
         if isinstance(obj, bytes) and bytes is not str:
             return obj.decode('utf8')
-        return obj
     except NameError:
-        return obj
+        pass
+    return obj
 
 def _to_bytes(reply):
     # HACK: force the type expected by the webserver's `write()` function
