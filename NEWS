@@ -1,3 +1,10 @@
+v0.13 (1 Feb 2010) "Revelations"
+    * Fixed an infinite loop bug in Injector
+    * Fixed a threading-related bug in the unit tests
+    * Made Injector inject after the first '>', not '\n'
+    * Overhauled and modularized the unit test code
+    * Increased the code coverage of the unit tests
+
 v0.12 (3 Jan 2010) "Safety net"
     * Fixed global USER_AGENT behavior
     * Fixed several crasher bugs
