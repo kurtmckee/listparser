@@ -591,22 +591,16 @@ class Injector(object):
         self.injected = False
         self.cache = _to_bytes('')
     def read(self, size):
-        if self.cache:
-            if len(self.cache) >= size:
-                # Pull content from the cache
-                read = self.cache[:size]
-                self.cache = self.cache[size:]
-            else:
-                # Pull content from both the cache and the obj
-                read = self.cache + self.obj.read(size - len(self.cache))
-                self.cache = _to_bytes('')
-        else:
-            # Pull content from the obj
-            read = self.obj.read(size)
+        # Read from the cache (and the object if necessary)
+        read = self.cache[:size]
+        if len(self.cache) < size:
+            read += self.obj.read(size - len(self.cache))
+        self.cache = self.cache[size:]
 
-        # Inject the entity declarations into the cache
         if self.injected or _to_bytes('>') not in read:
             return read
+
+        # Inject the entity declarations into the cache
         entities = str()
         for k, v in htmlentitydefs.name2codepoint.items():
             entities += '<!ENTITY %s "&#%s;">' % (k, v)
