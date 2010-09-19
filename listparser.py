@@ -55,9 +55,8 @@ namespaces = {
     'http://purl.org/rss/1.0/': 'rss',
     'http://blogs.yandex.ru/schema/foaf/': 'ya',
 }
-
-def _ns(ns):
-    return dict(zip(namespaces.values(), namespaces.keys())).get(ns, None)
+# Provide a shorthand to save space in-code, e.g. _ns['rdf']
+_ns = dict(zip(namespaces.values(), namespaces.keys()))
 
 # HACK: platform.python_implementation() would be ideal here, but
 # Jython 2.5.1 doesn't have it yet, and neither do CPythons < 2.6
@@ -349,17 +348,17 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self.harvest.version = u'rdf'
 
     def _start_rss_channel(self, attrs):
-        if attrs.get((_ns('rdf'), 'about'), '').strip():
+        if attrs.get((_ns['rdf'], 'about'), '').strip():
             # We now have a feed URL, so forget about any opportunity URL
             if self.flag_opportunity:
                 self.flag_opportunity = False
                 self.agent_opps.pop()
-            self.agent_feeds.append(attrs.get((_ns('rdf'), 'about')).strip())
+            self.agent_feeds.append(attrs.get((_ns['rdf'], 'about')).strip())
 
     def _start_ya_feed(self, attrs):
-        if attrs.get((_ns('rdf'), 'resource'), '').strip():
+        if attrs.get((_ns['rdf'], 'resource'), '').strip():
             # This is a feed URL
-            self.agent_feeds.append(attrs.get((_ns('rdf'), 'resource')).strip())
+            self.agent_feeds.append(attrs.get((_ns['rdf'], 'resource')).strip())
 
     def _start_foaf_Agent(self, attrs):
         self.flag_agent = True
@@ -389,9 +388,9 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     _end_foaf_Person = _end_foaf_Agent
 
     def _start_rdfs_seeAlso(self, attrs):
-        if attrs.get((_ns('rdf'), 'resource'), '').strip():
+        if attrs.get((_ns['rdf'], 'resource'), '').strip():
             # This is a subscription list URL
-            self.agent_lists.append(attrs.get((_ns('rdf'), 'resource')).strip())
+            self.agent_lists.append(attrs.get((_ns['rdf'], 'resource')).strip())
 
     def _start_foaf_Group(self, attrs):
         self.flag_group = True
@@ -430,10 +429,10 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     _end_foaf_member_name = _end_foaf_name
 
     def _start_foaf_Document(self, attrs):
-        if attrs.get((_ns('rdf'), 'about'), '').strip():
+        if attrs.get((_ns['rdf'], 'about'), '').strip():
             # Flag this as an opportunity (but ignore if a feed URL is found)
             self.flag_opportunity = True
-            self.agent_opps.append(attrs.get((_ns('rdf'), 'about')).strip())
+            self.agent_opps.append(attrs.get((_ns['rdf'], 'about')).strip())
 
 class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):
     def http_error_301(self, req, fp, code, msg, hdrs):
