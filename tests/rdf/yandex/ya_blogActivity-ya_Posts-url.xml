@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Description: RDF | Find feed URL in ya:blogActivity > ya:Posts
+    Eval: result.bozo == 0
+    Eval: len(result.feeds) == 1
+    Eval: result.feeds[0].url == "http://domain/feed"
+    Eval: result.feeds[0].title == ""
+-->
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:foaf="http://xmlns.com/foaf/0.1/"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:ya="http://blogs.yandex.ru/schema/foaf/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+>
+
+<foaf:Person>
+    <ya:blogActivity>
+        <ya:Posts>
+            <ya:feed rdf:resource="http://domain/feed" dc:type="application/rss+xml" />
+        </ya:Posts>
+    </ya:blogActivity>
+</foaf:Person>
+
+</rdf:RDF> 

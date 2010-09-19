@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Description: RDF | Test foaf:name in foaf:knows
+    Eval: result.bozo == 0
+    Eval: result.lists[0].title == "member"
+-->
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:foaf="http://xmlns.com/foaf/0.1/"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+>
+
+<foaf:Person>
+    <foaf:name>Bogus</foaf:name>
+    <foaf:knows>
+        <foaf:Person>
+            <foaf:member_name>member</foaf:member_name>
+            <rdfs:seeAlso rdf:resource="http://member/foaf" />
+        </foaf:Person>
+    </foaf:knows>
+</foaf:Person>
+
+</rdf:RDF> 

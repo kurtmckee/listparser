@@ -53,6 +53,7 @@ namespaces = {
     'http://xmlns.com/foaf/0.1/': 'foaf',
     'http://purl.org/dc/elements/1.1/': 'dc',
     'http://purl.org/rss/1.0/': 'rss',
+    'http://blogs.yandex.ru/schema/foaf/': 'ya',
 }
 
 def _ns(ns):
@@ -130,6 +131,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self.expect = False
         self._characters = str()
         self.hierarchy = []
+        self.flag_agent = False
         self.flag_feed = False
         self.flag_opportunity = False
         self.flag_group = False
@@ -138,6 +140,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         # group_objs = [(append_to_key, obj)]
         self.group_objs = []
         self.agent_feeds = []
+        self.agent_lists = []
         self.agent_opps = []
         self.foaf_name = unicode()
 
@@ -353,20 +356,42 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
                 self.agent_opps.pop()
             self.agent_feeds.append(attrs.get((_ns('rdf'), 'about')).strip())
 
+    def _start_ya_feed(self, attrs):
+        if attrs.get((_ns('rdf'), 'resource'), '').strip():
+            # This is a feed URL
+            self.agent_feeds.append(attrs.get((_ns('rdf'), 'resource')).strip())
+
     def _start_foaf_Agent(self, attrs):
+        self.flag_agent = True
         self.flag_feed = True
     def _end_foaf_Agent(self):
+        if self.flag_agent:
+            self.flag_agent = False
         for url in self.agent_feeds:
             obj = SuperDict({'url': url, 'title': self.foaf_name})
             self.group_objs.append(('feeds', obj))
+        for url in self.agent_lists:
+            obj = SuperDict({'url': url, 'title': self.foaf_name})
+            self.group_objs.append(('lists', obj))
         for url in self.agent_opps:
             obj = SuperDict({'url': url, 'title': self.foaf_name})
             self.group_objs.append(('opportunities', obj))
         self.foaf_name = u''
         self.agent_feeds = []
+        self.agent_lists = []
         self.agent_opps = []
+        self.flag_agent = False
         self.flag_feed = False
         self.flag_opportunity = False
+
+    def _start_foaf_Person(self, attrs):
+        self.flag_feed = True
+    _end_foaf_Person = _end_foaf_Agent
+
+    def _start_rdfs_seeAlso(self, attrs):
+        if attrs.get((_ns('rdf'), 'resource'), '').strip():
+            # This is a subscription list URL
+            self.agent_lists.append(attrs.get((_ns('rdf'), 'resource')).strip())
 
     def _start_foaf_Group(self, attrs):
         self.flag_group = True
@@ -400,6 +425,9 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         elif self.flag_group and self.normchars():
             self.hierarchy.append(self.normchars())
             self.flag_group = False
+
+    _start_foaf_member_name = _expect_characters
+    _end_foaf_member_name = _end_foaf_name
 
     def _start_foaf_Document(self, attrs):
         if attrs.get((_ns('rdf'), 'about'), '').strip():
