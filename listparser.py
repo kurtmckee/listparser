@@ -132,6 +132,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self.hierarchy = []
         self.flag_agent = False
         self.flag_feed = False
+        self.flag_new_title = False
         self.flag_opportunity = False
         self.flag_group = False
         # found_urls = {url: (append_to_key, obj)}
@@ -141,7 +142,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self.agent_feeds = []
         self.agent_lists = []
         self.agent_opps = []
-        self.foaf_name = unicode()
+        self.foaf_name = []
 
     def raise_bozo(self, err):
         self.harvest.bozo = 1
@@ -360,22 +361,33 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             # This is a feed URL
             self.agent_feeds.append(attrs.get((_ns['rdf'], 'resource')).strip())
 
+    def _clean_found_objs(self):
+        if self.foaf_name:
+            title = self.foaf_name[-1]
+        else:
+            title = unicode()
+        for url in self.agent_feeds:
+            obj = SuperDict({'url': url, 'title': title})
+            self.group_objs.append(('feeds', obj))
+        for url in self.agent_lists:
+            obj = SuperDict({'url': url, 'title': title})
+            self.group_objs.append(('lists', obj))
+        for url in self.agent_opps:
+            obj = SuperDict({'url': url, 'title': title})
+            self.group_objs.append(('opportunities', obj))
+
     def _start_foaf_Agent(self, attrs):
         self.flag_agent = True
         self.flag_feed = True
+        self.flag_new_title = True
     def _end_foaf_Agent(self):
         if self.flag_agent:
             self.flag_agent = False
-        for url in self.agent_feeds:
-            obj = SuperDict({'url': url, 'title': self.foaf_name})
-            self.group_objs.append(('feeds', obj))
-        for url in self.agent_lists:
-            obj = SuperDict({'url': url, 'title': self.foaf_name})
-            self.group_objs.append(('lists', obj))
-        for url in self.agent_opps:
-            obj = SuperDict({'url': url, 'title': self.foaf_name})
-            self.group_objs.append(('opportunities', obj))
-        self.foaf_name = u''
+        # this is source of the problem with the failing test
+        # the group_objs needs to have its own hierarchy if it will work this way
+        self._clean_found_objs()
+        if self.foaf_name:
+            self.foaf_name.pop()
         self.agent_feeds = []
         self.agent_lists = []
         self.agent_opps = []
@@ -385,6 +397,8 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
 
     def _start_foaf_Person(self, attrs):
         self.flag_feed = True
+        self.flag_new_title = True
+        self._clean_found_objs()
     _end_foaf_Person = _end_foaf_Agent
 
     def _start_rdfs_seeAlso(self, attrs):
@@ -419,8 +433,9 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
 
     _start_foaf_name = _expect_characters
     def _end_foaf_name(self):
-        if self.flag_feed:
-            self.foaf_name = self.normchars()
+        if self.flag_feed and self.flag_new_title:
+            self.foaf_name.append(self.normchars())
+            self.flag_new_title = False
         elif self.flag_group and self.normchars():
             self.hierarchy.append(self.normchars())
             self.flag_group = False

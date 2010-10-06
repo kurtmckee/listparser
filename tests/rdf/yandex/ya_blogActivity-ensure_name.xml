@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Description: RDF | Ensure foaf:knows entries don't override feed name
+    Eval: result.bozo == 0
+    Eval: len(result.feeds) == 1
+    Eval: len(result.lists) == 1
+    Eval: result.feeds[0].url == "http://domain/feed"
+    Eval: result.feeds[0].title == "name"
+    Eval: result.lists[0].url == "http://friend/foaf"
+    Eval: result.lists[0].title == "friend"
+-->
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:foaf="http://xmlns.com/foaf/0.1/"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:ya="http://blogs.yandex.ru/schema/foaf/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+>
+
+<foaf:Person>
+    <foaf:name>name</foaf:name>
+    <ya:blogActivity>
+        <ya:Posts>
+            <ya:feed rdf:resource="http://domain/feed" dc:type="application/rss+xml" />
+        </ya:Posts>
+    </ya:blogActivity>
+
+    <foaf:knows>
+        <foaf:Person>
+            <foaf:name>friend</foaf:name>
+            <rdfs:seeAlso rdf:resource="http://friend/foaf" />
+        </foaf:Person>
+    </foaf:knows>
+</foaf:Person>
+
+</rdf:RDF> 
