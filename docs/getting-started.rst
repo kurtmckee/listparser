@@ -48,4 +48,4 @@ Several subscription list formats can contain not just a feed URL but the feed's
 
 When listparser encounters a homepage URL without a corresponding feed URL, it puts that information into the ``opportunities`` key. Opportunities contain the same title and URL information as feeds do, but remember that the URLs are expected to point to a homepage. It is therefore expected that feed readers using listparser will have to run feed and subscription list autodiscovery software against the list of opportunity URLs.
 
-..  seealso:: `meta <reference/meta.html>`_, `feeds <reference/feeds.html>`_, `lists <reference/lists.html>`_, `opportunities <reference/opportunities.html>`_
+..  seealso:: :doc:`reference/meta`, :doc:`reference/feeds`, :doc:`reference/lists`, :doc:`reference/opportunities`

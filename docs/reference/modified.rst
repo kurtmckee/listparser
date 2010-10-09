@@ -9,9 +9,9 @@ A string returned by the webserver representing the date and time at which the s
 
 ..  seealso::
 
-    * `modified_parsed <modified_parsed.html>`_
-    * `meta.modified <meta-modified.html>`_
-    * `HTTP Features <../http-features.html>`_
+    * :doc:`modified_parsed`
+    * :doc:`meta-modified`
+    * :doc:`../http-features`
 
 ..  rubric:: Comes from
 

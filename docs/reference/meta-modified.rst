@@ -9,8 +9,8 @@ A string representing the date and time at which the subscription list was last 
 
 ..  seealso::
 
-    * `meta.modified_parsed <meta-modified_parsed.html>`_
-    * `modified <modified.html>`_
+    * :doc:`meta-modified_parsed`
+    * :doc:`modified`
  
 ..  rubric:: Comes from
 
