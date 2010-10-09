@@ -5,8 +5,8 @@ The ``opportunities`` attribute contains a list of all of the homepage URLs in t
 
 It is expected that feed readers using listparser can choose to run feed and subscription list autodiscovery software against the list of opportunity URLs.
 
-..  toctree::
-    :glob:
-    :maxdepth: 1
+..  seealso::
 
-    opportunity-*
+    * :doc:`objects`
+    * :doc:`feeds`
+    * :doc:`lists`

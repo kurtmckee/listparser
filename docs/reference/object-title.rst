@@ -1,7 +1,7 @@
-feeds[i].title
-==============
+objects[i].title
+================
 
-The title of the feed. It is not normalized except for the stripping of whitespace.
+The title of the feed, subscription list, or opportunity object. It is not normalized except for the stripping of whitespace.
 
 ..  note::
 
@@ -27,6 +27,6 @@ The title of the feed. It is not normalized except for the stripping of whitespa
 
 ..  rubric:: Comes from
 
-*   ``/opml/body//outline[type=feed]/@text``
-*   ``/opml/body//outline[type=feed]/@title``
+*   ``/opml/body//outline/@text``
+*   ``/opml/body//outline/@title``
 *   ``/rdf:RDF//foaf:Agent/foaf:name``

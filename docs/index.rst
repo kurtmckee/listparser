@@ -21,7 +21,14 @@ Reference
 ..  toctree::
     :maxdepth: 2
 
+    reference/objects
+
+
+..  toctree::
+    :maxdepth: 2
+
     reference/parse
+
 
 ..  toctree::
     :maxdepth: 2

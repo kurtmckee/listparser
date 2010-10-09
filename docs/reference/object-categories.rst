@@ -1,7 +1,7 @@
-feeds[i].categories
-===================
+objects[i].categories
+=====================
 
-A list of all of the categories associated with the feed.
+A list of all of the categories associated with the feed, subscription list, or opportunity object.
 
 Categories are hierarchical, and are represented as lists of strings. listparser uses the hierarchical groupings in the subscription list in order to assign categories. Here is an example in OPML:
 
@@ -17,15 +17,16 @@ Categories are hierarchical, and are represented as lists of strings. listparser
 
 In this example, the category hierarchy is ``["news", "sports"]``. In the OPML format, listparser will also use the ``category`` attribute of the ``opml:outline`` element as a source of categorization information. 
 
-..  seealso:: `feeds[i].tags <feed-tags.html>`_
+..  seealso:: :doc:`object-tags`
 
 ..  rubric:: Comes from
 
-*   ``/opml/body//outline[type=feed]/@category`` [#slashes]_
-*   ``/opml/body//outline[type=feed]/ancestor::outline/@text``
-*   ``/opml/body//outline[type=feed]/ancestor::outline/@title``
+*   ``/opml/body//outline/@category`` [#slashes]_
+*   ``/opml/body//outline/ancestor::outline/@text``
+*   ``/opml/body//outline/ancestor::outline/@title``
 *   ``/gtml:GadgetTabML//gtml:Tab/@title``
 *   ``/rdf:RDF/foaf:Group/foaf:name``
+*   ``/rdf:RDF//foaf:Agent/foaf:name``
 
 ..  rubric:: Footnotes
 
