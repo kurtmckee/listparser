@@ -30,3 +30,4 @@ The title of the feed, subscription list, or opportunity object. It is not norma
 *   ``/opml/body//outline/@text``
 *   ``/opml/body//outline/@title``
 *   ``/rdf:RDF//foaf:Agent/foaf:name``
+*   ``/rdf:RDF//foaf:Agent/foaf:member_name``

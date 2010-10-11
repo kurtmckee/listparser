@@ -10,12 +10,14 @@ Due to the ubiquity of format-agnostic feed parsers, there is nothing to indicat
 *   ``/opml/body//outline/@xmlUrl``
 *   ``/gtml:GadgetTabML//iGoogle:Module[@type="RSS"]/iGoogle:ModulePrefs/@xmlUrl``
 *   ``/rdf:RDF//foaf:Agent//rss:channel/@rdf:about``
+*   ``/rdf:RDF//ya:feed/@rdf:resource``
 
 
 ..  rubric:: Subscription list URLs come from
 
 *   ``/opml/body//outline/@url``
 *   ``/opml/body//outline[type="source"]/@xmlUrl``
+*   ``/rdf:RDF//rdfs:seeAlso/@rdf:resource``
 
 
 ..  rubric:: Opportunity URLs come from
