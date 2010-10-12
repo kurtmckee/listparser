@@ -28,6 +28,7 @@ Reference
     :maxdepth: 2
 
     reference/parse
+    reference/user_agent
 
 
 ..  toctree::

@@ -13,14 +13,14 @@ To change the User-Agent for only one request, call ``parse()`` with an ``agent`
 
     >>> listparser.parse('http://localhost/list', agent='PowerfulSoftware/1.0')
 
-To configure the User-Agent for all requests you need only set ``listparser.USER_AGENT`` to the desired value. The following code will send the same User-Agent header as the code above::
+To configure the User-Agent for all requests you need only set :py:data:`USER_AGENT` to the desired value. The following code will send the same User-Agent header as the code above::
 
     >>> listparser.USER_AGENT = 'PowerfulSoftware/1.0'
     >>> listparser.parse('http://localhost/list')
 
 If listparser is being used in a larger program it may be appropriate to change the User-Agent.
 
-..  seealso:: `User agent at Wikipedia <http://en.wikipedia.org/wiki/User_agent>`_
+..  seealso:: :py:data:`USER_AGENT`, `User agent at Wikipedia <http://en.wikipedia.org/wiki/User_agent>`_
 
 
 ETag
