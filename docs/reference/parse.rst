@@ -1,7 +1,9 @@
 parse()
 =======
 
-.. py:function:: listparser.parse(obj[, agent, etag, modified])
+.. py:currentmodule:: listparser
+
+.. py:function:: parse(obj[, agent, etag, modified])
 
    Parse a subscription list and return a dictionary containing the results.
 
@@ -21,4 +23,4 @@ parse()
 
    If *obj* is a URL, the :py:obj:`agent` will identify the software making the request, :py:obj:`etag` will identify the last HTTP ETag header returned by the webserver, and :py:obj:`modified` will identify the last HTTP Last-Modified header returned by the webserver. :py:obj:`agent` and :py:obj:`etag` must be strings, while :py:obj:`modified` can be either a string or a Python :py:class:`~datetime.datetime` object.
 
-   If :py:obj:`agent` is not provided, the :py:data:`USER_AGENT` global variable will be used by default.
+   If :py:obj:`agent` is not provided, the :py:data:`~listparser.USER_AGENT` global variable will be used by default.

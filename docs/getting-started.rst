@@ -1,14 +1,14 @@
 Getting started
 ===============
 
-Because listparser is just a single file, you can copy it to a convenient directory and start the Python interpreter. listparser has a single public function, ``parse()``. ::
+Because listparser is just a single file, you can copy it to a convenient directory and start the Python interpreter. listparser has a single public function, :py:func:`~listparser.parse`. ::
 
     >>> import listparser
     >>> result = listparser.parse('http://github.com/kurtmckee/listparser/raw/master/project.opml')
 
-``parse()`` can be given a URL, an open file handle, or even an in-memory string.
+:py:func:`~listparser.parse` can be given a URL, an open file handle, or even an in-memory string.
 
-The dictionary that ``parse()`` returns will contain several important keys.
+The dictionary that :py:func:`~listparser.parse` returns will contain several important keys.
 
 
 The ``meta`` key
