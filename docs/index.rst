@@ -14,6 +14,8 @@ Contents
     getting-started
     http-features
     detection-algorithm
+    reference/objects
+
 
 Reference
 ---------
@@ -21,15 +23,8 @@ Reference
 ..  toctree::
     :maxdepth: 2
 
-    reference/objects
-
-
-..  toctree::
-    :maxdepth: 2
-
     reference/parse
     reference/user_agent
-
 
 ..  toctree::
     :maxdepth: 2

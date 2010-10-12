@@ -7,6 +7,7 @@ It is expected that feed readers using listparser can choose to run feed and sub
 
 ..  seealso::
 
-    * :doc:`objects`
-    * :doc:`feeds`
-    * :doc:`lists`
+    * :doc:`opportunities[i].categories <object-categories>`
+    * :doc:`opportunities[i].tags <object-tags>`
+    * :doc:`opportunities[i].title <object-title>`
+    * :doc:`opportunities[i].url <object-url>`

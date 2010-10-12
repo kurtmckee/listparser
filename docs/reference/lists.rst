@@ -5,6 +5,7 @@ The ``lists`` attribute contains a list of all of the subscription lists in the 
 
 ..  seealso::
 
-    * :doc:`objects`
-    * :doc:`feeds`
-    * :doc:`opportunities`
+    * :doc:`lists[i].categories <object-categories>`
+    * :doc:`lists[i].tags <object-tags>`
+    * :doc:`lists[i].title <object-title>`
+    * :doc:`lists[i].url <object-url>`
