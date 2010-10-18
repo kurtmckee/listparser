@@ -33,6 +33,27 @@ except ImportError:
     # Python 2: Use a basestring-compatible stream implementation
     from StringIO import StringIO as BytesStrIO
 
+# Account for differences between the CPythons and Jython
+# HACK: platform.python_implementation() might be ideal here, but
+# Jython 2.5.1 doesn't have it yet, and neither do CPythons < 2.6
+try:
+    from org.xml.sax import SAXParseException
+    from com.sun.org.apache.xerces.internal.impl.io import \
+            MalformedByteSequenceException
+except ImportError:
+    # This isn't Jython
+    SAXParseException = xml.sax.SAXParseException
+    MalformedByteSequenceException = IOError
+    # NONS should be used in place of None when referencing XML
+    # elements with no namespace (see Jython bug comment below)
+    NONS = None
+else:
+    # If ImportError wasn't raised, this is Jython
+    # http://bugs.jython.org/issue1375
+    # Jython throws an exception when using attrs[(None, 'attr')];
+    # use attrs[('', 'attr')] instead to get desired behavior
+    NONS = ''
+
 def _to_bytes(text):
     # Force `text` to the type expected by Python 2 and Python 3
     # Python 3 expects type(bytes)
@@ -57,26 +78,6 @@ namespaces = {
 }
 # Provide a shorthand to save space in-code, e.g. _ns['rdf']
 _ns = dict((v, k) for k, v in namespaces.iteritems())
-
-# HACK: platform.python_implementation() would be ideal here, but
-# Jython 2.5.1 doesn't have it yet, and neither do CPythons < 2.6
-jython = True
-try:
-    from org.xml.sax import SAXParseException
-    from com.sun.org.apache.xerces.internal.impl.io import \
-            MalformedByteSequenceException
-except ImportError:
-    SAXParseException = xml.sax.SAXParseException
-    MalformedByteSequenceException = IOError
-    jython = False
-
-# http://bugs.jython.org/issue1375
-# Jython throws an exception when using attrs[(None, 'attr')];
-# use attrs[('', 'attr')] instead to get desired behavior
-if jython:
-    NONS = ''
-else:
-    NONS = None
 
 def parse(parse_obj, agent=None, etag=None, modified=None, inject=False):
     guarantees = SuperDict({
