@@ -644,7 +644,7 @@ class Injector(object):
 
         # Inject the entity declarations into the cache
         entities = str()
-        for k, v in htmlentitydefs.name2codepoint.items():
+        for k, v in htmlentitydefs.name2codepoint.iteritems():
             entities += '<!ENTITY %s "&#%s;">' % (k, v)
         # The '>' is deliberately missing; it will be appended by join()
         doctype = "<!DOCTYPE anyroot [%s]" % (entities, )
