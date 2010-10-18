@@ -56,7 +56,7 @@ namespaces = {
     'http://blogs.yandex.ru/schema/foaf/': 'ya',
 }
 # Provide a shorthand to save space in-code, e.g. _ns['rdf']
-_ns = dict(zip(namespaces.values(), namespaces.keys()))
+_ns = dict((v, k) for k, v in namespaces.iteritems())
 
 # HACK: platform.python_implementation() would be ideal here, but
 # Jython 2.5.1 doesn't have it yet, and neither do CPythons < 2.6
