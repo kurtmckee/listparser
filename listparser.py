@@ -505,7 +505,7 @@ def _mkfile(obj, agent, etag, modified):
     info = SuperDict({'status': getattr(ret, 'status', 200)})
     info.href = getattr(ret, 'newurl', obj)
     info.headers = SuperDict(getattr(ret, 'headers', {}))
-    # Python 3 doesn't normalize tag names; Python 2 does
+    # Python 3 doesn't normalize header names; Python 2 does
     if info.headers.get('ETag') or info.headers.get('etag'):
         info.etag = info.headers.get('ETag') or info.headers.get('etag')
     if info.headers.get('Last-Modified') or info.headers.get('last-modified'):
