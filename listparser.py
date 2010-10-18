@@ -359,7 +359,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def _start_ya_feed(self, attrs):
         if attrs.get((_ns['rdf'], 'resource'), '').strip():
             # This is a feed URL
-            self.agent_feeds.append(attrs.get((_ns['rdf'], 'resource')).strip())
+            self.agent_feeds.append(attrs[(_ns['rdf'], 'resource')].strip())
 
     def _clean_found_objs(self):
         if self.foaf_name:
@@ -383,8 +383,6 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def _end_foaf_Agent(self):
         if self.flag_agent:
             self.flag_agent = False
-        # this is source of the problem with the failing test
-        # the group_objs needs to have its own hierarchy if it will work this way
         self._clean_found_objs()
         if self.foaf_name:
             self.foaf_name.pop()
@@ -404,7 +402,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def _start_rdfs_seeAlso(self, attrs):
         if attrs.get((_ns['rdf'], 'resource'), '').strip():
             # This is a subscription list URL
-            self.agent_lists.append(attrs.get((_ns['rdf'], 'resource')).strip())
+            self.agent_lists.append(attrs[(_ns['rdf'], 'resource')].strip())
 
     def _start_foaf_Group(self, attrs):
         self.flag_group = True
