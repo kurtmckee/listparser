@@ -1,3 +1,8 @@
+v0.14 (22 Oct 2010) "A good year"
+    * Added support for LiveJournal FOAF files
+    * Improved the documentation
+    * Improved the code quality
+
 v0.13 (1 Feb 2010) "Revelations"
     * Fixed an infinite loop bug in Injector
     * Fixed a threading-related bug in the unit tests

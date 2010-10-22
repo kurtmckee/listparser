@@ -11,8 +11,7 @@ Usage
 =====
 
 >>> import listparser
->>> result = listparser.parse( \
-... 'http://github.com/kurtmckee/listparser/raw/master/project.opml')
+>>> result = listparser.parse('project.opml')
 
 A dictionary will be returned with several keys:
 `meta`: a dictionary of information about the subscription list
@@ -28,8 +27,8 @@ Continuing the example:
 u'listparser project feeds'
 >>> len(result.feeds)
 3
->>> result.feeds[0].keys()
-['url', 'title']
+>>> result.feeds[1].url
+u'http://freshmeat.net/projects/listparser/releases.atom'
 
 More extensive documentation is available in the docs/ directory,
 or online at <http://packages.python.org/listparser/>.
