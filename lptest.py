@@ -34,20 +34,11 @@ def _to_str(obj):
         pass
     return obj
 
-def _to_bytes(reply):
-    # HACK: force the type expected by the webserver's `write()` function
-    # Python 2 expects type(basestring)
-    # Python 3 expects type(bytes)
-    try:
-        return bytes(reply, 'utf8')
-    except (TypeError, NameError):
-        return reply
-
 class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_GET(self):
         status = 200
         location = etag = modified = None
-        reply = _to_bytes('')
+        reply = listparser._to_bytes('')
         end_directives = False
         f = open(dirname(abspath(__file__)) + self.path, 'rb')
         for line in f:
@@ -188,7 +179,7 @@ class TestInjection(unittest.TestCase):
                 else:
                     idoc.close()
                     break
-            xml = _to_str(_to_bytes('').join(tmp))
+            xml = _to_str(listparser._to_bytes('').join(tmp))
             result = listparser.parse(xml)
             self.assertFalse(result.bozo)
             self.assert_(len(result.feeds) == 1)

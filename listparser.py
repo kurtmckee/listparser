@@ -23,6 +23,7 @@ import datetime
 import htmlentitydefs
 import httplib
 import re
+import sys
 import urllib2
 import xml.sax
 
@@ -55,9 +56,11 @@ else:
     NONS = ''
 
 def _to_bytes(text):
-    # Force `text` to the type expected by Python 2 and Python 3
+    # Force `text` to the type expected by different interpreters
     # Python 3 expects type(bytes)
-    # Python 2 expects type(basestring)
+    # Python 2 and IronPython expect type(basestring)
+    if 'IronPython' in sys.version:
+        return text
     try:
         return bytes(text, 'utf8')
     except (TypeError, NameError):
