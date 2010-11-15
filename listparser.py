@@ -583,7 +583,8 @@ def _rfc822(date):
     # Return the date and timestamp in UTC
     try:
         return stamp - delta
-    except OverflowError:
+    except (OverflowError, ValueError):
+        # IronPython throws ValueErrors instead of OverflowErrors
         return None
 
 def _to_rfc822(date):
