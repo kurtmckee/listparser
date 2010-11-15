@@ -90,7 +90,7 @@ class ServerThread(threading.Thread):
         self.ready = threading.Event()
     def run(self):
         server = BaseHTTPServer.HTTPServer
-        bind_to = ('', 8091)
+        bind_to = ('127.0.0.1', 8091)
         reqhandler = Handler
         httpd = server(bind_to, reqhandler)
         self.ready.set()
