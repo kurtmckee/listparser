@@ -2,7 +2,7 @@
 <!--
     Description: HTTP 301 redirect
     Status: 301
-    Location: /tests/http/destination.xml
+    Location: http://localhost:8091/tests/http/destination.xml
     Eval: result['status'] == 301
     Eval: result['href'].endswith('/tests/http/destination.xml')
     Eval: result['meta']['title'] == 'Redirection destination'

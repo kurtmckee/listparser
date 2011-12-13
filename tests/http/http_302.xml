@@ -2,7 +2,7 @@
 <!--
     Description: HTTP 302 redirect
     Status: 302
-    Location: /tests/http/destination.xml
+    Location: http://localhost:8091/tests/http/destination.xml
     Eval: result['status'] == 302
     Eval: result['href'].endswith('/tests/http/destination.xml')
     Eval: result['meta']['title'] == 'Redirection destination'

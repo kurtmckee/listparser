@@ -2,7 +2,7 @@
 <!--
     Description: HTTP 303 redirect
     Status: 303
-    Location: /tests/http/destination.xml
+    Location: http://localhost:8091/tests/http/destination.xml
     Eval: result['status'] == 303
     Eval: result['href'].endswith('/tests/http/destination.xml')
     Eval: result['meta']['title'] == 'Redirection destination'

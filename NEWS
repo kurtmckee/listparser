@@ -1,3 +1,6 @@
+In the next release:
+    * Switched to absolute URLs in the HTTP redirect tests
+
 v0.15 (15 Nov 2010) "A special day"
     * IronPython 2.6.2 is now supported!
 
