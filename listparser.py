@@ -1,5 +1,5 @@
-# listparser.py - Parse subscription lists into a consistent format.
-# Copyright (C) 2009-2010 Kurt McKee <contactme@kurtmckee.org>
+# listparser.py - Parse OPML, FOAF, and iGoogle subscription lists.
+# Copyright (C) 2009-2011 Kurt McKee <contactme@kurtmckee.org>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by

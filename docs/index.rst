@@ -3,7 +3,7 @@ Welcome to listparser's documentation!
 
 listparser is a Python library that parses subscription lists (also called reading lists) and returns all of the feeds, subscription lists, and "opportunity" URLs that it finds. It supports OPML, RDF+FOAF, and the iGoogle exported settings format.
 
-listparser has been tested and runs on Python 2.4 and up, Python 3.0 and up, Jython 2.5.1, and IronPython 2.6.2.
+listparser has been tested and runs on Python 2.4 and up, Python 3.0 and up, Jython 2.5.1 and up, and IronPython 2.6.2.
 
 Contents
 --------

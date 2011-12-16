@@ -42,7 +42,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'listparser'
-copyright = u'2009-2010 Kurt McKee'
+copyright = u'2009-2011 Kurt McKee'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
