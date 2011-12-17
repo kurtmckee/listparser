@@ -31,7 +31,7 @@ The ``feeds`` key is a list of dictionaries. The title and the URL are stored in
     ...     print "%s <%s>" % (i.title, i.url)
     ... 
     listparser blog <http://kurtmckee.livejournal.com/data/atom?tag=listparser>
-    listparser releases <http://freshmeat.net/projects/listparser/releases.atom>
+    listparser releases <http://freecode.com/projects/listparser/announcements.atom>
     listparser changelog <http://github.com/feeds/kurtmckee/commits/listparser/master>
 
 

@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 __author__ = "Kurt McKee <contactme@kurtmckee.org>"
-__url__ = "http://freshmeat.net/projects/listparser"
+__url__ = "https://github.com/kurtmckee/listparser"
 __version__ = "0.15"
 
 import copy

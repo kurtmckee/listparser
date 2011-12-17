@@ -28,7 +28,7 @@ u'listparser project feeds'
 >>> len(result.feeds)
 3
 >>> result.feeds[1].url
-u'http://freshmeat.net/projects/listparser/releases.atom'
+u'http://freecode.com/projects/listparser/announcements.atom'
 
 More extensive documentation is available in the docs/ directory,
 or online at <http://packages.python.org/listparser/>.

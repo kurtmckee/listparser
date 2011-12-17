@@ -12,7 +12,7 @@ setup(
     long_description="""listparser is a Python library that parses subscription lists (also called reading lists) and returns all of the feeds, subscription lists, and "opportunity" URLs that it finds. It supports OPML, RDF+FOAF, and the iGoogle exported settings format.""",
     author='Kurt McKee',
     author_email='contactme@kurtmckee.org',
-    url='http://freshmeat.net/projects/listparser',
+    url='https://github.com/kurtmckee/listparser',
     py_modules=['listparser'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',

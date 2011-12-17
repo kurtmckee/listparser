@@ -10,7 +10,7 @@
         <outline type="rss" text="listparser blog"
             xmlUrl="http://kurtmckee.livejournal.com/data/atom?tag=listparser" />
         <outline type="rss" text="listparser releases"
-            xmlUrl="http://freshmeat.net/projects/listparser/releases.atom" />
+            xmlUrl="http://freecode.com/projects/listparser/announcements.atom" />
         <outline type="rss" text="listparser changelog"
             xmlUrl="http://github.com/feeds/kurtmckee/commits/listparser/master" />
     </body>
