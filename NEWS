@@ -1,4 +1,4 @@
-In the next release:
+v0.16 (17 Dec 2011) "Refresh"
     * Python 3.2 is now supported!
     * Made setup.py auto-convert listparser using 2to3 if necessary
     * Switched to absolute URLs in the HTTP redirect tests

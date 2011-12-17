@@ -16,7 +16,7 @@
 
 __author__ = "Kurt McKee <contactme@kurtmckee.org>"
 __url__ = "https://github.com/kurtmckee/listparser"
-__version__ = "0.15"
+__version__ = "0.16"
 
 import copy
 import datetime
