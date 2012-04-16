@@ -65,15 +65,6 @@ except ImportError:
     # This isn't Jython
     SAXParseException = xml.sax.SAXParseException
     MalformedByteSequenceException = IOError
-    # NONS should be used in place of None when referencing XML
-    # elements with no namespace (see Jython bug comment below)
-    NONS = None
-else:
-    # If ImportError wasn't raised, this is Jython
-    # http://bugs.jython.org/issue1375
-    # Jython throws an exception when using attrs[(None, 'attr')];
-    # use attrs[('', 'attr')] instead to get desired behavior
-    NONS = ''
 
 def _to_bytes(text):
     # Force `text` to the type expected by different interpreters
@@ -224,18 +215,18 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
 
     def _start_opml_opml(self, attrs):
         self.harvest.version = 'opml'
-        if attrs.get((NONS, 'version')) in ("1.0", "1.1"):
+        if attrs.get((None, 'version')) in ("1.0", "1.1"):
             self.harvest.version = 'opml1'
-        elif attrs.get((NONS, 'version')) == "2.0":
+        elif attrs.get((None, 'version')) == "2.0":
             self.harvest.version = 'opml2'
 
     def _start_opml_outline(self, attrs):
         url = None
         # Find an appropriate title in @text or @title (else empty)
-        if attrs.get((NONS, 'text'), '').strip():
-            title = attrs[(NONS, 'text')].strip()
+        if attrs.get((None, 'text'), '').strip():
+            title = attrs[(None, 'text')].strip()
         else:
-            title = attrs.get((NONS, 'title'), '').strip()
+            title = attrs.get((None, 'title'), '').strip()
 
         # Search for the URL regardless of xmlUrl's case
         for k, v in attrs.items():
@@ -246,13 +237,13 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         if url is not None:
             # It's a feed
             append_to = 'feeds'
-            if attrs.get((NONS, 'type'), '').strip().lower() == 'source':
+            if attrs.get((None, 'type'), '').strip().lower() == 'source':
                 # Actually, it's a subscription list!
                 append_to = 'lists'
-        elif attrs.get((NONS, 'type'), '').lower() in ('link', 'include'):
+        elif attrs.get((None, 'type'), '').lower() in ('link', 'include'):
             # It's a subscription list
             append_to = 'lists'
-            url = attrs.get((NONS, 'url'), '').strip()
+            url = attrs.get((None, 'url'), '').strip()
         elif title:
             # Assume that this is a grouping node
             self.hierarchy.append(title)
@@ -277,8 +268,8 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
 
         # Handle categories and tags
         obj.setdefault('categories', [])
-        if (NONS, 'category') in attrs.keys():
-            for i in attrs[(NONS, 'category')].split(','):
+        if (None, 'category') in attrs.keys():
+            for i in attrs[(None, 'category')].split(','):
                 tmp = [j.strip() for j in i.split('/') if j.strip()]
                 if tmp and tmp not in obj.categories:
                     obj.categories.append(tmp)
@@ -348,21 +339,21 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         self.harvest.version = 'igoogle'
 
     def _start_gtml_Tab(self, attrs):
-        if attrs.get((NONS, 'title'), '').strip():
-            self.hierarchy.append(attrs[(NONS, 'title')].strip())
+        if attrs.get((None, 'title'), '').strip():
+            self.hierarchy.append(attrs[(None, 'title')].strip())
     def _end_gtml_Tab(self):
         if self.hierarchy:
             self.hierarchy.pop()
 
     def _start_iGoogle_Module(self, attrs):
-        if attrs.get((NONS, 'type'), '').strip().lower() == 'rss':
+        if attrs.get((None, 'type'), '').strip().lower() == 'rss':
             self.flag_feed = True
     def _end_iGoogle_Module(self):
         self.flag_feed = False
 
     def _start_iGoogle_ModulePrefs(self, attrs):
-        if self.flag_feed and attrs.get((NONS, 'xmlUrl'), '').strip():
-            obj = SuperDict({'url': attrs[(NONS, 'xmlUrl')].strip()})
+        if self.flag_feed and attrs.get((None, 'xmlUrl'), '').strip():
+            obj = SuperDict({'url': attrs[(None, 'xmlUrl')].strip()})
             obj.title = ''
             if self.hierarchy:
                 obj.categories = [copy.copy(self.hierarchy)]
