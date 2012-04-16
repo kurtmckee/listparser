@@ -20,12 +20,32 @@ __version__ = "0.16"
 
 import copy
 import datetime
-import htmlentitydefs
-import httplib
 import re
 import sys
-import urllib2
 import xml.sax
+
+try:
+    import htmlentitydefs
+except ImportError:
+    import html.entities as htmlentitydefs
+
+try:
+    import httplib
+    class http(object):
+        client = httplib
+except ImportError:
+    import http.client
+
+try:
+    import urllib2
+    class urllib(object):
+        request = urllib2
+        error = urllib2
+        parse = urllib2
+except ImportError:
+    import urllib.error
+    import urllib.parse
+    import urllib.request
 
 try:
     # Python 3: Use a bytes-compatible stream implementation
@@ -80,7 +100,7 @@ namespaces = {
     'http://blogs.yandex.ru/schema/foaf/': 'ya',
 }
 # Provide a shorthand to save space in-code, e.g. _ns['rdf']
-_ns = dict((v, k) for k, v in namespaces.iteritems())
+_ns = dict((v, k) for k, v in namespaces.items())
 
 def parse(parse_obj, agent=None, etag=None, modified=None, inject=False):
     guarantees = SuperDict({
@@ -89,7 +109,7 @@ def parse(parse_obj, agent=None, etag=None, modified=None, inject=False):
         'lists': [],
         'opportunities': [],
         'meta': SuperDict(),
-        'version': u'',
+        'version': '',
     })
     fileobj, info = _mkfile(parse_obj, (agent or USER_AGENT), etag, modified)
     guarantees.update(info)
@@ -108,12 +128,13 @@ def parse(parse_obj, agent=None, etag=None, modified=None, inject=False):
         parser.parse(fileobj)
     except (SAXParseException, MalformedByteSequenceException,
             SystemError,
-            UnicodeDecodeError), err:
+            UnicodeDecodeError):
         # Jython propagates exceptions past the ErrorHandler;
         # The pyexpat module for IronPython throws a SystemError
         # instead of a SaxParseException or something more sensible;
         # Python 3 chokes if a file not opened in binary mode
         # contains non-Unicode byte sequences
+        err = sys.exc_info()[1]
         handler.harvest.bozo = 1
         handler.harvest.bozo_exception = err
     fileobj.close()
@@ -153,7 +174,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
 
     def raise_bozo(self, err):
         self.harvest.bozo = 1
-        if isinstance(err, basestring):
+        if isinstance(err, str):
             self.harvest.bozo_exception = ListError(err)
         else:
             self.harvest.bozo_exception = err
@@ -202,11 +223,11 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     #--------------
 
     def _start_opml_opml(self, attrs):
-        self.harvest.version = u'opml'
+        self.harvest.version = 'opml'
         if attrs.get((NONS, 'version')) in ("1.0", "1.1"):
-            self.harvest.version = u'opml1'
+            self.harvest.version = 'opml1'
         elif attrs.get((NONS, 'version')) == "2.0":
-            self.harvest.version = u'opml2'
+            self.harvest.version = 'opml2'
 
     def _start_opml_outline(self, attrs):
         url = None
@@ -214,7 +235,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         if attrs.get((NONS, 'text'), '').strip():
             title = attrs[(NONS, 'text')].strip()
         else:
-            title = attrs.get((NONS, 'title'), u'').strip()
+            title = attrs.get((NONS, 'title'), '').strip()
 
         # Search for the URL regardless of xmlUrl's case
         for k, v in attrs.items():
@@ -231,7 +252,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         elif attrs.get((NONS, 'type'), '').lower() in ('link', 'include'):
             # It's a subscription list
             append_to = 'lists'
-            url = attrs.get((NONS, 'url'), u'').strip()
+            url = attrs.get((NONS, 'url'), '').strip()
         elif title:
             # Assume that this is a grouping node
             self.hierarchy.append(title)
@@ -256,7 +277,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
 
         # Handle categories and tags
         obj.setdefault('categories', [])
-        if attrs.has_key((NONS, 'category')):
+        if (NONS, 'category') in attrs.keys():
             for i in attrs[(NONS, 'category')].split(','):
                 tmp = [j.strip() for j in i.split('/') if j.strip()]
                 if tmp and tmp not in obj.categories:
@@ -324,7 +345,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     #-----------------------------
 
     def _start_gtml_GadgetTabML(self, attrs):
-        self.harvest.version = u'igoogle'
+        self.harvest.version = 'igoogle'
 
     def _start_gtml_Tab(self, attrs):
         if attrs.get((NONS, 'title'), '').strip():
@@ -342,7 +363,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     def _start_iGoogle_ModulePrefs(self, attrs):
         if self.flag_feed and attrs.get((NONS, 'xmlUrl'), '').strip():
             obj = SuperDict({'url': attrs[(NONS, 'xmlUrl')].strip()})
-            obj.title = u''
+            obj.title = ''
             if self.hierarchy:
                 obj.categories = [copy.copy(self.hierarchy)]
             if len(self.hierarchy) == 1:
@@ -353,7 +374,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
     #------------------
 
     def _start_rdf_RDF(self, attrs):
-        self.harvest.version = u'rdf'
+        self.harvest.version = 'rdf'
 
     def _start_rss_channel(self, attrs):
         if attrs.get((_ns['rdf'], 'about'), '').strip():
@@ -372,7 +393,7 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         if self.foaf_name:
             title = self.foaf_name[-1]
         else:
-            title = unicode()
+            title = str()
         for url in self.agent_feeds:
             obj = SuperDict({'url': url, 'title': title})
             self.group_objs.append(('feeds', obj))
@@ -454,9 +475,9 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
             self.flag_opportunity = True
             self.agent_opps.append(attrs.get((_ns['rdf'], 'about')).strip())
 
-class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):
+class HTTPRedirectHandler(urllib.request.HTTPRedirectHandler):
     def http_error_301(self, req, fp, code, msg, hdrs):
-        result = urllib2.HTTPRedirectHandler.http_error_301(self, req, fp,
+        result = urllib.request.HTTPRedirectHandler.http_error_301(self, req, fp,
                                                             code, msg, hdrs)
         result.status = code
         result.newurl = result.geturl()
@@ -466,7 +487,7 @@ class HTTPRedirectHandler(urllib2.HTTPRedirectHandler):
     # won't affect anything
     http_error_302 = http_error_303 = http_error_307 = http_error_301
 
-class HTTPErrorHandler(urllib2.HTTPDefaultErrorHandler):
+class HTTPErrorHandler(urllib.request.HTTPDefaultErrorHandler):
     def http_error_default(self, req, fp, code, msg, hdrs):
         # The default implementation just raises HTTPError.
         # Forget that.
@@ -477,7 +498,7 @@ def _mkfile(obj, agent, etag, modified):
     if hasattr(obj, 'read') and hasattr(obj, 'close'):
         # It's file-like
         return obj, SuperDict()
-    elif not isinstance(obj, basestring):
+    elif not isinstance(obj, str):
         # This isn't a known-parsable object
         err = ListError('parse() called with unparsable object')
         return None, SuperDict({'bozo': 1, 'bozo_exception': err})
@@ -489,24 +510,26 @@ def _mkfile(obj, agent, etag, modified):
         # Try dealing with it as a file
         try:
             return open(obj, 'rb'), SuperDict()
-        except IOError, err:
+        except IOError:
+            err = sys.exc_info()[1]
             return None, SuperDict({'bozo': 1, 'bozo_exception': err})
     # It's a URL
     headers = {}
-    if isinstance(agent, basestring):
+    if isinstance(agent, str):
         headers['User-Agent'] = agent
-    if isinstance(etag, basestring):
+    if isinstance(etag, str):
         headers['If-None-Match'] = etag
-    if isinstance(modified, basestring):
+    if isinstance(modified, str):
         headers['If-Modified-Since'] = modified
     elif isinstance(modified, datetime.datetime):
         # It is assumed that `modified` is in UTC time
         headers['If-Modified-Since'] = _to_rfc822(modified)
-    request = urllib2.Request(obj, headers=headers)
-    opener = urllib2.build_opener(HTTPRedirectHandler, HTTPErrorHandler)
+    request = urllib.request.Request(obj, headers=headers)
+    opener = urllib.request.build_opener(HTTPRedirectHandler, HTTPErrorHandler)
     try:
         ret = opener.open(request)
-    except (urllib2.URLError, httplib.HTTPException), err:
+    except (urllib.error.URLError, http.client.HTTPException):
+        err = sys.exc_info()[1]
         return None, SuperDict({'bozo': 1, 'bozo_exception': err})
 
     info = SuperDict({'status': getattr(ret, 'status', 200)})
@@ -650,7 +673,7 @@ class Injector(object):
 
         # Inject the entity declarations into the cache
         entities = str()
-        for k, v in htmlentitydefs.name2codepoint.iteritems():
+        for k, v in htmlentitydefs.name2codepoint.items():
             entities += '<!ENTITY %s "&#%s;">' % (k, v)
         # The '>' is deliberately missing; it will be appended by join()
         doctype = "<!DOCTYPE anyroot [%s]" % (entities, )

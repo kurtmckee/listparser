@@ -1,9 +1,4 @@
 from setuptools import setup
-import sys
-
-extra = {}
-if sys.version_info >= (3, ):
-    extra['use_2to3'] = True
 
 setup(
     name='listparser',
@@ -31,6 +26,5 @@ setup(
         'Programming Language :: Python :: 3.2',
         'Topic :: Software Development :: Libraries',
         'Topic :: Text Processing :: Markup :: XML',
-    ],
-    **extra
+    ]
 )

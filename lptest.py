@@ -20,19 +20,54 @@ from os.path import abspath, dirname, join, splitext
 import threading
 import unittest
 import sys
-import BaseHTTPServer
-import SimpleHTTPServer
-import StringIO
 
 import listparser
 
-def _to_str(obj):
-    try:
-        if isinstance(obj, bytes) and bytes is not str:
-            return obj.decode('utf8')
-    except NameError:
-        pass
-    return obj
+try:
+    import BaseHTTPServer
+    import SimpleHTTPServer
+except ImportError:
+    import http.server
+    BaseHTTPServer = http.server
+    SimpleHTTPServer = http.server
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
+try:
+    if bytes is str:
+        # bytes is an alias for str in Python 2.6 and 2.7
+        raise NameError
+except NameError:
+    # Python 2
+    def _to_unicode(obj):
+        """_to_unicode(str or unicode) -> unicode"""
+        if isinstance(obj, str):
+            obj.decode('utf-8')
+        return obj
+else:
+    # Python 3
+    def _to_unicode(obj):
+        """_to_unicode(bytes or str) -> str"""
+        if isinstance(obj, bytes):
+            return obj.decode('utf-8')
+        return obj
+
+try:
+    unicode
+except NameError:
+    # Python 3
+    def _to_str(obj):
+        return obj
+else:
+    # Python 2
+    def _to_str(obj):
+        """_to_str(unicode or str) -> str (UTF-8 encoded)"""
+        if isinstance(obj, unicode):
+            return obj.encode('utf-8')
+        return obj
 
 class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -85,7 +120,7 @@ class ServerThread(threading.Thread):
         reqhandler = Handler
         httpd = server(bind_to, reqhandler)
         self.ready.set()
-        for i in xrange(self.numtests):
+        for i in range(self.numtests):
             httpd.handle_request()
 
 class TestCases(unittest.TestCase):
@@ -149,7 +184,7 @@ class TestMkfile(unittest.TestCase):
         return fn
     doc = """<?xml version="1.0"?><opml />"""
     testStringInput = _good_test(doc)
-    testFileishInput = _good_test(StringIO.StringIO(doc))
+    testFileishInput = _good_test(StringIO(_to_str(doc)))
 
     testfile = os.path.join('tests', 'filename.xml')
     testRelativeFilename = _good_test(testfile)
@@ -179,11 +214,11 @@ class TestInjection(unittest.TestCase):
                 else:
                     idoc.close()
                     break
-            xml = _to_str(listparser._to_bytes('').join(tmp))
+            xml = _to_unicode(listparser._to_bytes('').join(tmp))
             result = listparser.parse(xml)
             self.assertFalse(result.bozo)
-            self.assert_(len(result.feeds) == 1)
-            self.assert_(result.feeds[0].title == u'\u00e1')
+            self.assertEqual(len(result.feeds), 1)
+            self.assertEqual(ord(result.feeds[0].title), 225) # \u00e1
         return fn
     testRead1by1 = _read_size(1)
     testReadChunks = _read_size(20)
@@ -307,7 +342,7 @@ for testfile in files:
         if line.lstrip().startswith('Eval:'):
             evals.append(line.split(': ', 1)[1].strip())
         elif ': ' in line:
-            info.update((map(unicode.strip, line.split(': ', 1)),))
+            info.update((map(str.strip, _to_str(line).split(': ', 1)),))
     openfile.close()
     description = info.get('Description', '')
     etag = info.get('ETag', None)
