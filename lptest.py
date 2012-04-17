@@ -231,6 +231,9 @@ class TestRFC822(unittest.TestCase):
         self.assertEqual(dt.hour, 11)
         self.assertEqual(dt.minute, 47)
         self.assertEqual(dt.second, 32)
+    def testSingleDigitDay(self):
+        dt = listparser._rfc822('Thu,  5 Apr 2012 10:00:00 GMT')
+        self.assertEqual(dt.day, 5)
     def testSecondMissing(self):
         dt = listparser._rfc822('Sun, 21 Jun 2009 12:00 GMT')
         self.assertEqual(dt.second, 0)

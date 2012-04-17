@@ -547,7 +547,7 @@ def _rfc822(date):
 
     month_ = "(?P<month>%s)" % ('|'.join(months))
     year_ = "(?P<year>(?:\d{2})?\d{2})"
-    day_ = "(?P<day>\d{2})"
+    day_ = "(?P<day> *\d{1,2})"
     date_ = "%s %s %s" % (day_, month_, year_)
     
     hour_ = "(?P<hour>\d{2}):(?P<minute>\d{2})(?::(?P<second>\d{2}))?"
