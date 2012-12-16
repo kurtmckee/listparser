@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='listparser',
-    version='0.16',
+    version='0.17',
     description='Parse OPML, FOAF, and iGoogle subscription lists.',
     long_description="""listparser is a Python library that parses subscription lists (also called reading lists) and returns all of the feeds, subscription lists, and "opportunity" URLs that it finds. It supports OPML, RDF+FOAF, and the iGoogle exported settings format.""",
     author='Kurt McKee',
