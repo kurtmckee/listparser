@@ -1,4 +1,7 @@
 Coming in the next release
+    * Python 3.3 is now tested and supported!
+    * PyPy is now tested and supported!
+    * Jython 2.5.2 and 2.5.3 are now tested and supported!
     * Python 2 and 3 are now supported without 2to3 conversion
     * Remove the hack to work around Jython bug 1375
     * Support single-digit days in RFC822 dates
