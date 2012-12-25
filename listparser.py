@@ -538,66 +538,103 @@ def _mkfile(obj, agent, etag, modified):
 
 
 def _rfc822(date):
-    """Parse RFC 822 dates and times, with one minor
-    difference: years may be 4DIGIT or 2DIGIT.
-    http://tools.ietf.org/html/rfc822#section-5"""
-    months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun',
-              'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
-    daynames = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+    """Parse RFC 822 dates and times
+    http://tools.ietf.org/html/rfc822#section-5
 
-    month_ = "(?P<month>%s)" % ('|'.join(months))
-    year_ = "(?P<year>(?:\d{2})?\d{2})"
-    day_ = "(?P<day> *\d{1,2})"
-    date_ = "%s %s %s" % (day_, month_, year_)
-    
-    hour_ = "(?P<hour>\d{2}):(?P<minute>\d{2})(?::(?P<second>\d{2}))?"
-    tz_ = "(?P<tz>ut|gmt|[ecmp][sd]t|[zamny]|[+-]\d{4})"
-    time_ = "%s %s" % (hour_, tz_)
+    There are some formatting differences that are accounted for:
+    1. Years may be two or four digits.
+    2. The month and day can be swapped.
+    3. Additional timezone names are supported.
+    4. A default time and timezone are assumed if only a date is present.
+    5. 
+    """
+    daynames = set(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'])
+    months = {
+        'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
+        'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,
+    }
+    timezonenames = {
+        'ut': 0, 'gmt': 0, 'z': 0,
+        'adt': -3, 'ast': -4, 'at': -4,
+        'edt': -4, 'est': -5, 'et': -5,
+        'cdt': -5, 'cst': -6, 'ct': -6,
+        'mdt': -6, 'mst': -7, 'mt': -7,
+        'pdt': -7, 'pst': -8, 'pt': -8,
+        'a': -1, 'n': 1,
+        'm': -12, 'y': 12,
+    }
 
-    dayname_ = "(?P<dayname>%s)" % ('|'.join(daynames))
-    dt_ = "(?:%s, )?%s %s" % (dayname_, date_, time_)
-
-    try:
-        m = re.match(dt_, date.lower()).groupdict(0)
-    except AttributeError:
+    parts = date.lower().split()
+    if len(parts) < 5:
+        # Assume that the time and timezone are missing
+        parts.extend(('00:00:00', '0000'))
+    # Remove the day name
+    if parts[0][:3] in daynames:
+        parts = parts[1:]
+    if len(parts) < 5:
+        # If there are still fewer than five parts, there's not enough
+        # information to interpret this
         return None
-
-    # Calculate a date and timestamp
-    for k in ('year', 'day', 'hour', 'minute', 'second'):
-        m[k] = int(m[k])
-    m['month'] = months.index(m['month']) + 1
-    # If the year is 2 digits, assume everything in the 90's is the 1990's
-    if m['year'] < 100:
-        m['year'] += (1900, 2000)[m['year'] < 90]
     try:
-        stamp = datetime.datetime(*[m[i] for i in 
-                    ('year', 'month', 'day', 'hour', 'minute', 'second')])
+        day = int(parts[0])
+    except ValueError:
+        # Check if the day and month are swapped
+        if months.get(parts[0][:3]):
+            try:
+                day = int(parts[1])
+            except ValueError:
+                return None
+            else:
+                parts[1] = parts[0]
+        else:
+            return None
+    month = months.get(parts[1][:3])
+    if not month:
+        return None
+    try:
+        year = int(parts[2])
     except ValueError:
         return None
-
-    # Use the timezone information to calculate the difference between
-    # the given date and timestamp and Universal Coordinated Time
-    if m['tz'].startswith('+'):
-        tzhour = int(m['tz'][1:3])
-        tzmin = int(m['tz'][3:])
-    elif m['tz'].startswith('-'):
-        tzhour = int(m['tz'][1:3]) * -1
-        tzmin = int(m['tz'][3:]) * -1
+    # Normalize two-digit years:
+    # Anything in the 90's is interpreted as 1990 and on
+    # Anything 89 or less is interpreted as 2089 or before
+    if len(parts[2]) <= 2:
+        year += (1900, 2000)[year < 90]
+    timeparts = parts[3].split(':')
+    timeparts = timeparts + ([0] * (3 - len(timeparts)))
+    try:
+        (hour, minute, second) = map(int, timeparts)
+    except ValueError:
+        return None
+    tzhour = 0
+    tzmin = 0
+    # Strip 'Etc/' from the timezone
+    if parts[4].startswith('etc/'):
+        parts[4] = parts[4][4:]
+    # Normalize timezones that start with 'gmt':
+    # GMT-05:00 => -0500
+    # GMT => GMT
+    if parts[4].startswith('gmt'):
+        parts[4] = ''.join(parts[4][3:].split(':')) or 'gmt'
+    # Handle timezones like '-0500', '+0500', and 'EST'
+    if parts[4][0] in ('-', '+'):
+        try:
+            tzhour = int(parts[4][1:3])
+            tzmin = int(parts[4][3:])
+        except ValueError:
+            return None
+        if parts[4].startswith('-'):
+            tzhour = tzhour * -1
+            tzmin = tzmin * -1
     else:
-        tzinfo = {
-                    'ut': 0, 'gmt': 0, 'z': 0,
-                    'edt': -4, 'est': -5,
-                    'cdt': -5, 'cst': -6,
-                    'mdt': -6, 'mst': -7,
-                    'pdt': -7, 'pst': -8,
-                    'a': -1, 'n': 1,
-                    'm': -12, 'y': 12,
-                 }
-        tzhour = tzinfo[m['tz']]
-        tzmin = 0
+        tzhour = timezonenames.get(parts[4], 0)
+    # Create the datetime object and timezone delta objects
+    try:
+        stamp = datetime.datetime(year, month, day, hour, minute, second)
+    except ValueError:
+        return None
     delta = datetime.timedelta(0, 0, 0, 0, tzmin, tzhour)
-
-    # Return the date and timestamp in UTC
+    # Return the date and timestamp in a UTC 9-tuple
     try:
         return stamp - delta
     except (OverflowError, ValueError):

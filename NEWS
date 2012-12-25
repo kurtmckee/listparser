@@ -1,3 +1,6 @@
+coming in the next release:
+    * Replace the regex RFC 822 date parser with procedural code
+
 v0.17 (16 Dec 2012) "Territory expansion"
     * Python 3.3 is now tested and supported!
     * PyPy is now tested and supported!

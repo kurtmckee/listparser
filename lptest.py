@@ -227,26 +227,40 @@ class TestRFC822(unittest.TestCase):
     def testGeneral(self):
         dt = listparser._rfc822('Sun, 14 Jun 2009 11:47:32 GMT')
         self.assertEqual(dt.day, 14)
+        self.assertEqual(dt.month, 6)
         self.assertEqual(dt.year, 2009)
         self.assertEqual(dt.hour, 11)
         self.assertEqual(dt.minute, 47)
         self.assertEqual(dt.second, 32)
+    def testSwappedMonthAndDay(self):
+        dt = listparser._rfc822('Sun, Dec 16 2012 11:15:01 GMT')
+        self.assertEqual(dt.day, 16)
+        self.assertEqual(dt.month, 12)
+        self.assertEqual(dt.year, 2012)
+        self.assertEqual(dt.hour, 11)
+        self.assertEqual(dt.minute, 15)
+        self.assertEqual(dt.second, 1)
+    def testMissingTimeAndTimezone(self):
+        dt = listparser._rfc822('Sun, Dec 16 2012')
+        self.assertEqual(dt.day, 16)
+        self.assertEqual(dt.month, 12)
+        self.assertEqual(dt.year, 2012)
+        self.assertEqual(dt.hour, 0)
+        self.assertEqual(dt.minute, 0)
+        self.assertEqual(dt.second, 0)
     def testSingleDigitDay(self):
         dt = listparser._rfc822('Thu,  5 Apr 2012 10:00:00 GMT')
         self.assertEqual(dt.day, 5)
     def testSecondMissing(self):
         dt = listparser._rfc822('Sun, 21 Jun 2009 12:00 GMT')
         self.assertEqual(dt.second, 0)
-    def testInvalidDateTime(self):
-        dt = listparser._rfc822('Earlier today...wait, no, yesterday')
-        self.assert_(dt is None)
 
-    def _month_test(s, m):
+    def _month_test(s, month):
         # Take an RFC822 datetime string and a month integer (1-12) and
         # return a TestCase function that tests that datetime.month == m
         def fn(self):
             dt = listparser._rfc822(s)
-            self.assertEqual(dt.month, m)
+            self.assertEqual(dt.month, month)
         return fn
     testMonth01 = _month_test('21 Jan 2009 12:00:00 GMT', 1)
     testMonth02 = _month_test('21 Feb 2009 12:00:00 GMT', 2)
@@ -261,15 +275,15 @@ class TestRFC822(unittest.TestCase):
     testMonth11 = _month_test('21 Nov 2009 12:00:00 GMT', 11)
     testMonth12 = _month_test('21 Dec 2009 12:00:00 GMT', 12)
 
-    def _tz_test(s, h, m=15, d=22):
+    def _tz_test(s, hour, minute=15, day=22):
         # Take an RFC822 datetime string, and hour, minute, and day
         # integers, and return a TestCase function that tests that:
-        # dt.hour == h, dt.minute == m, dt.day == d
+        # dt.hour == hour, dt.minute == minute, dt.day == day
         def fn(self):
             dt = listparser._rfc822(s)
-            self.assertEqual(dt.hour, h)
-            self.assertEqual(dt.minute, m)
-            self.assertEqual(dt.day, d)
+            self.assertEqual(dt.hour, hour)
+            self.assertEqual(dt.minute, minute)
+            self.assertEqual(dt.day, day)
         return fn
     testTZ_Z = _tz_test('Mon, 22 Jun 2009 13:15:17 Z', 13)
     testTZ_UT = _tz_test('Mon, 22 Jun 2009 13:15:17 UT', 13)
@@ -284,40 +298,46 @@ class TestRFC822(unittest.TestCase):
     testTZ_PST = _tz_test('Mon, 22 Jun 2009 13:15:17 PST', 21)
     testTZ_A = _tz_test('Mon, 22 Jun 2009 13:15:17 A', 14)
     testTZ_N = _tz_test('Mon, 22 Jun 2009 13:15:17 N', 12)
-    testTZ_M = _tz_test('Mon, 22 Jun 2009 13:15:17 M', 1, d=23)
-    testTZ_Y = _tz_test('Mon, 22 Jun 2009 13:15:17 Y', 1, d=22)
-    testTZ_plus = _tz_test('Mon, 22 Jun 2009 13:15:17 -0430', 17, m=45)
-    testTZ_minus = _tz_test('Mon, 22 Jun 2009 13:15:17 +0545', 7, m=30)
+    testTZ_M = _tz_test('Mon, 22 Jun 2009 13:15:17 M', 1, day=23)
+    testTZ_Y = _tz_test('Mon, 22 Jun 2009 13:15:17 Y', 1, day=22)
+    testTZ_plus = _tz_test('Mon, 22 Jun 2009 13:15:17 -0430', 17, minute=45)
+    testTZ_minus = _tz_test('Mon, 22 Jun 2009 13:15:17 +0545', 7, minute=30)
+    testTZ_ETC_GMT = _tz_test('Mon, 22 Jun 2009 13:15:17 Etc/GMT', 13)
 
-    def _year2digit_test(s, y):
+    def _year2digit_test(s, year):
         # Take an RFC822 datetime string and a year and,
         # return a TestCase that tests that dt.year == y
         def fn(self):
             dt = listparser._rfc822(s)
-            self.assertEqual(dt.year, y)
+            self.assertEqual(dt.year, year)
         return fn
     testYear2Digit00 = _year2digit_test('Wed, 21 Jun 00 12:00:00 GMT', 2000)
     testYear2Digit89 = _year2digit_test('Wed, 21 Jun 89 12:00:00 GMT', 2089)
     testYear2Digit90 = _year2digit_test('Thu, 21 Jun 90 12:00:00 GMT', 1990)
     testYear2Digit99 = _year2digit_test('Mon, 21 Jun 99 12:00:00 GMT', 1999)
 
-    def _range_test(s):
+    def _invalid_date_test(s):
         # Test extreme date and time ranges
         def fn(self):
             dt = listparser._rfc822(s)
-            self.assert_(dt is None)
+            self.assertEqual(dt, None)
         return fn
-    testRangeDayHigh = _range_test('Sun, 99 Jun 2009 12:00:00 GMT')
-    testRangeDayLow = _range_test('Sun, 00 Jun 2009 12:00:00 GMT')
-    testRangeHour = _range_test('Sun, 01 Jun 2009 99:00:00 GMT')
-    testRangeMinute = _range_test('Sun, 01 Jun 2009 00:99:00 GMT')
-    testRangeSecond = _range_test('Sun, 01 Jun 2009 00:00:99 GMT')
-    testRangeYearHigh = _range_test('Sun, 31 Dec 9999 23:59:59 -9999')
-
-    def testRangeYearLow(self):
-        dt = listparser._rfc822('Sun, 01 Jan 0000 00:00:00 +9999')
-        # This works only because 0 is interpreted as the year 2000
-        self.assert_(isinstance(dt, datetime.datetime))
+    testRangeDayHigh = _invalid_date_test('Sun, 99 Jun 2009 12:00:00 GMT')
+    testRangeDayLow = _invalid_date_test('Sun, 00 Jun 2009 12:00:00 GMT')
+    testRangeHour = _invalid_date_test('Sun, 01 Jun 2009 99:00:00 GMT')
+    testRangeMinute = _invalid_date_test('Sun, 01 Jun 2009 00:99:00 GMT')
+    testRangeSecond = _invalid_date_test('Sun, 01 Jun 2009 00:00:99 GMT')
+    testRangeYearHigh = _invalid_date_test('Sun, 31 Dec 9999 23:59:59 -9999')
+    testRangeYearLow = _invalid_date_test('Sun, 01 Jan 0000 00:00:00 +9999')
+    testTooFewParts = _invalid_date_test('yesterday')
+    testTooManyTimeParts = _invalid_date_test('Sun, 16 Dec 2012 1:2:3:4 GMT')
+    testBadMonthName = _invalid_date_test('Sun, 16 zzz 2012 11:47:32 GMT')
+    testBadMonthDaySwap = _invalid_date_test('Sun, Dec x 2012 11:47:32 GMT')
+    testBadYear = _invalid_date_test('Sun, 16 Dec zz 11:47:32 GMT')
+    testBadPosTZHour = _invalid_date_test('Sun, 16 Dec 2012 11:47:32 +zz:00')
+    testBadPosTZMinute = _invalid_date_test('Sun, 16 Dec 2012 11:47:32 +00:zz')
+    testBadNegTZHour = _invalid_date_test('Sun, 16 Dec 2012 11:47:32 -zz:00')
+    testBadNegTZMinute = _invalid_date_test('Sun, 16 Dec 2012 11:47:32 -00:zz')
 
 def make_testcase(evals, testfile, etag, modified):
     # HACK: Only necessary in order to ensure that `evals` is evaluated
