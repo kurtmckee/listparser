@@ -617,7 +617,7 @@ def _rfc822(date):
     if parts[4].startswith('gmt'):
         parts[4] = ''.join(parts[4][3:].split(':')) or 'gmt'
     # Handle timezones like '-0500', '+0500', and 'EST'
-    if parts[4][0] in ('-', '+'):
+    if parts[4] and parts[4][0] in ('-', '+'):
         try:
             tzhour = int(parts[4][1:3])
             tzmin = int(parts[4][3:])

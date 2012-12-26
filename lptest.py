@@ -303,6 +303,7 @@ class TestRFC822(unittest.TestCase):
     testTZ_plus = _tz_test('Mon, 22 Jun 2009 13:15:17 -0430', 17, minute=45)
     testTZ_minus = _tz_test('Mon, 22 Jun 2009 13:15:17 +0545', 7, minute=30)
     testTZ_ETC_GMT = _tz_test('Mon, 22 Jun 2009 13:15:17 Etc/GMT', 13)
+    testTZ_crasher = _tz_test('Mon, 22 Jun 2009 13:15:17 Etc/', 13)
 
     def _year2digit_test(s, year):
         # Take an RFC822 datetime string and a year and,
