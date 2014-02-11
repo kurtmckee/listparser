@@ -266,6 +266,11 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         else:
             obj = self.found_urls[url][1]
 
+        # Handle created date
+        obj.setdefault('created', None)
+        if (None, 'created') in attrs.keys():
+            obj.created = _rfc822(attrs[(None, 'created')])
+
         # Handle categories and tags
         obj.setdefault('categories', [])
         if (None, 'category') in attrs.keys():
