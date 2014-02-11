@@ -266,6 +266,14 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         else:
             obj = self.found_urls[url][1]
 
+        # Handle extra arbitrary attribs
+        obj.setdefault('extras', SuperDict())
+        standards = ('title', 'text', 'xmlurl', 'type', 'htmlurl', 'created',
+                'isbreakpoint', 'iscomment')
+        for k, v in attrs.items():
+            if k[1].lower() not in standards:
+                obj.extras[k[1]] = v
+
         # Handle categories and tags
         obj.setdefault('categories', [])
         if (None, 'category') in attrs.keys():
