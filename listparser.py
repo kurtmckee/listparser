@@ -266,6 +266,21 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler):
         else:
             obj = self.found_urls[url][1]
 
+        # handle isComment and isBreakpoint
+        for isProp in ('comment','breakpoint'):
+            obj.setdefault(isProp, False)
+            for k, v in attrs.items():
+                if k[1].lower() == 'is' + isProp:
+                    v = v.strip().lower()
+                    if v == 'true':
+                        obj[isProp] = True
+                    elif v == 'false':
+                        obj[isProp] = False
+                    else:
+                        self.raise_bozo(
+                            'is' + isProp + ' must be "true" or "false"'
+                            )
+
         # Handle categories and tags
         obj.setdefault('categories', [])
         if (None, 'category') in attrs.keys():
