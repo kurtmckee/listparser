@@ -1,5 +1,5 @@
 # lptest.py - Run unit tests against listparser.py
-# Copyright (C) 2009-2012 Kurt McKee <contactme@kurtmckee.org>
+# Copyright (C) 2009-2015 Kurt McKee <contactme@kurtmckee.org>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
