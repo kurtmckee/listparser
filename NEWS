@@ -1,4 +1,4 @@
-coming in the next release:
+v0.18 (21 April 2015)
     * Replace the regex RFC 822 date parser with procedural code
 
 v0.17 (16 Dec 2012) "Territory expansion"

@@ -1,5 +1,5 @@
 # listparser.py - Parse OPML, FOAF, and iGoogle subscription lists.
-# Copyright (C) 2009-2012 Kurt McKee <contactme@kurtmckee.org>
+# Copyright (C) 2009-2015 Kurt McKee <contactme@kurtmckee.org>
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -16,7 +16,7 @@
 
 __author__ = "Kurt McKee <contactme@kurtmckee.org>"
 __url__ = "https://github.com/kurtmckee/listparser"
-__version__ = "0.17"
+__version__ = "0.18"
 
 import copy
 import datetime
