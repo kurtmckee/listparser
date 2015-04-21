@@ -1,10 +1,13 @@
-listparser.py - Parse OPML, FOAF, and iGoogle subscription lists.
-Copyright (C) 2009-2012 Kurt McKee <contactme@kurtmckee.org>
+What is listparser?
+===================
 
-listparser is a Python library that parses subscription lists (also
-called reading lists) and returns all of the feeds, subscription lists,
-and "opportunity" URLs that it finds. It supports OPML, RDF+FOAF, and
-the iGoogle exported settings format.
+listparser is a Python module that parses subscription lists (also called
+reading lists) and returns all of the feeds and subscription lists that it
+finds. It supports OPML, RDF+FOAF, and the iGoogle exported settings format,
+and runs in Python 2.4 through Python 3.3.
+
+listparser is licensed under the terms of the GNU Lesser General Public License
+version 3 or higher.
 
 
 Usage
@@ -14,24 +17,25 @@ Usage
 >>> result = listparser.parse('project.opml')
 
 A dictionary will be returned with several keys:
-`meta`: a dictionary of information about the subscription list
-`feeds`: a list of feeds
-`lists`: a list of subscription lists
-`version`: a file format identifier
-`bozo`: 1 if there is a problem with the list, 0 otherwise
-`bozo_exception`: (if `bozo` is 1) a description of the problem
+
+* ``meta``: a dictionary of information about the subscription list
+* ``feeds``: a list of feeds
+* ``lists``: a list of subscription lists
+* ``version``: a file format identifier
+* ``bozo``: 1 if there is a problem with the list, 0 otherwise
+* ``bozo_exception``: (if ``bozo`` is 1) a description of the problem
 
 Continuing the example:
 
 >>> result.meta.title
 u'listparser project feeds'
 >>> len(result.feeds)
-3
->>> result.feeds[1].url
-u'http://freecode.com/projects/listparser/announcements.atom'
+2
+>>> result.feeds[0].url
+u'http://kurtmckee.livejournal.com/data/atom?tag=listparser'
 
 More extensive documentation is available in the docs/ directory,
-or online at <http://packages.python.org/listparser/>.
+or online at <https://pythonhosted.org/listparser/>.
 
 
 Bugs
