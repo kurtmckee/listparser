@@ -2,4 +2,4 @@
 MANIFEST
 dist
 build
-listparser$py.class
+*$py.class
