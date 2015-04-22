@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with listparser.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+
 namespaces = {
     'http://opml.org/spec2': 'opml',
     'http://www.google.com/ig': 'iGoogle',

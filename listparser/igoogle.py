@@ -16,9 +16,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with listparser.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+
 import copy
 
-import common
+from . import common
 
 class IgoogleMixin(common.CommonMixin):
     def _start_gtml_GadgetTabML(self, attrs):

@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with listparser.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+
 __author__ = "Kurt McKee <contactme@kurtmckee.org>"
 __url__ = "https://github.com/kurtmckee/listparser"
 __version__ = "0.18"
@@ -68,11 +70,11 @@ except ImportError:
     SAXParseException = xml.sax.SAXParseException
     MalformedByteSequenceException = IOError
 
-import common
-from dates import *
-import foaf
-import igoogle
-import opml
+from . import common
+from . import dates
+from . import foaf
+from . import igoogle
+from . import opml
 
 def _to_bytes(text):
     # Force `text` to the type expected by different interpreters
