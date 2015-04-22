@@ -16,10 +16,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with listparser.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+
 import copy
 
-import common
-from dates import *
+from . import common
 
 class FoafMixin(common.CommonMixin):
     def _start_rdf_RDF(self, attrs):

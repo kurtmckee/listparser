@@ -16,11 +16,13 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with listparser.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+
 import copy
 import datetime
 
-import common
-import dates
+from . import common
+from . import dates
 
 class OpmlMixin(common.CommonMixin):
     def _start_opml_opml(self, attrs):
