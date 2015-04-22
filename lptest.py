@@ -1,18 +1,20 @@
 # lptest.py - Run unit tests against listparser.py
 # Copyright (C) 2009-2015 Kurt McKee <contactme@kurtmckee.org>
 # 
-# This program is free software: you can redistribute it and/or modify
+# This file is part of listparser.
+#
+# listparser is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
+#
+# listparser is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# along with listparser.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime # required by evals
 import os
@@ -21,7 +23,7 @@ import threading
 import unittest
 import sys
 
-import listparser
+import listparser.dates
 
 try:
     import BaseHTTPServer
@@ -225,7 +227,7 @@ class TestInjection(unittest.TestCase):
 
 class TestRFC822(unittest.TestCase):
     def testGeneral(self):
-        dt = listparser._rfc822('Sun, 14 Jun 2009 11:47:32 GMT')
+        dt = listparser.dates._rfc822('Sun, 14 Jun 2009 11:47:32 GMT')
         self.assertEqual(dt.day, 14)
         self.assertEqual(dt.month, 6)
         self.assertEqual(dt.year, 2009)
@@ -233,7 +235,7 @@ class TestRFC822(unittest.TestCase):
         self.assertEqual(dt.minute, 47)
         self.assertEqual(dt.second, 32)
     def testSwappedMonthAndDay(self):
-        dt = listparser._rfc822('Sun, Dec 16 2012 11:15:01 GMT')
+        dt = listparser.dates._rfc822('Sun, Dec 16 2012 11:15:01 GMT')
         self.assertEqual(dt.day, 16)
         self.assertEqual(dt.month, 12)
         self.assertEqual(dt.year, 2012)
@@ -241,7 +243,7 @@ class TestRFC822(unittest.TestCase):
         self.assertEqual(dt.minute, 15)
         self.assertEqual(dt.second, 1)
     def testMissingTimeAndTimezone(self):
-        dt = listparser._rfc822('Sun, Dec 16 2012')
+        dt = listparser.dates._rfc822('Sun, Dec 16 2012')
         self.assertEqual(dt.day, 16)
         self.assertEqual(dt.month, 12)
         self.assertEqual(dt.year, 2012)
@@ -249,17 +251,17 @@ class TestRFC822(unittest.TestCase):
         self.assertEqual(dt.minute, 0)
         self.assertEqual(dt.second, 0)
     def testSingleDigitDay(self):
-        dt = listparser._rfc822('Thu,  5 Apr 2012 10:00:00 GMT')
+        dt = listparser.dates._rfc822('Thu,  5 Apr 2012 10:00:00 GMT')
         self.assertEqual(dt.day, 5)
     def testSecondMissing(self):
-        dt = listparser._rfc822('Sun, 21 Jun 2009 12:00 GMT')
+        dt = listparser.dates._rfc822('Sun, 21 Jun 2009 12:00 GMT')
         self.assertEqual(dt.second, 0)
 
     def _month_test(s, month):
         # Take an RFC822 datetime string and a month integer (1-12) and
         # return a TestCase function that tests that datetime.month == m
         def fn(self):
-            dt = listparser._rfc822(s)
+            dt = listparser.dates._rfc822(s)
             self.assertEqual(dt.month, month)
         return fn
     testMonth01 = _month_test('21 Jan 2009 12:00:00 GMT', 1)
@@ -280,7 +282,7 @@ class TestRFC822(unittest.TestCase):
         # integers, and return a TestCase function that tests that:
         # dt.hour == hour, dt.minute == minute, dt.day == day
         def fn(self):
-            dt = listparser._rfc822(s)
+            dt = listparser.dates._rfc822(s)
             self.assertEqual(dt.hour, hour)
             self.assertEqual(dt.minute, minute)
             self.assertEqual(dt.day, day)
@@ -309,7 +311,7 @@ class TestRFC822(unittest.TestCase):
         # Take an RFC822 datetime string and a year and,
         # return a TestCase that tests that dt.year == y
         def fn(self):
-            dt = listparser._rfc822(s)
+            dt = listparser.dates._rfc822(s)
             self.assertEqual(dt.year, year)
         return fn
     testYear2Digit00 = _year2digit_test('Wed, 21 Jun 00 12:00:00 GMT', 2000)
@@ -320,7 +322,7 @@ class TestRFC822(unittest.TestCase):
     def _invalid_date_test(s):
         # Test extreme date and time ranges
         def fn(self):
-            dt = listparser._rfc822(s)
+            dt = listparser.dates._rfc822(s)
             self.assertEqual(dt, None)
         return fn
     testRangeDayHigh = _invalid_date_test('Sun, 99 Jun 2009 12:00:00 GMT')
@@ -389,7 +391,7 @@ for testfile in files:
         testcase.__doc__ = '%s: %s [string]' % (testfile, description)
         setattr(TestCases, 'test_%s_1' % splitext(testfile)[0], testcase)
         testcase = make_testcase(evals, testfile, etag,
-                                 listparser._rfc822(modified))
+                                 listparser.dates._rfc822(modified))
         testcase.__doc__ = '%s: %s [datetime]' % (testfile, description)
         setattr(TestCases, 'test_%s_2' % splitext(testfile)[0], testcase)
     else:

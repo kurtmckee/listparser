@@ -8,7 +8,7 @@ setup(
     author='Kurt McKee',
     author_email='contactme@kurtmckee.org',
     url='https://github.com/kurtmckee/listparser',
-    py_modules=['listparser'],
+    packages=['listparser'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
