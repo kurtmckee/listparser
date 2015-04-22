@@ -1,7 +1,7 @@
 include COPYING
 include COPYING.LESSER
 include NEWS
-include README
+include README.rst
 include lptest.py
 include project.opml
 recursive-include docs *.rst conf.py
