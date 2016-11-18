@@ -3,3 +3,5 @@ MANIFEST
 dist
 build
 *$py.class
+.tox/
+listparser.egg-info/
