@@ -271,7 +271,7 @@ def make_testcase(evals, testfile, etag, modified):
     # once at the end of the loop, containing the final testcase' values).
     return lambda self: self.worker(evals, testfile, etag, modified)
 
-numtests = 0
+http_test_count = 0
 testpath = join(dirname(abspath(__file__)), 'tests/')
 # files contains a list of relative paths to test files
 # HACK: replace() is only being used because os.path.relpath()
@@ -296,13 +296,13 @@ for testfile in files:
     etag = info.get('ETag', None)
     modified = info.get('Modified', None)
     if 'http' in testfile:
-        numtests += int(info.get('Requests', 1))
+        http_test_count += int(info.get('Requests', 1))
 
     if 'No-Eval' in info:
         # No-Eval files are requested over HTTP (generally representing
         # an HTTP redirection destination) and contain no testcases.
         # They probably have a Requests directive, though, which is why
-        # the `continue` here appears after numtests is incremented.
+        # the `continue` here appears after http_test_count is incremented.
         continue
     if not description:
         raise ValueError("Description not found in test %s" % testfile)
@@ -364,9 +364,9 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
 
 class ServerThread(threading.Thread):
-    def __init__(self, numtests):
+    def __init__(self, http_test_count):
         super(ServerThread, self).__init__()
-        self.numtests = numtests
+        self.http_test_count = http_test_count
         self.ready = threading.Event()
     def run(self):
         server = BaseHTTPServer.HTTPServer
@@ -374,11 +374,11 @@ class ServerThread(threading.Thread):
         reqhandler = Handler
         httpd = server(bind_to, reqhandler)
         self.ready.set()
-        for i in range(self.numtests):
+        for i in range(self.http_test_count):
             httpd.handle_request()
 
 
-server = ServerThread(numtests)
+server = ServerThread(http_test_count)
 server.setDaemon(True)
 server.start()
 
