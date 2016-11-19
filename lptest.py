@@ -73,60 +73,6 @@ else:
             return obj.encode('utf-8')
         return obj
 
-class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
-    def do_GET(self):
-        status = 200
-        location = etag = modified = None
-        reply = listparser._to_bytes('')
-        end_directives = False
-        f = open(dirname(abspath(__file__)) + self.path, 'rb')
-        for line in f:
-            reply += line
-            line = line.decode('utf8', 'replace')
-            if not end_directives:
-                if line.strip() == '-->':
-                    end_directives = True
-                elif 'Status:' in line:
-                    status = int(line.strip()[7:])
-                elif 'Location:' in line:
-                    location = line.strip()[9:].strip()
-                elif 'Server-ETag:' in line:
-                    etag = line.split(': ', 1)[1].strip()
-                    if self.headers.get('if-none-match') == etag:
-                        status = 304
-                elif 'Server-Modified:' in line:
-                    modified = line.split(': ', 1)[1].strip()
-                    if self.headers.get('if-modified-since') == modified:
-                        status = 304
-        f.close()
-        self.send_response(status)
-        if location:
-            self.send_header('Location', location)
-        if etag:
-            self.send_header('ETag', etag)
-        if modified:
-            self.send_header('Last-Modified', modified)
-        self.send_header('Content-type', 'text/xml')
-        self.send_header('x-agent', self.headers.get('user-agent'))
-        self.end_headers()
-        self.wfile.write(reply)
-    def log_request(self, *arg, **karg):
-        pass
-
-class ServerThread(threading.Thread):
-    def __init__(self, numtests):
-        super(ServerThread, self).__init__()
-        self.numtests = numtests
-        self.ready = threading.Event()
-    def run(self):
-        server = BaseHTTPServer.HTTPServer
-        bind_to = ('127.0.0.1', 8091)
-        reqhandler = Handler
-        httpd = server(bind_to, reqhandler)
-        self.ready.set()
-        for i in range(self.numtests):
-            httpd.handle_request()
-
 class TestCases(unittest.TestCase):
     def testUserAgentInvalid(self):
         url = 'http://localhost:8091/tests/http/useragent.xml'
@@ -376,6 +322,63 @@ for testfile in files:
         testcase = make_testcase(evals, testfile, etag, modified)
         testcase.__doc__ = '%s: %s' % (testfile, description)
         setattr(TestCases, 'test_%s' % splitext(testfile)[0], testcase)
+
+
+class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        status = 200
+        location = etag = modified = None
+        reply = listparser._to_bytes('')
+        end_directives = False
+        f = open(dirname(abspath(__file__)) + self.path, 'rb')
+        for line in f:
+            reply += line
+            line = line.decode('utf8', 'replace')
+            if not end_directives:
+                if line.strip() == '-->':
+                    end_directives = True
+                elif 'Status:' in line:
+                    status = int(line.strip()[7:])
+                elif 'Location:' in line:
+                    location = line.strip()[9:].strip()
+                elif 'Server-ETag:' in line:
+                    etag = line.split(': ', 1)[1].strip()
+                    if self.headers.get('if-none-match') == etag:
+                        status = 304
+                elif 'Server-Modified:' in line:
+                    modified = line.split(': ', 1)[1].strip()
+                    if self.headers.get('if-modified-since') == modified:
+                        status = 304
+        f.close()
+        self.send_response(status)
+        if location:
+            self.send_header('Location', location)
+        if etag:
+            self.send_header('ETag', etag)
+        if modified:
+            self.send_header('Last-Modified', modified)
+        self.send_header('Content-type', 'text/xml')
+        self.send_header('x-agent', self.headers.get('user-agent'))
+        self.end_headers()
+        self.wfile.write(reply)
+    def log_request(self, *arg, **karg):
+        pass
+
+
+class ServerThread(threading.Thread):
+    def __init__(self, numtests):
+        super(ServerThread, self).__init__()
+        self.numtests = numtests
+        self.ready = threading.Event()
+    def run(self):
+        server = BaseHTTPServer.HTTPServer
+        bind_to = ('127.0.0.1', 8091)
+        reqhandler = Handler
+        httpd = server(bind_to, reqhandler)
+        self.ready.set()
+        for i in range(self.numtests):
+            httpd.handle_request()
+
 
 server = ServerThread(numtests)
 server.setDaemon(True)
