@@ -110,35 +110,33 @@ class TestCases(unittest.TestCase):
         for ev in evals:
             self.assert_(eval(ev))
 
-class TestMkfile(unittest.TestCase):
-    def _bad_test(obj):
-        # A TestCase factory; its tests assume unusable return values
-        def fn(self):
-            n, sdict = listparser._mkfile(obj, 'agent', None, None)
-            self.assert_(n is None)
-            self.assertEqual(sdict.bozo, 1)
-        return fn
-    testUnparsableObject = _bad_test(True)
-    testBadURLProtocol = _bad_test("xxx://badurl.com/")
-    testBadURLUnreachable = _bad_test("http://badurl.com.INVALID/")
-    testBogusFilename = _bad_test('totally made up and bogus /\:')
 
-    def _good_test(obj):
-        # A TestCase factory; its tests expect a usable file-like or
-        # stream object and an empty SuperDict will be returned
-        def fn(self):
-            f, sdict = listparser._mkfile(obj, 'agent', None, None)
-            f.close()
-            self.assert_(f is not None)
-            self.assertFalse(sdict)
-        return fn
-    doc = """<?xml version="1.0"?><opml />"""
-    testStringInput = _good_test(doc)
-    testFileishInput = _good_test(StringIO(_to_str(doc)))
+doc = """<?xml version="1.0"?><opml />"""
+testfile = os.path.join('tests', 'filename.xml')
+@pytest.mark.parametrize('obj', [
+    doc,  # string input
+    StringIO(_to_str(doc)),  # file-like object
+    testfile,  # relative path
+    os.path.abspath(testfile),  # absolute path
+])
+def test_good_mkfile(obj):
+    f, sdict = listparser._mkfile(obj, 'agent', None, None)
+    f.close()
+    assert f is not None
+    assert not sdict
 
-    testfile = os.path.join('tests', 'filename.xml')
-    testRelativeFilename = _good_test(testfile)
-    testAbsoluteFilename = _good_test(os.path.abspath(testfile))
+
+@pytest.mark.parametrize('obj', [
+    True,  # unparsable object
+    "xxx://badurl.com/",  # bad protocol
+    "http://badurl.com.INVALID/",  # URL unreachable
+    'totally made up and bogus /\:',  # bogus filename
+])
+def test_bad_mkfile(obj):
+    n, sdict = listparser._mkfile(obj, 'agent', None, None)
+    assert n is None
+    assert sdict.bozo == 1
+
 
 class TestInjection(unittest.TestCase):
     def _read_size(size):
