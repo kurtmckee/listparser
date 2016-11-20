@@ -1,13 +1,14 @@
 objects[i].categories
 =====================
 
-A list of all of the categories associated with the feed, subscription list, or opportunity object.
+A list of all of the categories associated with the feed, subscription
+list, or opportunity object.
 
-Categories are hierarchical, and are represented as lists of strings. listparser uses the hierarchical groupings in the subscription list in order to assign categories. Here is an example in OPML:
+Categories are hierarchical, and are represented as lists of strings.
+listparser uses the hierarchical groupings in the subscription list in
+order to assign categories. Here is an example in OPML:
 
-..  highlight:: xml
-
-::
+..  code-block:: xml
 
     <outline text="news">
         <outline text="sports">
@@ -15,7 +16,9 @@ Categories are hierarchical, and are represented as lists of strings. listparser
         </outline>
     </outline>
 
-In this example, the category hierarchy is ``["news", "sports"]``. In the OPML format, listparser will also use the ``category`` attribute of the ``opml:outline`` element as a source of categorization information. 
+In this example, the category hierarchy is ``["news", "sports"]``. In
+the OPML format, listparser will also use the ``category`` attribute of
+the ``opml:outline`` element as a source of categorization information.
 
 ..  seealso:: :doc:`object-tags`
 

@@ -1,9 +1,11 @@
 objects[i].url
 ==============
 
-The URL of the feed, subscription list, or opportunity object. It is not normalized beyond the stripping of whitespace.
+The URL of the feed, subscription list, or opportunity object. It is
+not normalized beyond the stripping of whitespace.
 
-Due to the ubiquity of format-agnostic feed parsers, there is nothing to indicate what format the target feed is presented in.
+Due to the ubiquity of format-agnostic feed parsers, there is nothing
+to indicate what format the target feed is presented in.
 
 ..  rubric:: Feed URLs come from
 

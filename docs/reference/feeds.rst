@@ -1,7 +1,8 @@
 feeds
 =====
 
-The ``feeds`` attribute contains a list of all of the feeds in the subscription list.
+The ``feeds`` attribute contains a list of all of the feeds in the
+subscription list.
 
 ..  seealso::
 
