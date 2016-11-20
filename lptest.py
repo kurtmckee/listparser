@@ -20,7 +20,6 @@ import datetime # required by evals
 import os
 import sys
 import threading
-import unittest
 
 import pytest
 
@@ -72,34 +71,42 @@ else:
             return obj.encode('utf-8')
         return obj
 
-class TestCases(unittest.TestCase):
-    def testUserAgentInvalid(self):
-        url = 'http://localhost:8091/tests/http/useragent.xml'
-        obj, sdict = listparser._mkfile(url, True, None, None)
-        obj.close()
-        self.assertEqual(sdict.status, 200)
-    def testUserAgentDefault(self):
-        url = 'http://localhost:8091/tests/http/useragent.xml'
-        result = listparser.parse(url)
-        self.assertFalse(result.bozo)
-        self.assert_(result.headers.get('x-agent') == listparser.USER_AGENT)
-    def testUserAgentCustomArg(self):
-        url = 'http://localhost:8091/tests/http/useragent.xml'
-        result = listparser.parse(url, agent="CustomAgent")
-        self.assertFalse(result.bozo)
-        self.assert_(result.headers.get('x-agent') == "CustomAgent")
-    def testUserAgentGlobalOverride(self):
-        url = 'http://localhost:8091/tests/http/useragent.xml'
-        tmp = listparser.USER_AGENT
-        listparser.USER_AGENT = "NewGlobalAgent"
-        result = listparser.parse(url)
-        listparser.USER_AGENT = tmp
-        self.assertFalse(result.bozo)
-        self.assert_(result.headers.get('x-agent') == "NewGlobalAgent")
-    def testImage(self):
-        f = os.path.abspath(os.path.join('tests', '1x1.gif'))
-        result = listparser.parse(f)
-        self.assert_(result.bozo == 1)
+
+def test_useragent_invalid():
+    url = 'http://localhost:8091/tests/http/useragent.xml'
+    obj, sdict = listparser._mkfile(url, True, None, None)
+    obj.close()
+    assert sdict.status == 200
+
+
+def test_useragent_default():
+    url = 'http://localhost:8091/tests/http/useragent.xml'
+    result = listparser.parse(url)
+    assert not result.bozo
+    assert result.headers.get('x-agent') == listparser.USER_AGENT
+
+
+def test_useragent_custom():
+    url = 'http://localhost:8091/tests/http/useragent.xml'
+    result = listparser.parse(url, agent="CustomAgent")
+    assert not result.bozo
+    assert result.headers.get('x-agent') == "CustomAgent"
+
+
+def test_useragent_global_override():
+    url = 'http://localhost:8091/tests/http/useragent.xml'
+    tmp = listparser.USER_AGENT
+    listparser.USER_AGENT = "NewGlobalAgent"
+    result = listparser.parse(url)
+    listparser.USER_AGENT = tmp
+    assert not result.bozo
+    assert result.headers.get('x-agent') == "NewGlobalAgent"
+
+
+def test_image():
+    path = os.path.abspath(os.path.join('tests', '1x1.gif'))
+    result = listparser.parse(path)
+    assert result.bozo
 
 
 doc = """<?xml version="1.0"?><opml />"""
@@ -129,38 +136,36 @@ def test_bad_mkfile(obj):
     assert sdict.bozo == 1
 
 
-class TestInjection(unittest.TestCase):
-    def _read_size(size):
-        # Return a TestCase function that will manually feed the subscription
-        # list through the Injector, calling read() using the given size
-        def fn(self):
-            doc = listparser._to_bytes("""<?xml version="1.0"?><rdf:RDF
-                    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-                    xmlns:foaf="http://xmlns.com/foaf/0.1/"
-                    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-                    xmlns:rss="http://purl.org/rss/1.0/">
-                    <foaf:Agent><foaf:name>&aacute;</foaf:name><foaf:weblog>
-                    <foaf:Document rdf:about="http://domain/"><rdfs:seeAlso>
-                    <rss:channel rdf:about="http://domain/feed" />
-                    </rdfs:seeAlso></foaf:Document></foaf:weblog></foaf:Agent>
-                    </rdf:RDF>""")
-            idoc = listparser.Injector(listparser.BytesStrIO(doc))
-            tmp = []
-            while 1:
-                i = idoc.read(size)
-                if i:
-                    tmp.append(i)
-                else:
-                    idoc.close()
-                    break
-            xml = _to_unicode(listparser._to_bytes('').join(tmp))
-            result = listparser.parse(xml)
-            self.assertFalse(result.bozo)
-            self.assertEqual(len(result.feeds), 1)
-            self.assertEqual(ord(result.feeds[0].title), 225) # \u00e1
-        return fn
-    testRead1by1 = _read_size(1)
-    testReadChunks = _read_size(20)
+@pytest.fixture(params=[1, 20])
+def injector_fixture(request):
+    size = request.param
+    doc = listparser._to_bytes("""<?xml version="1.0"?><rdf:RDF
+            xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+            xmlns:foaf="http://xmlns.com/foaf/0.1/"
+            xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+            xmlns:rss="http://purl.org/rss/1.0/">
+            <foaf:Agent><foaf:name>&aacute;</foaf:name><foaf:weblog>
+            <foaf:Document rdf:about="http://domain/"><rdfs:seeAlso>
+            <rss:channel rdf:about="http://domain/feed" />
+            </rdfs:seeAlso></foaf:Document></foaf:weblog></foaf:Agent>
+            </rdf:RDF>""")
+    idoc = listparser.Injector(listparser.BytesStrIO(doc))
+    tmp = []
+    while 1:
+        i = idoc.read(size)
+        if i:
+            tmp.append(i)
+        else:
+            idoc.close()
+            break
+    return _to_unicode(listparser._to_bytes('').join(tmp))
+
+
+def test_injector(injector_fixture):
+    result = listparser.parse(injector_fixture)
+    assert not result.bozo
+    assert len(result.feeds) == 1
+    assert ord(result.feeds[0].title) == 225  # \u00e1
 
 
 @pytest.mark.parametrize('date,expected_values', [
