@@ -304,9 +304,11 @@ for testfile in files:
         # the `continue` here appears after http_test_count is incremented.
         continue
     if not description:
-        raise ValueError("Description not found in test %s" % testfile)
+        message = 'Description not found in test {}'.format(testfile)
+        raise ValueError(message)
     if not evals:
-        raise ValueError("Eval not found in test %s" % testfile)
+        message = 'Eval not found in test {}'.format(testfile)
+        raise ValueError(message)
     if modified:
         # Create a string test for `modified`.
         testcase = make_testcase(evals, testfile, etag, modified)
