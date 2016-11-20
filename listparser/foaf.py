@@ -1,5 +1,5 @@
 # listparser - Parse OPML, FOAF, and iGoogle subscription lists.
-# Copyright (C) 2009-2015 Kurt McKee <contactme@kurtmckee.org>
+# Copyright 2009-2016 Kurt McKee <contactme@kurtmckee.org>
 #
 # This file is part of listparser.
 #
