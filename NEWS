@@ -2,6 +2,8 @@ coming in the next release:
     * Split the codebase into multiple files (drops Python 2.4 support)
     * Use tox to automate testing across multiple interpreters and versions
     * Drop support for IronPython for lack of ipy XML parsers
+    * Migrate to pytest for unit testing (affects Python version support)
+    * Drop support for Python 2.4, 2.5, 3.0, 3.1, and 3.2
 
 v0.18 (21 April 2015)
     * Replace the regex RFC 822 date parser with procedural code
