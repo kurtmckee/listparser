@@ -18,6 +18,7 @@
 
 import datetime
 
+
 def _rfc822(date):
     """Parse RFC 822 dates and times
     http://tools.ietf.org/html/rfc822#section-5
@@ -27,7 +28,7 @@ def _rfc822(date):
     2. The month and day can be swapped.
     3. Additional timezone names are supported.
     4. A default time and timezone are assumed if only a date is present.
-    5. 
+    5.
     """
     daynames = set(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'])
     months = {
@@ -121,6 +122,7 @@ def _rfc822(date):
     except (OverflowError, ValueError):
         # IronPython throws ValueErrors instead of OverflowErrors
         return None
+
 
 def _to_rfc822(date):
     """_to_rfc822(datetime.datetime) -> str

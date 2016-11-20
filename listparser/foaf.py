@@ -22,6 +22,7 @@ import copy
 
 from . import common
 
+
 class FoafMixin(common.CommonMixin):
     def _start_rdf_RDF(self, attrs):
         self.harvest.version = 'rdf'
@@ -32,12 +33,14 @@ class FoafMixin(common.CommonMixin):
             if self.flag_opportunity:
                 self.flag_opportunity = False
                 self.agent_opps.pop()
-            self.agent_feeds.append(attrs.get((common._ns['rdf'], 'about')).strip())
+            agent_feed = attrs.get((common._ns['rdf'], 'about')).strip()
+            self.agent_feeds.append(agent_feed)
 
     def _start_ya_feed(self, attrs):
         if attrs.get((common._ns['rdf'], 'resource'), '').strip():
             # This is a feed URL
-            self.agent_feeds.append(attrs[(common._ns['rdf'], 'resource')].strip())
+            agent_feed = attrs[(common._ns['rdf'], 'resource')].strip()
+            self.agent_feeds.append(agent_feed)
 
     def _clean_found_objs(self):
         if self.foaf_name:
@@ -58,6 +61,7 @@ class FoafMixin(common.CommonMixin):
         self.flag_agent = True
         self.flag_feed = True
         self.flag_new_title = True
+
     def _end_foaf_Agent(self):
         if self.flag_agent:
             self.flag_agent = False
@@ -80,10 +84,12 @@ class FoafMixin(common.CommonMixin):
     def _start_rdfs_seeAlso(self, attrs):
         if attrs.get((common._ns['rdf'], 'resource'), '').strip():
             # This is a subscription list URL
-            self.agent_lists.append(attrs[(common._ns['rdf'], 'resource')].strip())
+            agent_list = attrs[(common._ns['rdf'], 'resource')].strip()
+            self.agent_lists.append(agent_list)
 
     def _start_foaf_Group(self, attrs):
         self.flag_group = True
+
     def _end_foaf_Group(self):
         self.flag_group = False
         for key, obj in self.group_objs:
@@ -108,6 +114,7 @@ class FoafMixin(common.CommonMixin):
     _end_rdf_RDF = _end_foaf_Group
 
     _start_foaf_name = common.CommonMixin._expect_characters
+
     def _end_foaf_name(self):
         if self.flag_feed and self.flag_new_title:
             self.foaf_name.append(self.normchars())
@@ -123,4 +130,5 @@ class FoafMixin(common.CommonMixin):
         if attrs.get((common._ns['rdf'], 'about'), '').strip():
             # Flag this as an opportunity (but ignore if a feed URL is found)
             self.flag_opportunity = True
-            self.agent_opps.append(attrs.get((common._ns['rdf'], 'about')).strip())
+            agent_opp = attrs.get((common._ns['rdf'], 'about')).strip()
+            self.agent_opps.append(agent_opp)

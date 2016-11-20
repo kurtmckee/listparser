@@ -32,6 +32,7 @@ namespaces = {
 # Provide a shorthand to save space in-code, e.g. _ns['rdf']
 _ns = dict((v, k) for k, v in namespaces.items())
 
+
 class SuperDict(dict):
     """
     SuperDict is a dictionary object with keys posing as instance attributes.
@@ -51,6 +52,7 @@ class SuperDict(dict):
     def __setattr__(self, name, value):
         self[name] = value
         return value
+
 
 class CommonMixin(object):
     def _expect_characters(self, attrs):
