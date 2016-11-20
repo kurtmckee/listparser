@@ -18,9 +18,9 @@
 
 import datetime # required by evals
 import os
+import sys
 import threading
 import unittest
-import sys
 
 import pytest
 
@@ -100,14 +100,6 @@ class TestCases(unittest.TestCase):
         f = os.path.abspath(os.path.join('tests', '1x1.gif'))
         result = listparser.parse(f)
         self.assert_(result.bozo == 1)
-    def worker(self, evals, testfile, etag, modified):
-        if 'http' in testfile:
-            testfile = 'http://localhost:8091/tests/' + testfile
-        else:
-            testfile = os.path.join('tests', testfile)
-        result = listparser.parse(testfile, etag=etag, modified=modified)
-        for ev in evals:
-            self.assert_(eval(ev))
 
 
 doc = """<?xml version="1.0"?><opml />"""
@@ -263,38 +255,32 @@ def test_invalid_dates(date):
     assert listparser.dates._rfc822(date) is None
 
 
-def make_testcase(evals, testfile, etag, modified):
-    # HACK: Only necessary in order to ensure that `evals` is evaluated
-    # for every testcase, not just for the last one in the loop below
-    # (where, apparently, `lambda` would cause it to be evaluated only
-    # once at the end of the loop, containing the final testcase' values).
-    return lambda self: self.worker(evals, testfile, etag, modified)
-
 http_test_count = 0
-testpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tests/')
-# files contains a list of relative paths to test files
-# HACK: replace() is only being used because os.path.relpath()
-# was only added to Python in version 2.6
-files = (os.path.join(r, f).replace(testpath, '', 1)
-            for r, d, files in os.walk(testpath)
-            for f in files if f.endswith('.xml'))
-for testfile in files:
+tests = []
+tests_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tests/')
+filenames = (
+    os.path.join(root, filename).replace(tests_path, '', 1)
+    for root, directories, files in os.walk(tests_path)
+    for filename in files
+    if filename.endswith('.xml')
+)
+for filename in filenames:
     info = {}
-    evals = []
-    with open(os.path.join(testpath, testfile), 'rb') as f:
+    assertions = []
+    with open(os.path.join('tests', filename), 'rb') as f:
         blob = f.read()
     for line in blob.splitlines():
         line = line.decode('utf8', 'replace').strip()
         if '-->' in line:
             break
         if line.lstrip().startswith('Eval:'):
-            evals.append(line.split(': ', 1)[1].strip())
+            assertions.append(line.split(': ', 1)[1].strip())
         elif ': ' in line:
             info.update((map(str.strip, _to_str(line).split(': ', 1)),))
     description = info.get('Description', '')
     etag = info.get('ETag', None)
     modified = info.get('Modified', None)
-    if 'http' in testfile:
+    if 'http' in filename:
         http_test_count += int(info.get('Requests', 1))
 
     if 'No-Eval' in info:
@@ -303,30 +289,30 @@ for testfile in files:
         # They probably have a Requests directive, though, which is why
         # the `continue` here appears after http_test_count is incremented.
         continue
+
     if not description:
         message = 'Description not found in test {}'.format(testfile)
         raise ValueError(message)
-    if not evals:
+    if not assertions:
         message = 'Eval not found in test {}'.format(testfile)
         raise ValueError(message)
-    if modified:
-        # Create a string test for `modified`.
-        testcase = make_testcase(evals, testfile, etag, modified)
-        testcase.__doc__ = '{}: {} [string]'.format(testfile, description)
-        attr_name = 'test_{}_1'.format(os.path.splitext(testfile)[0])
-        setattr(TestCases, attr_name, testcase)
 
+    tests.append([filename, etag, modified, assertions])
+    if modified:
         # Create a datetime test for `modified`.
-        parsed_modified = listparser.dates._rfc822(modified)
-        testcase = make_testcase(evals, testfile, etag, parsed_modified)
-        testcase.__doc__ = '{}: {} [datetime]'.format(testfile, description)
-        attr_name = 'test_{}_2'.format(os.path.splitext(testfile)[0])
-        setattr(TestCases, attr_name, testcase)
+        modified = listparser.dates._rfc822(modified)
+        tests.append([filename, etag, modified, assertions])
+
+
+@pytest.mark.parametrize('filename,etag,modified,assertions', tests)
+def test_file(filename, etag, modified, assertions):
+    if 'http' in filename:
+        path = 'http://localhost:8091/tests/' + filename
     else:
-        testcase = make_testcase(evals, testfile, etag, modified)
-        testcase.__doc__ = '{}: {}'.format(testfile, description)
-        attr_name = 'test_{}'.format(os.path.splitext(testfile)[0])
-        setattr(TestCases, attr_name, testcase)
+        path = os.path.join('tests', filename)
+    result = listparser.parse(path, etag=etag, modified=modified)
+    for assertion in assertions:
+        assert eval(assertion)
 
 
 class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
