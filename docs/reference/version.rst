@@ -1,7 +1,9 @@
 version
 =======
 
-``version`` is a string that represents the format of the subscription list. It always exists, although it may be an empty string if the subscription list format is not recognized.
+``version`` is a string that represents the format of the subscription
+list. It always exists, although it may be an empty string if the
+subscription list format is not recognized.
 
 These are the possible values:
 
