@@ -1,7 +1,7 @@
 Getting started
 ===============
 
-Because listparser is just a single file, you can copy it to a convenient directory and start the Python interpreter. listparser has a single public function, :py:func:`~listparser.parse`. ::
+You can install listparser using pip. listparser has a single public function, :py:func:`~listparser.parse`. ::
 
     >>> import listparser
     >>> result = listparser.parse('http://github.com/kurtmckee/listparser/raw/master/project.opml')
