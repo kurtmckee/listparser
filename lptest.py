@@ -18,7 +18,6 @@
 
 import datetime # required by evals
 import os
-from os.path import abspath, dirname, join, splitext
 import threading
 import unittest
 import sys
@@ -105,7 +104,7 @@ class TestCases(unittest.TestCase):
         if 'http' in testfile:
             testfile = 'http://localhost:8091/tests/' + testfile
         else:
-            testfile = join('tests', testfile)
+            testfile = os.path.join('tests', testfile)
         result = listparser.parse(testfile, etag=etag, modified=modified)
         for ev in evals:
             self.assert_(eval(ev))
@@ -272,18 +271,19 @@ def make_testcase(evals, testfile, etag, modified):
     return lambda self: self.worker(evals, testfile, etag, modified)
 
 http_test_count = 0
-testpath = join(dirname(abspath(__file__)), 'tests/')
+testpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tests/')
 # files contains a list of relative paths to test files
 # HACK: replace() is only being used because os.path.relpath()
 # was only added to Python in version 2.6
-files = (join(r, f).replace(testpath, '', 1)
+files = (os.path.join(r, f).replace(testpath, '', 1)
             for r, d, files in os.walk(testpath)
             for f in files if f.endswith('.xml'))
 for testfile in files:
     info = {}
     evals = []
-    openfile = open(join(testpath, testfile), 'rb')
-    for line in openfile:
+    with open(os.path.join(testpath, testfile), 'rb') as f:
+        blob = f.read()
+    for line in blob.splitlines():
         line = line.decode('utf8', 'replace').strip()
         if '-->' in line:
             break
@@ -291,7 +291,6 @@ for testfile in files:
             evals.append(line.split(': ', 1)[1].strip())
         elif ': ' in line:
             info.update((map(str.strip, _to_str(line).split(': ', 1)),))
-    openfile.close()
     description = info.get('Description', '')
     etag = info.get('ETag', None)
     modified = info.get('Modified', None)
@@ -309,17 +308,23 @@ for testfile in files:
     if not evals:
         raise ValueError("Eval not found in test %s" % testfile)
     if modified:
+        # Create a string test for `modified`.
         testcase = make_testcase(evals, testfile, etag, modified)
-        testcase.__doc__ = '%s: %s [string]' % (testfile, description)
-        setattr(TestCases, 'test_%s_1' % splitext(testfile)[0], testcase)
-        testcase = make_testcase(evals, testfile, etag,
-                                 listparser.dates._rfc822(modified))
-        testcase.__doc__ = '%s: %s [datetime]' % (testfile, description)
-        setattr(TestCases, 'test_%s_2' % splitext(testfile)[0], testcase)
+        testcase.__doc__ = '{}: {} [string]'.format(testfile, description)
+        attr_name = 'test_{}_1'.format(os.path.splitext(testfile)[0])
+        setattr(TestCases, attr_name, testcase)
+
+        # Create a datetime test for `modified`.
+        parsed_modified = listparser.dates._rfc822(modified)
+        testcase = make_testcase(evals, testfile, etag, parsed_modified)
+        testcase.__doc__ = '{}: {} [datetime]'.format(testfile, description)
+        attr_name = 'test_{}_2'.format(os.path.splitext(testfile)[0])
+        setattr(TestCases, attr_name, testcase)
     else:
         testcase = make_testcase(evals, testfile, etag, modified)
-        testcase.__doc__ = '%s: %s' % (testfile, description)
-        setattr(TestCases, 'test_%s' % splitext(testfile)[0], testcase)
+        testcase.__doc__ = '{}: {}'.format(testfile, description)
+        attr_name = 'test_{}'.format(os.path.splitext(testfile)[0])
+        setattr(TestCases, attr_name, testcase)
 
 
 class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
@@ -328,7 +333,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         location = etag = modified = None
         reply = listparser._to_bytes('')
         end_directives = False
-        f = open(dirname(abspath(__file__)) + self.path, 'rb')
+        f = open(os.path.dirname(os.path.abspath(__file__)) + self.path, 'rb')
         for line in f:
             reply += line
             line = line.decode('utf8', 'replace')
