@@ -4,7 +4,7 @@ Getting started
 You can install listparser using pip. listparser has a single public function, :py:func:`~listparser.parse`. ::
 
     >>> import listparser
-    >>> result = listparser.parse('http://github.com/kurtmckee/listparser/raw/master/project.opml')
+    >>> result = listparser.parse('https://github.com/kurtmckee/listparser/raw/develop/project.opml')
 
 :py:func:`~listparser.parse` can be given a URL, an open file handle, or even an in-memory string.
 
@@ -28,11 +28,10 @@ The ``feeds`` key
 The ``feeds`` key is a list of dictionaries. The title and the URL are stored in keys of the same names::
 
     >>> for i in result.feeds:
-    ...     print "%s <%s>" % (i.title, i.url)
-    ... 
+    ...     print '{title} <{url}>'.format(**i)
+    ...
     listparser blog <http://kurtmckee.livejournal.com/data/atom?tag=listparser>
-    listparser releases <http://freecode.com/projects/listparser/announcements.atom>
-    listparser changelog <http://github.com/feeds/kurtmckee/commits/listparser/master>
+    listparser changelog <https://github.com/kurtmckee/listparser/commits/develop.atom>
 
 
 The ``lists`` key
