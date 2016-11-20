@@ -35,7 +35,7 @@ to change the User-Agent.
 ..  seealso::
 
     :py:data:`~listparser.USER_AGENT`,
-    `User agent at Wikipedia <http://en.wikipedia.org/wiki/User_agent>`_
+    `User agent at Wikipedia <https://en.wikipedia.org/wiki/User_agent>`_
 
 
 ETag
@@ -72,7 +72,7 @@ not all webservers support both.
 
 ..  seealso::
 
-    `HTTP Etag at Wikipedia <http://en.wikipedia.org/wiki/HTTP_ETag>`_
+    `HTTP Etag at Wikipedia <https://en.wikipedia.org/wiki/HTTP_ETag>`_
 
 
 Last-Modified

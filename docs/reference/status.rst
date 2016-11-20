@@ -13,5 +13,5 @@ Permanently", and the new location should be used for future requests.
 
 ..  rubric:: Footnotes
 
-..  [#codes] `List of HTTP status codes <http://en.wikipedia.org/wiki/List_of_HTTP_status_codes>`_
+..  [#codes] `List of HTTP status codes <https://en.wikipedia.org/wiki/List_of_HTTP_status_codes>`_
 
