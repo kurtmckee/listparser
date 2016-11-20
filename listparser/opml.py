@@ -24,6 +24,7 @@ import datetime
 from . import common
 from . import dates
 
+
 class OpmlMixin(common.CommonMixin):
     def _start_opml_opml(self, attrs):
         self.harvest.version = 'opml'
@@ -92,33 +93,39 @@ class OpmlMixin(common.CommonMixin):
         obj.tags = [i[0] for i in obj.categories if len(i) == 1]
 
         self.hierarchy.append('')
+
     def _end_opml_outline(self):
         self.hierarchy.pop()
 
     _start_opml_title = common.CommonMixin._expect_characters
+
     def _end_opml_title(self):
         if self.normchars():
             self.harvest.meta.title = self.normchars()
 
     _start_opml_ownerId = common.CommonMixin._expect_characters
+
     def _end_opml_ownerId(self):
         if self.normchars():
             self.harvest.meta.setdefault('author', common.SuperDict())
             self.harvest.meta.author.url = self.normchars()
 
     _start_opml_ownerEmail = common.CommonMixin._expect_characters
+
     def _end_opml_ownerEmail(self):
         if self.normchars():
             self.harvest.meta.setdefault('author', common.SuperDict())
             self.harvest.meta.author.email = self.normchars()
 
     _start_opml_ownerName = common.CommonMixin._expect_characters
+
     def _end_opml_ownerName(self):
         if self.normchars():
             self.harvest.meta.setdefault('author', common.SuperDict())
             self.harvest.meta.author.name = self.normchars()
 
     _start_opml_dateCreated = common.CommonMixin._expect_characters
+
     def _end_opml_dateCreated(self):
         if self.normchars():
             self.harvest.meta.created = self.normchars()
@@ -129,6 +136,7 @@ class OpmlMixin(common.CommonMixin):
                 self.raise_bozo('dateCreated is not an RFC 822 datetime')
 
     _start_opml_dateModified = common.CommonMixin._expect_characters
+
     def _end_opml_dateModified(self):
         if self.normchars():
             self.harvest.meta.modified = self.normchars()

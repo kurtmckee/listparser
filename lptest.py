@@ -16,9 +16,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with listparser.  If not, see <http://www.gnu.org/licenses/>.
 
-import datetime # required by evals
+import datetime  # noqa: F401 (required by evals)
 import os
-import sys
 import threading
 
 import pytest
@@ -58,17 +57,15 @@ else:
         return obj
 
 try:
-    unicode
-except NameError:
-    # Python 3
-    def _to_str(obj):
-        return obj
-else:
     # Python 2
     def _to_str(obj):
         """_to_str(unicode or str) -> str (UTF-8 encoded)"""
-        if isinstance(obj, unicode):
+        if isinstance(obj, unicode):  # noqa: F821
             return obj.encode('utf-8')
+        return obj
+except NameError:
+    # Python 3
+    def _to_str(obj):
         return obj
 
 
@@ -111,6 +108,8 @@ def test_image():
 
 doc = """<?xml version="1.0"?><opml />"""
 testfile = os.path.join('tests', 'filename.xml')
+
+
 @pytest.mark.parametrize('obj', [
     doc,  # string input
     StringIO(_to_str(doc)),  # file-like object
@@ -315,7 +314,7 @@ def test_file(filename, etag, modified, assertions):
         path = 'http://localhost:8091/tests/' + filename
     else:
         path = os.path.join('tests', filename)
-    result = listparser.parse(path, etag=etag, modified=modified)
+    listparser.parse(path, etag=etag, modified=modified)
     for assertion in assertions:
         assert eval(assertion)
 
@@ -357,6 +356,7 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         self.send_header('x-agent', self.headers.get('user-agent'))
         self.end_headers()
         self.wfile.write(reply)
+
     def log_request(self, *arg, **karg):
         pass
 
@@ -366,6 +366,7 @@ class ServerThread(threading.Thread):
         super(ServerThread, self).__init__()
         self.http_test_count = http_test_count
         self.ready = threading.Event()
+
     def run(self):
         server = BaseHTTPServer.HTTPServer
         bind_to = ('127.0.0.1', 8091)

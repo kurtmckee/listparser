@@ -1,30 +1,24 @@
 # listparser - Parse OPML, FOAF, and iGoogle subscription lists.
 # Copyright (C) 2009-2015 Kurt McKee <contactme@kurtmckee.org>
-# 
+#
 # This file is part of listparser.
 #
 # listparser is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # listparser is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with listparser.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
 
-__author__ = "Kurt McKee <contactme@kurtmckee.org>"
-__url__ = "https://github.com/kurtmckee/listparser"
-__version__ = "0.18"
-
-import copy
 import datetime
-import re
 import sys
 import xml.sax
 
@@ -35,6 +29,7 @@ except ImportError:
 
 try:
     import httplib
+
     class http(object):
         client = httplib
 except ImportError:
@@ -42,6 +37,7 @@ except ImportError:
 
 try:
     import urllib2
+
     class urllib(object):
         request = urllib2
         error = urllib2
@@ -64,7 +60,7 @@ except ImportError:
 try:
     from org.xml.sax import SAXParseException
     from com.sun.org.apache.xerces.internal.impl.io import \
-            MalformedByteSequenceException
+        MalformedByteSequenceException
 except ImportError:
     # This isn't Jython
     SAXParseException = xml.sax.SAXParseException
@@ -75,6 +71,15 @@ from . import dates
 from . import foaf
 from . import igoogle
 from . import opml
+
+
+__author__ = "Kurt McKee <contactme@kurtmckee.org>"
+__url__ = "https://github.com/kurtmckee/listparser"
+__version__ = "0.18"
+
+
+USER_AGENT = "listparser/%s +%s" % (__version__, __url__)
+
 
 def _to_bytes(text):
     # Force `text` to the type expected by different interpreters
@@ -87,7 +92,6 @@ def _to_bytes(text):
     except (TypeError, NameError):
         return text
 
-USER_AGENT = "listparser/%s +%s" % (__version__, __url__)
 
 def parse(parse_obj, agent=None, etag=None, modified=None, inject=False):
     guarantees = common.SuperDict({
@@ -137,6 +141,7 @@ def parse(parse_obj, agent=None, etag=None, modified=None, inject=False):
         handler.harvest.bozo = 1
         handler.harvest.bozo_exception = ListError("undefined entity found")
     return handler.harvest
+
 
 class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler,
               foaf.FoafMixin, igoogle.IgoogleMixin, opml.OpmlMixin):
@@ -207,10 +212,12 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler,
         if self.expect:
             self._characters += content
 
+
 class HTTPRedirectHandler(urllib.request.HTTPRedirectHandler):
     def http_error_301(self, req, fp, code, msg, hdrs):
-        result = urllib.request.HTTPRedirectHandler.http_error_301(self, req, fp,
-                                                            code, msg, hdrs)
+        result = urllib.request.HTTPRedirectHandler.http_error_301(
+            self, req, fp, code, msg, hdrs
+        )
         result.status = code
         result.newurl = result.geturl()
         return result
@@ -219,12 +226,14 @@ class HTTPRedirectHandler(urllib.request.HTTPRedirectHandler):
     # won't affect anything
     http_error_302 = http_error_303 = http_error_307 = http_error_301
 
+
 class HTTPErrorHandler(urllib.request.HTTPDefaultErrorHandler):
     def http_error_default(self, req, fp, code, msg, hdrs):
         # The default implementation just raises HTTPError.
         # Forget that.
         fp.status = code
         return fp
+
 
 def _mkfile(obj, agent, etag, modified):
     if hasattr(obj, 'read') and hasattr(obj, 'close'):
@@ -277,6 +286,7 @@ def _mkfile(obj, agent, etag, modified):
             info.modified_parsed = dates._rfc822(info.modified)
     return ret, info
 
+
 class Injector(object):
     """
     Injector buffers read() calls to a file-like object in order to
@@ -287,6 +297,7 @@ class Injector(object):
         self.obj = obj
         self.injected = False
         self.cache = _to_bytes('')
+
     def read(self, size):
         # Read from the cache (and the object if necessary)
         read = self.cache[:size]
@@ -311,8 +322,10 @@ class Injector(object):
         ret = self.cache[:size]
         self.cache = self.cache[size:]
         return ret
+
     def __getattr__(self, name):
         return getattr(self.obj, name)
+
 
 class ListError(Exception):
     """Used when a specification deviation is encountered in an XML file"""
