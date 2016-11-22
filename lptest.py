@@ -385,7 +385,7 @@ class ServerThread(threading.Thread):
 
 
 server = ServerThread(http_test_count)
-server.setDaemon(True)
+server.daemon = True
 server.start()
 
 # Wait for the server thread to signal that it's ready
