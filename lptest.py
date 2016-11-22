@@ -375,10 +375,7 @@ class ServerThread(threading.Thread):
         self.ready = threading.Event()
 
     def run(self):
-        server = BaseHTTPServer.HTTPServer
-        bind_to = ('127.0.0.1', 8091)
-        reqhandler = Handler
-        httpd = server(bind_to, reqhandler)
+        httpd = BaseHTTPServer.HTTPServer(('127.0.0.1', 8091), Handler)
         self.ready.set()
         for i in range(self.http_test_count):
             httpd.handle_request()
