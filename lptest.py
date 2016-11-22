@@ -25,16 +25,20 @@ import pytest
 import listparser.dates
 
 try:
+    # Python 2
     import BaseHTTPServer
     import SimpleHTTPServer
 except ImportError:
+    # Python 3
     import http.server
     BaseHTTPServer = http.server
     SimpleHTTPServer = http.server
 
 try:
+    # Python 2
     from StringIO import StringIO
 except ImportError:
+    # Python 3
     from io import StringIO
 
 try:
@@ -57,15 +61,17 @@ else:
         return obj
 
 try:
+    unicode
+except NameError:
+    # Python 3
+    def _to_str(obj):
+        return obj
+else:
     # Python 2
     def _to_str(obj):
         """_to_str(unicode or str) -> str (UTF-8 encoded)"""
         if isinstance(obj, unicode):  # noqa: F821
             return obj.encode('utf-8')
-        return obj
-except NameError:
-    # Python 3
-    def _to_str(obj):
         return obj
 
 
@@ -314,7 +320,8 @@ def test_file(filename, etag, modified, assertions):
         path = 'http://localhost:8091/tests/' + filename
     else:
         path = os.path.join('tests', filename)
-    listparser.parse(path, etag=etag, modified=modified)
+    # `result` must exist in the local scope for the assertions to run.
+    result = listparser.parse(path, etag=etag, modified=modified)  # noqa: F841
     for assertion in assertions:
         assert eval(assertion)
 
@@ -368,17 +375,14 @@ class ServerThread(threading.Thread):
         self.ready = threading.Event()
 
     def run(self):
-        server = BaseHTTPServer.HTTPServer
-        bind_to = ('127.0.0.1', 8091)
-        reqhandler = Handler
-        httpd = server(bind_to, reqhandler)
+        httpd = BaseHTTPServer.HTTPServer(('127.0.0.1', 8091), Handler)
         self.ready.set()
         for i in range(self.http_test_count):
             httpd.handle_request()
 
 
 server = ServerThread(http_test_count)
-server.setDaemon(True)
+server.daemon = True
 server.start()
 
 # Wait for the server thread to signal that it's ready
