@@ -25,16 +25,20 @@ import pytest
 import listparser.dates
 
 try:
+    # Python 2
     import BaseHTTPServer
     import SimpleHTTPServer
 except ImportError:
+    # Python 3
     import http.server
     BaseHTTPServer = http.server
     SimpleHTTPServer = http.server
 
 try:
+    # Python 2
     from StringIO import StringIO
 except ImportError:
+    # Python 3
     from io import StringIO
 
 try:
