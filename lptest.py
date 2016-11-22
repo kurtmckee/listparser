@@ -314,7 +314,8 @@ def test_file(filename, etag, modified, assertions):
         path = 'http://localhost:8091/tests/' + filename
     else:
         path = os.path.join('tests', filename)
-    listparser.parse(path, etag=etag, modified=modified)
+    # `result` must exist in the local scope for the assertions to run.
+    result = listparser.parse(path, etag=etag, modified=modified)  # noqa: F841
     for assertion in assertions:
         assert eval(assertion)
 
