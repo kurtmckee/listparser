@@ -57,15 +57,17 @@ else:
         return obj
 
 try:
+    unicode
+except NameError:
+    # Python 3
+    def _to_str(obj):
+        return obj
+else:
     # Python 2
     def _to_str(obj):
         """_to_str(unicode or str) -> str (UTF-8 encoded)"""
         if isinstance(obj, unicode):  # noqa: F821
             return obj.encode('utf-8')
-        return obj
-except NameError:
-    # Python 3
-    def _to_str(obj):
         return obj
 
 
