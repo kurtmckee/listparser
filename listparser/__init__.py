@@ -128,7 +128,8 @@ def parse(parse_obj, agent=None, etag=None, modified=None, inject=False):
         err = sys.exc_info()[1]
         handler.harvest.bozo = 1
         handler.harvest.bozo_exception = err
-    fileobj.close()
+    finally:
+        fileobj.close()
 
     # Test if a DOCTYPE injection is needed
     if hasattr(handler.harvest, 'bozo_exception'):
