@@ -21,7 +21,7 @@ setup(
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
+        'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',  # noqa: E501
         'Programming Language :: Java',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
