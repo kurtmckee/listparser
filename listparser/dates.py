@@ -133,11 +133,11 @@ def _to_rfc822(date):
     days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     fmt = '%(day)s, %(d)02i %(month)s %(y)04i %(h)02i:%(m)02i:%(s)02i GMT'
     return fmt % {
-                    'day': days[date.weekday()],
-                    'd': date.day,
-                    'month': months[date.month - 1],
-                    'y': date.year,
-                    'h': date.hour,
-                    'm': date.minute,
-                    's': date.second,
-                 }
+        'day': days[date.weekday()],
+        'd': date.day,
+        'month': months[date.month - 1],
+        'y': date.year,
+        'h': date.hour,
+        'm': date.minute,
+        's': date.second,
+    }
