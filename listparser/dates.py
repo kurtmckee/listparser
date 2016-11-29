@@ -119,8 +119,7 @@ def _rfc822(date):
     # Return the date and timestamp in a UTC 9-tuple
     try:
         return stamp - delta
-    except (OverflowError, ValueError):
-        # IronPython throws ValueErrors instead of OverflowErrors
+    except OverflowError:
         return None
 
 

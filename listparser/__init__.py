@@ -78,9 +78,7 @@ USER_AGENT = "listparser/%s +%s" % (__version__, __url__)
 def _to_bytes(text):
     # Force `text` to the type expected by different interpreters
     # Python 3 expects type(bytes)
-    # Python 2 and IronPython expect type(basestring)
-    if 'IronPython' in sys.version:
-        return text
+    # Python 2 expects type(basestring)
     try:
         return bytes(text, 'utf8')
     except (TypeError, NameError):
@@ -112,11 +110,8 @@ def parse(parse_obj, agent=None, etag=None, modified=None, inject=False):
     try:
         parser.parse(fileobj)
     except (SAXParseException, MalformedByteSequenceException,
-            SystemError,
             UnicodeDecodeError):
         # Jython propagates exceptions past the ErrorHandler;
-        # The pyexpat module for IronPython throws a SystemError
-        # instead of a SaxParseException or something more sensible;
         # Python 3 chokes if a file not opened in binary mode
         # contains non-Unicode byte sequences
         err = sys.exc_info()[1]
