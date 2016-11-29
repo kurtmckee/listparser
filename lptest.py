@@ -17,6 +17,7 @@
 # along with listparser.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime  # noqa: F401 (required by evals)
+import io
 import os
 import threading
 
@@ -33,13 +34,6 @@ except ImportError:
     import http.server
     BaseHTTPServer = http.server
     SimpleHTTPServer = http.server
-
-try:
-    # Python 2
-    from StringIO import StringIO
-except ImportError:
-    # Python 3
-    from io import StringIO
 
 try:
     if bytes is str:
@@ -118,7 +112,7 @@ testfile = os.path.join('tests', 'filename.xml')
 
 @pytest.mark.parametrize('obj', [
     doc,  # string input
-    StringIO(_to_str(doc)),  # file-like object
+    io.BytesIO(listparser._to_bytes(doc)),  # file-like object
     testfile,  # relative path
     os.path.abspath(testfile),  # absolute path
 ])
@@ -154,7 +148,7 @@ def injector_fixture(request):
             <rss:channel rdf:about="http://domain/feed" />
             </rdfs:seeAlso></foaf:Document></foaf:weblog></foaf:Agent>
             </rdf:RDF>""")
-    idoc = listparser.Injector(listparser.BytesStrIO(doc))
+    idoc = listparser.Injector(io.BytesIO(doc))
     tmp = []
     while 1:
         i = idoc.read(size)

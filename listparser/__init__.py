@@ -19,6 +19,7 @@
 from __future__ import absolute_import
 
 import datetime
+import io
 import sys
 import xml.sax
 
@@ -46,13 +47,6 @@ except ImportError:
     import urllib.error
     import urllib.parse
     import urllib.request
-
-try:
-    # Python 3: Use a bytes-compatible stream implementation
-    from io import BytesIO as BytesStrIO
-except ImportError:
-    # Python 2: Use a basestring-compatible stream implementation
-    from StringIO import StringIO as BytesStrIO
 
 # Account for differences between the CPythons and Jython
 # HACK: platform.python_implementation() might be ideal here, but
@@ -248,7 +242,7 @@ def _mkfile(obj, agent, etag, modified):
               obj.startswith('ftp://') or obj.startswith('file://')):
         # It's not a URL; test if it's an XML document
         if obj.lstrip().startswith('<'):
-            return BytesStrIO(_to_bytes(obj)), common.SuperDict()
+            return io.BytesIO(_to_bytes(obj)), common.SuperDict()
         # Try dealing with it as a file
         try:
             return open(obj, 'rb'), common.SuperDict()
