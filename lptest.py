@@ -294,10 +294,10 @@ for filename in filenames:
         # the `continue` here appears after http_test_count is incremented.
         continue
 
-    if not description:
+    if not description:  # pragma: no cover
         message = 'Description not found in test {}'.format(testfile)
         raise ValueError(message)
-    if not assertions:
+    if not assertions:  # pragma: no cover
         message = 'Eval not found in test {}'.format(testfile)
         raise ValueError(message)
 
