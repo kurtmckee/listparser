@@ -106,6 +106,11 @@ def test_image():
     assert result.bozo
 
 
+def test_return_guarantees():
+    result = listparser.parse(0)
+    assert result.bozo
+
+
 doc = """<?xml version="1.0"?><opml />"""
 testfile = os.path.join('tests', 'filename.xml')
 
