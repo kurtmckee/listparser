@@ -278,7 +278,7 @@ for filename in filenames:
     assertions = []
     with open(os.path.join('tests', filename), 'rb') as f:
         blob = f.read()
-    for line in blob.splitlines():
+    for line in blob.splitlines():  # pragma: no branch
         line = line.decode('utf8', 'replace').strip()
         if '-->' in line:
             break
