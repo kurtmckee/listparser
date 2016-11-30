@@ -51,12 +51,13 @@ except ImportError:
 # Account for differences between the CPythons and Jython
 # HACK: platform.python_implementation() might be ideal here, but
 # Jython 2.5.1 doesn't have it yet, and neither do CPythons < 2.6
-try:
+try:  # pragma: no cover
+    # Jython
     from org.xml.sax import SAXParseException
     from com.sun.org.apache.xerces.internal.impl.io import \
         MalformedByteSequenceException
 except ImportError:
-    # This isn't Jython
+    # CPython and PyPy
     SAXParseException = xml.sax.SAXParseException
     MalformedByteSequenceException = IOError
 
