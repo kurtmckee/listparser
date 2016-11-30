@@ -109,11 +109,8 @@ def parse(parse_obj, agent=None, etag=None, modified=None, inject=False):
         fileobj = Injector(fileobj)
     try:
         parser.parse(fileobj)
-    except (SAXParseException, MalformedByteSequenceException,
-            UnicodeDecodeError):
-        # Jython propagates exceptions past the ErrorHandler;
-        # Python 3 chokes if a file not opened in binary mode
-        # contains non-Unicode byte sequences
+    except (SAXParseException, MalformedByteSequenceException):  # noqa: E501  # pragma: no cover
+        # Jython propagates exceptions past the ErrorHandler.
         err = sys.exc_info()[1]
         handler.harvest.bozo = 1
         handler.harvest.bozo_exception = err
