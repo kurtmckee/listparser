@@ -17,6 +17,7 @@
 # along with listparser.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime  # noqa: F401 (required by evals)
+import io
 import os
 import threading
 
@@ -33,13 +34,6 @@ except ImportError:
     import http.server
     BaseHTTPServer = http.server
     SimpleHTTPServer = http.server
-
-try:
-    # Python 2
-    from StringIO import StringIO
-except ImportError:
-    # Python 3
-    from io import StringIO
 
 try:
     if bytes is str:
@@ -112,13 +106,18 @@ def test_image():
     assert result.bozo
 
 
+def test_return_guarantees():
+    result = listparser.parse(0)
+    assert result.bozo
+
+
 doc = """<?xml version="1.0"?><opml />"""
 testfile = os.path.join('tests', 'filename.xml')
 
 
 @pytest.mark.parametrize('obj', [
     doc,  # string input
-    StringIO(_to_str(doc)),  # file-like object
+    io.BytesIO(listparser._to_bytes(doc)),  # file-like object
     testfile,  # relative path
     os.path.abspath(testfile),  # absolute path
 ])
@@ -154,7 +153,7 @@ def injector_fixture(request):
             <rss:channel rdf:about="http://domain/feed" />
             </rdfs:seeAlso></foaf:Document></foaf:weblog></foaf:Agent>
             </rdf:RDF>""")
-    idoc = listparser.Injector(listparser.BytesStrIO(doc))
+    idoc = listparser.Injector(io.BytesIO(doc))
     tmp = []
     while 1:
         i = idoc.read(size)
@@ -279,7 +278,7 @@ for filename in filenames:
     assertions = []
     with open(os.path.join('tests', filename), 'rb') as f:
         blob = f.read()
-    for line in blob.splitlines():
+    for line in blob.splitlines():  # pragma: no branch
         line = line.decode('utf8', 'replace').strip()
         if '-->' in line:
             break
@@ -300,10 +299,10 @@ for filename in filenames:
         # the `continue` here appears after http_test_count is incremented.
         continue
 
-    if not description:
+    if not description:  # pragma: no cover
         message = 'Description not found in test {}'.format(testfile)
         raise ValueError(message)
-    if not assertions:
+    if not assertions:  # pragma: no cover
         message = 'Eval not found in test {}'.format(testfile)
         raise ValueError(message)
 

@@ -6,3 +6,5 @@ build
 .tox/
 listparser.egg-info/
 .cache
+htmlcov/
+.coverage

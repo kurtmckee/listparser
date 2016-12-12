@@ -19,6 +19,7 @@
 from __future__ import absolute_import
 
 import datetime
+import io
 import sys
 import xml.sax
 
@@ -47,22 +48,16 @@ except ImportError:
     import urllib.parse
     import urllib.request
 
-try:
-    # Python 3: Use a bytes-compatible stream implementation
-    from io import BytesIO as BytesStrIO
-except ImportError:
-    # Python 2: Use a basestring-compatible stream implementation
-    from StringIO import StringIO as BytesStrIO
-
 # Account for differences between the CPythons and Jython
 # HACK: platform.python_implementation() might be ideal here, but
 # Jython 2.5.1 doesn't have it yet, and neither do CPythons < 2.6
-try:
+try:  # pragma: no cover
+    # Jython
     from org.xml.sax import SAXParseException
     from com.sun.org.apache.xerces.internal.impl.io import \
         MalformedByteSequenceException
 except ImportError:
-    # This isn't Jython
+    # CPython and PyPy
     SAXParseException = xml.sax.SAXParseException
     MalformedByteSequenceException = IOError
 
@@ -84,9 +79,7 @@ USER_AGENT = "listparser/%s +%s" % (__version__, __url__)
 def _to_bytes(text):
     # Force `text` to the type expected by different interpreters
     # Python 3 expects type(bytes)
-    # Python 2 and IronPython expect type(basestring)
-    if 'IronPython' in sys.version:
-        return text
+    # Python 2 expects type(basestring)
     try:
         return bytes(text, 'utf8')
     except (TypeError, NameError):
@@ -117,14 +110,8 @@ def parse(parse_obj, agent=None, etag=None, modified=None, inject=False):
         fileobj = Injector(fileobj)
     try:
         parser.parse(fileobj)
-    except (SAXParseException, MalformedByteSequenceException,
-            SystemError,
-            UnicodeDecodeError):
-        # Jython propagates exceptions past the ErrorHandler;
-        # The pyexpat module for IronPython throws a SystemError
-        # instead of a SaxParseException or something more sensible;
-        # Python 3 chokes if a file not opened in binary mode
-        # contains non-Unicode byte sequences
+    except (SAXParseException, MalformedByteSequenceException):  # noqa: E501  # pragma: no cover
+        # Jython propagates exceptions past the ErrorHandler.
         err = sys.exc_info()[1]
         handler.harvest.bozo = 1
         handler.harvest.bozo_exception = err
@@ -248,7 +235,7 @@ def _mkfile(obj, agent, etag, modified):
               obj.startswith('ftp://') or obj.startswith('file://')):
         # It's not a URL; test if it's an XML document
         if obj.lstrip().startswith('<'):
-            return BytesStrIO(_to_bytes(obj)), common.SuperDict()
+            return io.BytesIO(_to_bytes(obj)), common.SuperDict()
         # Try dealing with it as a file
         try:
             return open(obj, 'rb'), common.SuperDict()
