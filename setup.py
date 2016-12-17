@@ -18,6 +18,9 @@ setup(
     author_email='contactme@kurtmckee.org',
     url='https://github.com/kurtmckee/listparser',
     packages=['listparser'],
+    install_requires=[
+        'six',
+    ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',

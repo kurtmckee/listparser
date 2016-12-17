@@ -23,6 +23,8 @@ import io
 import sys
 import xml.sax
 
+import six
+
 try:
     import htmlentitydefs
 except ImportError:
