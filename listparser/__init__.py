@@ -54,7 +54,7 @@ __url__ = "https://github.com/kurtmckee/listparser"
 __version__ = "0.18"
 
 
-USER_AGENT = "listparser/%s +%s" % (__version__, __url__)
+USER_AGENT = 'listparser/{0} +{1}'.format(__version__, __url__)
 
 
 def b(text):
@@ -153,18 +153,18 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler,
     def startElementNS(self, name, qname, attrs):
         fn = ''
         if name[0] in common.namespaces:
-            fn = '_start_%s_%s' % (common.namespaces[name[0]], name[1])
+            fn = '_start_{0}_{1}'.format(common.namespaces[name[0]], name[1])
         elif name[0] is None:
-            fn = '_start_opml_%s' % (name[1])
+            fn = '_start_opml_{0}'.format(name[1])
         if hasattr(getattr(self, fn, None), '__call__'):
             getattr(self, fn)(attrs)
 
     def endElementNS(self, name, qname):
         fn = ''
         if name[0] in common.namespaces:
-            fn = '_end_%s_%s' % (common.namespaces[name[0]], name[1])
+            fn = '_end_{0}_{1}'.format(common.namespaces[name[0]], name[1])
         elif name[0] is None:
-            fn = '_end_opml_%s' % (name[1])
+            fn = '_end_opml_{0}'.format(name[1])
         if hasattr(getattr(self, fn, None), '__call__'):
             getattr(self, fn)()
             # Always disable and reset character capture in order to
@@ -281,9 +281,9 @@ class Injector(object):
         # Inject the entity declarations into the cache
         entities = ''
         for k, v in html_entities.name2codepoint.items():
-            entities += '<!ENTITY %s "&#%s;">' % (k, v)
+            entities += '<!ENTITY {0} "&#{1};">'.format(k, v)
         # The '>' is deliberately missing; it will be appended by join()
-        doctype = "<!DOCTYPE anyroot [%s]" % (entities, )
+        doctype = '<!DOCTYPE anyroot [{0}]'.format(entities)
         content = read.split(b'>', 1)
         content.insert(1, b(doctype))
         self.cache = b'>'.join(content)
