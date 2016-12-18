@@ -24,31 +24,9 @@ import sys
 import xml.sax
 
 import six
-
-try:
-    import htmlentitydefs
-except ImportError:
-    import html.entities as htmlentitydefs
-
-try:
-    import httplib
-
-    class http(object):
-        client = httplib
-except ImportError:
-    import http.client
-
-try:
-    import urllib2
-
-    class urllib(object):
-        request = urllib2
-        error = urllib2
-        parse = urllib2
-except ImportError:
-    import urllib.error
-    import urllib.parse
-    import urllib.request
+import six.moves.html_entities as html_entities
+import six.moves.http_client as http_client
+import six.moves.urllib as urllib
 
 # Account for differences between the CPythons and Jython
 # HACK: platform.python_implementation() might be ideal here, but
@@ -259,7 +237,7 @@ def _mkfile(obj, agent, etag, modified):
     opener = urllib.request.build_opener(HTTPRedirectHandler, HTTPErrorHandler)
     try:
         ret = opener.open(request)
-    except (urllib.error.URLError, http.client.HTTPException):
+    except (urllib.error.URLError, http_client.HTTPException):
         err = sys.exc_info()[1]
         return None, common.SuperDict({'bozo': 1, 'bozo_exception': err})
 
@@ -299,8 +277,8 @@ class Injector(object):
             return read
 
         # Inject the entity declarations into the cache
-        entities = str()
-        for k, v in htmlentitydefs.name2codepoint.items():
+        entities = ''
+        for k, v in html_entities.name2codepoint.items():
             entities += '<!ENTITY %s "&#%s;">' % (k, v)
         # The '>' is deliberately missing; it will be appended by join()
         doctype = "<!DOCTYPE anyroot [%s]" % (entities, )

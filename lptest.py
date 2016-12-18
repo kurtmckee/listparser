@@ -22,18 +22,11 @@ import os
 import threading
 
 import pytest
+import six
+import six.moves.BaseHTTPServer as BaseHTTPServer
+import six.moves.SimpleHTTPServer as SimpleHTTPServer
 
 import listparser.dates
-
-try:
-    # Python 2
-    import BaseHTTPServer
-    import SimpleHTTPServer
-except ImportError:
-    # Python 3
-    import http.server
-    BaseHTTPServer = http.server
-    SimpleHTTPServer = http.server
 
 try:
     if bytes is str:
