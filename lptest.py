@@ -28,38 +28,12 @@ import six.moves.SimpleHTTPServer as SimpleHTTPServer
 
 import listparser.dates
 
-try:
-    if bytes is str:
-        # bytes is an alias for str in Python 2.6 and 2.7
-        raise NameError
-except NameError:
-    # Python 2
-    def _to_unicode(obj):
-        """_to_unicode(str or unicode) -> unicode"""
-        if isinstance(obj, str):
-            obj.decode('utf-8')
-        return obj
-else:
-    # Python 3
-    def _to_unicode(obj):
-        """_to_unicode(bytes or str) -> str"""
-        if isinstance(obj, bytes):
-            return obj.decode('utf-8')
-        return obj
 
-try:
-    unicode
-except NameError:
-    # Python 3
-    def _to_str(obj):
-        return obj
-else:
-    # Python 2
-    def _to_str(obj):
-        """_to_str(unicode or str) -> str (UTF-8 encoded)"""
-        if isinstance(obj, unicode):  # noqa: F821
-            return obj.encode('utf-8')
-        return obj
+def u(obj):
+    """u(str or unicode) -> unicode"""
+    if isinstance(obj, six.binary_type):
+        return obj.decode('utf-8')
+    return obj
 
 
 def test_useragent_invalid():
@@ -110,7 +84,7 @@ testfile = os.path.join('tests', 'filename.xml')
 
 @pytest.mark.parametrize('obj', [
     doc,  # string input
-    io.BytesIO(listparser._to_bytes(doc)),  # file-like object
+    io.BytesIO(listparser.b(doc)),  # file-like object
     testfile,  # relative path
     os.path.abspath(testfile),  # absolute path
 ])
@@ -136,7 +110,7 @@ def test_bad_mkfile(obj):
 @pytest.fixture(params=[1, 20])
 def injector_fixture(request):
     size = request.param
-    doc = listparser._to_bytes("""<?xml version="1.0"?><rdf:RDF
+    doc = listparser.b("""<?xml version="1.0"?><rdf:RDF
             xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
             xmlns:foaf="http://xmlns.com/foaf/0.1/"
             xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
@@ -155,7 +129,7 @@ def injector_fixture(request):
         else:
             idoc.close()
             break
-    return _to_unicode(listparser._to_bytes('').join(tmp))
+    return u(b''.join(tmp))
 
 
 def test_injector(injector_fixture):
@@ -270,15 +244,15 @@ for filename in filenames:
     info = {}
     assertions = []
     with open(os.path.join('tests', filename), 'rb') as f:
-        blob = f.read()
+        blob = f.read().decode('utf8', 'replace')
     for line in blob.splitlines():  # pragma: no branch
-        line = line.decode('utf8', 'replace').strip()
         if '-->' in line:
             break
         if line.lstrip().startswith('Eval:'):
             assertions.append(line.split(': ', 1)[1].strip())
         elif ': ' in line:
-            info.update((map(str.strip, _to_str(line).split(': ', 1)),))
+            key, value = line.strip().split(': ', 1)
+            info[key] = value
     description = info.get('Description', '')
     etag = info.get('ETag', None)
     modified = info.get('Modified', None)
@@ -322,12 +296,12 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_GET(self):
         status = 200
         location = etag = modified = None
-        reply = listparser._to_bytes('')
+        reply = b''
         end_directives = False
-        f = open(os.path.dirname(os.path.abspath(__file__)) + self.path, 'rb')
-        for line in f:
-            reply += line
-            line = line.decode('utf8', 'replace')
+        filename = os.path.dirname(os.path.abspath(__file__)) + self.path
+        with open(filename, 'rb') as f:
+            reply = f.read()
+        for line in reply.decode('utf8', 'replace').splitlines():
             if not end_directives:
                 if line.strip() == '-->':
                     end_directives = True
@@ -343,7 +317,6 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                     modified = line.split(': ', 1)[1].strip()
                     if self.headers.get('if-modified-since') == modified:
                         status = 304
-        f.close()
         self.send_response(status)
         if location:
             self.send_header('Location', location)
