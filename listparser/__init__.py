@@ -23,30 +23,10 @@ import io
 import sys
 import xml.sax
 
-try:
-    import htmlentitydefs
-except ImportError:
-    import html.entities as htmlentitydefs
-
-try:
-    import httplib
-
-    class http(object):
-        client = httplib
-except ImportError:
-    import http.client
-
-try:
-    import urllib2
-
-    class urllib(object):
-        request = urllib2
-        error = urllib2
-        parse = urllib2
-except ImportError:
-    import urllib.error
-    import urllib.parse
-    import urllib.request
+import six
+import six.moves.html_entities as html_entities
+import six.moves.http_client as http_client
+import six.moves.urllib as urllib
 
 # Account for differences between the CPythons and Jython
 # HACK: platform.python_implementation() might be ideal here, but
@@ -76,14 +56,15 @@ __version__ = "0.18"
 USER_AGENT = "listparser/%s +%s" % (__version__, __url__)
 
 
-def _to_bytes(text):
+def b(text):
+    """Encode unicode and string objects to bytes objects."""
+
     # Force `text` to the type expected by different interpreters
     # Python 3 expects type(bytes)
     # Python 2 expects type(basestring)
-    try:
-        return bytes(text, 'utf8')
-    except (TypeError, NameError):
-        return text
+    if isinstance(text, six.text_type):
+        return text.encode('utf8')
+    return text
 
 
 def parse(parse_obj, agent=None, etag=None, modified=None, inject=False):
@@ -227,7 +208,7 @@ def _mkfile(obj, agent, etag, modified):
     if hasattr(obj, 'read') and hasattr(obj, 'close'):
         # It's file-like
         return obj, common.SuperDict()
-    elif not isinstance(obj, str):
+    elif not isinstance(obj, (six.text_type, six.binary_type)):
         # This isn't a known-parsable object
         err = ListError('parse() called with unparsable object')
         return None, common.SuperDict({'bozo': 1, 'bozo_exception': err})
@@ -235,7 +216,7 @@ def _mkfile(obj, agent, etag, modified):
               obj.startswith('ftp://') or obj.startswith('file://')):
         # It's not a URL; test if it's an XML document
         if obj.lstrip().startswith('<'):
-            return io.BytesIO(_to_bytes(obj)), common.SuperDict()
+            return io.BytesIO(b(obj)), common.SuperDict()
         # Try dealing with it as a file
         try:
             return open(obj, 'rb'), common.SuperDict()
@@ -244,11 +225,11 @@ def _mkfile(obj, agent, etag, modified):
             return None, common.SuperDict({'bozo': 1, 'bozo_exception': err})
     # It's a URL
     headers = {}
-    if isinstance(agent, str):
+    if isinstance(agent, six.string_types):
         headers['User-Agent'] = agent
-    if isinstance(etag, str):
+    if isinstance(etag, (str, six.string_types)):
         headers['If-None-Match'] = etag
-    if isinstance(modified, str):
+    if isinstance(modified, six.string_types):
         headers['If-Modified-Since'] = modified
     elif isinstance(modified, datetime.datetime):
         # It is assumed that `modified` is in UTC time
@@ -257,7 +238,7 @@ def _mkfile(obj, agent, etag, modified):
     opener = urllib.request.build_opener(HTTPRedirectHandler, HTTPErrorHandler)
     try:
         ret = opener.open(request)
-    except (urllib.error.URLError, http.client.HTTPException):
+    except (urllib.error.URLError, http_client.HTTPException):
         err = sys.exc_info()[1]
         return None, common.SuperDict({'bozo': 1, 'bozo_exception': err})
 
@@ -284,7 +265,7 @@ class Injector(object):
     def __init__(self, obj):
         self.obj = obj
         self.injected = False
-        self.cache = _to_bytes('')
+        self.cache = b''
 
     def read(self, size):
         # Read from the cache (and the object if necessary)
@@ -293,18 +274,18 @@ class Injector(object):
             read += self.obj.read(size - len(self.cache))
         self.cache = self.cache[size:]
 
-        if self.injected or _to_bytes('>') not in read:
+        if self.injected or b'>' not in read:
             return read
 
         # Inject the entity declarations into the cache
-        entities = str()
-        for k, v in htmlentitydefs.name2codepoint.items():
+        entities = ''
+        for k, v in html_entities.name2codepoint.items():
             entities += '<!ENTITY %s "&#%s;">' % (k, v)
         # The '>' is deliberately missing; it will be appended by join()
         doctype = "<!DOCTYPE anyroot [%s]" % (entities, )
-        content = read.split(_to_bytes('>'), 1)
-        content.insert(1, _to_bytes(doctype))
-        self.cache = _to_bytes('>').join(content)
+        content = read.split(b'>', 1)
+        content.insert(1, b(doctype))
+        self.cache = b'>'.join(content)
         self.injected = True
 
         ret = self.cache[:size]
