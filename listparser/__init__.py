@@ -17,6 +17,7 @@
 # along with listparser.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
+from __future__ import unicode_literals
 
 import datetime
 import io
