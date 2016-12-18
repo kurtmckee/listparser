@@ -29,9 +29,9 @@ from . import dates
 class OpmlMixin(common.CommonMixin):
     def _start_opml_opml(self, attrs):
         self.harvest.version = 'opml'
-        if attrs.get((None, 'version')) in ("1.0", "1.1"):
+        if attrs.get((None, 'version')) in ('1.0', '1.1'):
             self.harvest.version = 'opml1'
-        elif attrs.get((None, 'version')) == "2.0":
+        elif attrs.get((None, 'version')) == '2.0':
             self.harvest.version = 'opml2'
 
     def _start_opml_outline(self, attrs):
