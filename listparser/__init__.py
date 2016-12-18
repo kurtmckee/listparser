@@ -49,9 +49,9 @@ from . import igoogle
 from . import opml
 
 
-__author__ = "Kurt McKee <contactme@kurtmckee.org>"
-__url__ = "https://github.com/kurtmckee/listparser"
-__version__ = "0.18"
+__author__ = 'Kurt McKee <contactme@kurtmckee.org>'
+__url__ = 'https://github.com/kurtmckee/listparser'
+__version__ = '0.18'
 
 
 USER_AGENT = 'listparser/{0} +{1}'.format(__version__, __url__)
@@ -102,14 +102,14 @@ def parse(parse_obj, agent=None, etag=None, modified=None, inject=False):
 
     # Test if a DOCTYPE injection is needed
     if hasattr(handler.harvest, 'bozo_exception'):
-        if "entity" in handler.harvest.bozo_exception.__str__():
+        if 'entity' in handler.harvest.bozo_exception.__str__():
             if not inject:
                 return parse(parse_obj, agent, etag, modified, True)
     # Make it clear that the XML file is broken
     # (if no other exception has been assigned)
     if inject and not handler.harvest.bozo:
         handler.harvest.bozo = 1
-        handler.harvest.bozo_exception = ListError("undefined entity found")
+        handler.harvest.bozo_exception = ListError('undefined entity found')
     return handler.harvest
 
 

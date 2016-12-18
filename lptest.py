@@ -52,19 +52,19 @@ def test_useragent_default():
 
 def test_useragent_custom():
     url = 'http://localhost:8091/tests/http/useragent.xml'
-    result = listparser.parse(url, agent="CustomAgent")
+    result = listparser.parse(url, agent='CustomAgent')
     assert not result.bozo
-    assert result.headers.get('x-agent') == "CustomAgent"
+    assert result.headers.get('x-agent') == 'CustomAgent'
 
 
 def test_useragent_global_override():
     url = 'http://localhost:8091/tests/http/useragent.xml'
     tmp = listparser.USER_AGENT
-    listparser.USER_AGENT = "NewGlobalAgent"
+    listparser.USER_AGENT = 'NewGlobalAgent'
     result = listparser.parse(url)
     listparser.USER_AGENT = tmp
     assert not result.bozo
-    assert result.headers.get('x-agent') == "NewGlobalAgent"
+    assert result.headers.get('x-agent') == 'NewGlobalAgent'
 
 
 def test_image():
@@ -78,7 +78,7 @@ def test_return_guarantees():
     assert result.bozo
 
 
-doc = """<?xml version="1.0"?><opml />"""
+doc = '<?xml version="1.0"?><opml />'
 testfile = os.path.join('tests', 'filename.xml')
 
 
@@ -97,8 +97,8 @@ def test_good_mkfile(obj):
 
 @pytest.mark.parametrize('obj', [
     True,  # unparsable object
-    "xxx://badurl.com/",  # bad protocol
-    "http://badurl.com.INVALID/",  # URL unreachable
+    'xxx://badurl.com/',  # bad protocol
+    'http://badurl.com.INVALID/',  # URL unreachable
     'totally made up and bogus /\:',  # bogus filename
 ])
 def test_bad_mkfile(obj):
