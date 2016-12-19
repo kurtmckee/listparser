@@ -1,17 +1,30 @@
 History
-*******
+=======
 
-coming in the next release:
+
+Unreleased changes
+------------------
+
     * Split the codebase into multiple files (drops Python 2.4 support)
     * Use tox to automate testing across multiple interpreters and versions
     * Drop support for IronPython for lack of ipy XML parsers
     * Migrate to pytest for unit testing (affects Python version support)
     * Drop support for Python 2.4, 2.5, 3.0, 3.1, and 3.2
 
-v0.18 (21 April 2015)
+
+0.18
+----
+
+*Released 21 April 2015*
+
     * Replace the regex RFC 822 date parser with procedural code
 
-v0.17 (16 Dec 2012) "Territory expansion"
+
+0.17
+----
+
+*Released 16 December 2012 -- "Territory expansion"*
+
     * Python 3.3 is now tested and supported!
     * PyPy is now tested and supported!
     * Jython 2.5.2 and 2.5.3 are now tested and supported!
@@ -20,37 +33,72 @@ v0.17 (16 Dec 2012) "Territory expansion"
         (this means that Jython 2.5.1 is no longer supported)
     * Support single-digit days in RFC822 dates
 
-v0.16 (17 Dec 2011) "Refresh"
+
+0.16
+----
+
+*Released 17 December 2011 -- "Refresh"*
+
     * Python 3.2 is now supported!
     * Made setup.py auto-convert listparser using 2to3 if necessary
     * Switched to absolute URLs in the HTTP redirect tests
 
-v0.15 (15 Nov 2010) "A special day"
+
+0.15
+----
+
+*Released 15 November 2010 "A special day"*
+
     * IronPython 2.6.2 is now supported!
 
-v0.14 (22 Oct 2010) "A good year"
+
+0.14
+----
+
+*Released 22 October 2010 -- "A good year"*
+
     * Added support for LiveJournal FOAF files
     * Improved the documentation
     * Improved the code quality
 
-v0.13 (1 Feb 2010) "Revelations"
+
+0.13
+----
+
+*Released 1 February 2010 -- "Revelations"*
+
     * Fixed an infinite loop bug in Injector
     * Fixed a threading-related bug in the unit tests
     * Made Injector inject after the first '>', not '\n'
     * Overhauled and modularized the unit test code
     * Increased the code coverage of the unit tests
 
-v0.12 (3 Jan 2010) "Safety net"
+
+0.12
+----
+
+*Released 3 January 2010 -- "Safety net"*
+
     * Fixed global USER_AGENT behavior
     * Fixed several crasher bugs
     * Fixed a 2to3 tool warning in lptest.py
     * Made lptest.py return a status code to the shell
 
-v0.11 (25 Dec 2009) "Floodgates"
+
+0.11
+----
+
+*Released 25 December 2009 -- "Floodgates"*
+
     * Jython 2.5.1 is now supported!
     * Added support for opening relative and absolute filenames
 
-v0.10 (12 Dec 2009) "Internet-ready"
+
+0.10
+----
+
+*Released 12 December 2009 -- "Internet-ready"*
+
     * Python 3 is now supported!
     * Correctly interpret undeclared HTML character entities
     * Significantly sped up large RDF+FOAF document parsing
@@ -60,19 +108,34 @@ v0.10 (12 Dec 2009) "Internet-ready"
     * Refreshed and added to documentation
     * Added many more tests
 
-v0.9 (3 Oct 2009) "Celery wolves"
+
+0.9
+---
+
+*Released 3 October 2009 -- "Celery wolves"*
+
     * Support RDF+FOAF!
     * Capture opportunity URLs
     * Added duplicate URL detection
     * Added distutils support for easier distribution
 
-v0.8 (3 Sep 2009) "Three day weekend"
+
+0.8
+---
+
+*Released 3 September 2009 -- "Three day weekend"*
+
     * Support the iGoogle exported settings format!
-    * Support Liferea's version of subscription lists in OPML 
+    * Support Liferea's version of subscription lists in OPML
     * Removed feeds[i].claims
     * Removed almost all of listparser's bozo warnings
 
-v0.7 (28 Aug 2009) "The Codex"
+
+0.7
+---
+
+*Released 28 August 2009 -- "The Codex"*
+
     * Added documentation!
     * Unified feed and subscription list code
     * Extended category and tag support to subscription lists
@@ -81,13 +144,23 @@ v0.7 (28 Aug 2009) "The Codex"
     * Feed and list titles are no longer filled with the
         associated URL if the title is not found
 
-v0.6 (7 Aug 2009) "Hatchet Hotel"
+
+0.6
+---
+
+*Released 7 August 2009 -- "Hatchet Hotel"*
+
     * Certain return result elements are now guaranteed
     * `bozo_detail` has been renamed `bozo_exception`
     * Better support for Wordpress' wp-links-opml.php output
     * Added 22 new tests (and modified several others)
 
-v0.5 (1 Aug 2009) "Going green"
+
+0.5
+---
+
+*Released 1 August 2009 -- "Going green"*
+
     * Send a (configurable) User-Agent header
     * Support HTTP ETag and Last-Modified headers
     * Support HTTP redirects and errors
@@ -95,23 +168,43 @@ v0.5 (1 Aug 2009) "Going green"
     * The subscription list title is now stripped of whitespace
     * Added 11 more tests
 
-v0.4 (18 July 2009) "07/18,29"
+
+0.4
+---
+
+*Released 18 July 2009 -- "07/18,29"*
+
     * Support categories and tags specified in @category
     * Support categorization using nested <outline> tags
     * Added 21 more tests
 
-v0.3 (3 July 2009) "...and Recursion for all."
+
+0.3
+---
+
+*Released 3 July 2009 -- "...and Recursion for all."*
+
     * The feed key `name` is now `title`
     * Additional optional attributes supported
     * Support subscription list inclusions
     * Added 13 more tests
 
-v0.2 (26 June 2009) "Leveling up"
+
+0.2
+---
+
+*Released 26 June 2009 -- "Leveling up"*
+
     * RFC 822 date and time support added (+39 tests)
     * Added more thorough OPML version attribute detection (+5 tests)
     * `dateModified` and `dateCreated` OPML tags supported (+4 tests)
     * Added test cases for existing functionality (+2 tests)
     * <outline> `htmlUrl` attribute support added (+1 test)
 
-v0.1 (19 June 2009) "Achievement unlocked"
+
+0.1
+---
+
+*Released 19 June 2009 -- "Achievement unlocked"*
+
     * Initial release
