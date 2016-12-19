@@ -15,6 +15,7 @@ Contents
 ..  toctree::
     :maxdepth: 2
 
+    history
     getting-started
     http-features
     detection-algorithm

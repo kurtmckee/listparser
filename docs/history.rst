@@ -1,3 +1,6 @@
+History
+*******
+
 coming in the next release:
     * Split the codebase into multiple files (drops Python 2.4 support)
     * Use tox to automate testing across multiple interpreters and versions
