@@ -1,5 +1,5 @@
 # lptest.py - Run unit tests against listparser.py
-# Copyright 2009-2016 Kurt McKee <contactme@kurtmckee.org>
+# Copyright 2009-2017 Kurt McKee <contactme@kurtmckee.org>
 #
 # This file is part of listparser.
 #
