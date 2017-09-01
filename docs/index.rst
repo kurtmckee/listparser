@@ -13,6 +13,11 @@ Contents
 --------
 
 ..  toctree::
+    :maxdepth: 1
+
+    history
+
+..  toctree::
     :maxdepth: 2
 
     getting-started

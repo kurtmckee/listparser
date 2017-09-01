@@ -1,5 +1,5 @@
 # listparser - Parse OPML, FOAF, and iGoogle subscription lists.
-# Copyright 2009-2016 Kurt McKee <contactme@kurtmckee.org>
+# Copyright 2009-2017 Kurt McKee <contactme@kurtmckee.org>
 #
 # This file is part of listparser.
 #
@@ -69,6 +69,37 @@ def b(text):
 
 
 def parse(parse_obj, agent=None, etag=None, modified=None, inject=False):
+    """Parse a subscription list and return a dict containing the results.
+
+    :param parse_obj: A file-like object or a string containing a URL, an
+        absolute or relative filename, or an XML document.
+    :type parse_obj: str or file
+    :param agent: User-Agent header to be sent when requesting a URL
+    :type agent: str
+    :param etag: The ETag header to be sent when requesting a URL.
+    :type etag: str
+    :param modified: The Last-Modified header to be sent when requesting a URL.
+    :type modified: str or datetime.datetime
+
+    :returns: All of the parsed information, webserver HTTP response
+        headers, and any exception encountered.
+    :rtype: dict
+
+    :py:func:`~listparser.parse` is the only public function exposed by
+    listparser.
+
+    If *parse_obj* is a URL, the *agent* will identify the software
+    making the request, *etag* will identify the last HTTP ETag
+    header returned by the webserver, and *modified* will
+    identify the last HTTP Last-Modified header returned by the
+    webserver. *agent* and *etag* must be strings,
+    while *modified* can be either a string or a Python
+    *datetime.datetime* object.
+
+    If *agent* is not provided, the :py:data:`~listparser.USER_AGENT` global
+    variable will be used by default.
+    """
+
     guarantees = common.SuperDict({
         'bozo': 0,
         'feeds': [],
