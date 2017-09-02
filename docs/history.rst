@@ -10,6 +10,7 @@ Unreleased changes
     * Drop support for IronPython for lack of ipy XML parsers
     * Migrate to pytest for unit testing (affects Python version support)
     * Drop support for Python 2.4, 2.5, 3.0, 3.1, and 3.2
+    * Add support for Python 3.6
 
 
 0.18
