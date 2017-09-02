@@ -9,7 +9,7 @@ Unreleased changes
     * Use tox to automate testing across multiple interpreters and versions
     * Drop support for IronPython for lack of ipy XML parsers
     * Migrate to pytest for unit testing (affects Python version support)
-    * Drop support for Python 2.4, 2.5, 3.0, 3.1, and 3.2
+    * Drop support for Python 2.4, 2.5, 2.6, 3.0, 3.1, and 3.2
     * Add support for Python 3.6
 
 
