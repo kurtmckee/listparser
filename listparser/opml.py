@@ -16,9 +16,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with listparser.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
 import copy
 import datetime
 
@@ -130,7 +127,7 @@ class OpmlMixin(common.CommonMixin):
     def _end_opml_dateCreated(self):
         if self.normchars():
             self.harvest.meta.created = self.normchars()
-            d = dates._rfc822(self.harvest.meta.created)
+            d = dates.rfc822(self.harvest.meta.created)
             if isinstance(d, datetime.datetime):
                 self.harvest.meta.created_parsed = d
             else:
@@ -141,7 +138,7 @@ class OpmlMixin(common.CommonMixin):
     def _end_opml_dateModified(self):
         if self.normchars():
             self.harvest.meta.modified = self.normchars()
-            d = dates._rfc822(self.harvest.meta.modified)
+            d = dates.rfc822(self.harvest.meta.modified)
             if isinstance(d, datetime.datetime):
                 self.harvest.meta.modified_parsed = d
             else:

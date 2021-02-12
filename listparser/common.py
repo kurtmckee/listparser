@@ -1,5 +1,5 @@
 # listparser - Parse OPML, FOAF, and iGoogle subscription lists.
-# Copyright 2009-2017 Kurt McKee <contactme@kurtmckee.org>
+# Copyright 2009-2021 Kurt McKee <contactme@kurtmckee.org>
 #
 # This file is part of listparser.
 #
@@ -15,9 +15,6 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with listparser.  If not, see <http://www.gnu.org/licenses/>.
-
-from __future__ import absolute_import
-from __future__ import unicode_literals
 
 namespaces = {
     'http://opml.org/spec2': 'opml',
@@ -38,10 +35,13 @@ class SuperDict(dict):
     """
     SuperDict is a dictionary object with keys posing as instance attributes.
 
-    >>> i = SuperDict()
-    >>> i.one = 1
-    >>> i
-    {'one': 1}
+    ..  code-block:: pycon
+
+        >>> i = SuperDict()
+        >>> i.one = 1
+        >>> i
+        {'one': 1}
+
     """
 
     def __getattribute__(self, name):
@@ -55,7 +55,7 @@ class SuperDict(dict):
         return value
 
 
-class CommonMixin(object):
+class CommonMixin:
     def _expect_characters(self, attrs):
         # Most _start_opml_* functions only need to set these two variables,
         # so this function exists to reduce significant code duplication

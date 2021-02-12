@@ -4,7 +4,7 @@ Getting started
 You can install listparser using pip.
 listparser has a single public function, :py:func:`~listparser.parse`.
 
-..  code-block:: python
+..  code-block:: pycon
 
     >>> import listparser
     >>> result = listparser.parse('https://github.com/kurtmckee/listparser/raw/develop/project.opml')
@@ -23,7 +23,7 @@ The ``meta`` key contains a dictionary of information about the
 subscription list, including its title, when it was created and last
 modified, and who maintains the subscription list.
 
-..  code-block:: python
+..  code-block:: pycon
 
     >>> result.meta.title
     'listparser project feeds'
@@ -37,12 +37,12 @@ The ``feeds`` key
 The ``feeds`` key is a list of dictionaries.
 The title and the URL are stored in keys of the same names.
 
-..  code-block:: python
+..  code-block:: pycon
 
     >>> for i in result.feeds:
-    ...     print '{title} <{url}>'.format(**i)
+    ...     print('{title} <{url}>'.format(**i))
     ...
-    listparser blog <http://kurtmckee.livejournal.com/data/atom?tag=listparser>
+    listparser blog <https://kurtmckee.org/tag/listparser>
     listparser changelog <https://github.com/kurtmckee/listparser/commits/develop.atom>
 
 

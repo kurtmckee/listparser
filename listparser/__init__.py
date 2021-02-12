@@ -1,5 +1,5 @@
 # listparser - Parse OPML, FOAF, and iGoogle subscription lists.
-# Copyright 2009-2017 Kurt McKee <contactme@kurtmckee.org>
+# Copyright 2009-2021 Kurt McKee <contactme@kurtmckee.org>
 #
 # This file is part of listparser.
 #
@@ -16,31 +16,16 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with listparser.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
 import datetime
 import io
 import sys
+from typing import Dict, IO, Union
 import xml.sax
 
-import six
-import six.moves.html_entities as html_entities
-import six.moves.http_client as http_client
-import six.moves.urllib as urllib
-
-# Account for differences between the CPythons and Jython
-# HACK: platform.python_implementation() might be ideal here, but
-# Jython 2.5.1 doesn't have it yet, and neither do CPythons < 2.6
-try:  # pragma: no cover
-    # Jython
-    from org.xml.sax import SAXParseException
-    from com.sun.org.apache.xerces.internal.impl.io import \
-        MalformedByteSequenceException
-except ImportError:
-    # CPython and PyPy
-    SAXParseException = xml.sax.SAXParseException
-    MalformedByteSequenceException = IOError
+import html.entities
+import http.client
+import urllib.error
+import urllib.request
 
 from . import common
 from . import dates
@@ -57,47 +42,36 @@ __version__ = '0.18'
 USER_AGENT = 'listparser/{0} +{1}'.format(__version__, __url__)
 
 
-def b(text):
-    """Encode unicode and string objects to bytes objects."""
-
-    # Force `text` to the type expected by different interpreters
-    # Python 3 expects type(bytes)
-    # Python 2 expects type(basestring)
-    if isinstance(text, six.text_type):
-        return text.encode('utf8')
-    return text
-
-
-def parse(parse_obj, agent=None, etag=None, modified=None, inject=False):
+def parse(
+        parse_obj: Union[str, IO],
+        agent: str = None,
+        etag: str = None,
+        modified: Union[str, datetime.datetime] = None,
+        inject: bool = False,
+) -> Dict:
     """Parse a subscription list and return a dict containing the results.
 
-    :param parse_obj: A file-like object or a string containing a URL, an
-        absolute or relative filename, or an XML document.
-    :type parse_obj: str or file
-    :param agent: User-Agent header to be sent when requesting a URL
-    :type agent: str
-    :param etag: The ETag header to be sent when requesting a URL.
-    :type etag: str
-    :param modified: The Last-Modified header to be sent when requesting a URL.
-    :type modified: str or datetime.datetime
+    *parse_obj* must be one of the following:
 
-    :returns: All of the parsed information, webserver HTTP response
-        headers, and any exception encountered.
-    :rtype: dict
-
-    :py:func:`~listparser.parse` is the only public function exposed by
-    listparser.
+    *   a string containing a URL
+    *   a string containing an absolute or relative filename
+    *   a string containing an XML document
+    *   an open file object
 
     If *parse_obj* is a URL, the *agent* will identify the software
     making the request, *etag* will identify the last HTTP ETag
     header returned by the webserver, and *modified* will
     identify the last HTTP Last-Modified header returned by the
-    webserver. *agent* and *etag* must be strings,
-    while *modified* can be either a string or a Python
-    *datetime.datetime* object.
+    webserver.
 
     If *agent* is not provided, the :py:data:`~listparser.USER_AGENT` global
     variable will be used by default.
+
+    If *inject* is True, HTML character references will be injected into
+    the XML document before it is parsed.
+
+    The dictionary returned will contain all of the parsed information,
+    webserver HTTP response headers, and any exception encountered.
     """
 
     guarantees = common.SuperDict({
@@ -123,8 +97,7 @@ def parse(parse_obj, agent=None, etag=None, modified=None, inject=False):
         fileobj = Injector(fileobj)
     try:
         parser.parse(fileobj)
-    except (SAXParseException, MalformedByteSequenceException):  # noqa: E501  # pragma: no cover
-        # Jython propagates exceptions past the ErrorHandler.
+    except (xml.sax.SAXParseException, IOError):  # noqa: E501  # pragma: no cover
         err = sys.exc_info()[1]
         handler.harvest.bozo = 1
         handler.harvest.bozo_exception = err
@@ -240,7 +213,7 @@ def _mkfile(obj, agent, etag, modified):
     if hasattr(obj, 'read') and hasattr(obj, 'close'):
         # It's file-like
         return obj, common.SuperDict()
-    elif not isinstance(obj, (six.text_type, six.binary_type)):
+    elif not isinstance(obj, (str, bytes)):
         # This isn't a known-parsable object
         err = ListError('parse() called with unparsable object')
         return None, common.SuperDict({'bozo': 1, 'bozo_exception': err})
@@ -248,7 +221,7 @@ def _mkfile(obj, agent, etag, modified):
               obj.startswith('ftp://') or obj.startswith('file://')):
         # It's not a URL; test if it's an XML document
         if obj.lstrip().startswith('<'):
-            return io.BytesIO(b(obj)), common.SuperDict()
+            return io.BytesIO(obj.encode('utf8')), common.SuperDict()
         # Try dealing with it as a file
         try:
             return open(obj, 'rb'), common.SuperDict()
@@ -257,20 +230,20 @@ def _mkfile(obj, agent, etag, modified):
             return None, common.SuperDict({'bozo': 1, 'bozo_exception': err})
     # It's a URL
     headers = {}
-    if isinstance(agent, six.string_types):
+    if isinstance(agent, str):
         headers['User-Agent'] = agent
-    if isinstance(etag, (str, six.string_types)):
+    if isinstance(etag, str):
         headers['If-None-Match'] = etag
-    if isinstance(modified, six.string_types):
+    if isinstance(modified, str):
         headers['If-Modified-Since'] = modified
     elif isinstance(modified, datetime.datetime):
         # It is assumed that `modified` is in UTC time
-        headers['If-Modified-Since'] = dates._to_rfc822(modified)
+        headers['If-Modified-Since'] = dates.to_rfc822(modified)
     request = urllib.request.Request(obj, headers=headers)
     opener = urllib.request.build_opener(HTTPRedirectHandler, HTTPErrorHandler)
     try:
         ret = opener.open(request)
-    except (urllib.error.URLError, http_client.HTTPException):
+    except (urllib.error.URLError, http.client.HTTPException):
         err = sys.exc_info()[1]
         return None, common.SuperDict({'bozo': 1, 'bozo_exception': err})
 
@@ -283,12 +256,12 @@ def _mkfile(obj, agent, etag, modified):
     if info.headers.get('Last-Modified') or info.headers.get('last-modified'):
         info.modified = info.headers.get('Last-Modified') or \
                         info.headers.get('last-modified')  # noqa: E126
-        if isinstance(dates._rfc822(info.modified), datetime.datetime):
-            info.modified_parsed = dates._rfc822(info.modified)
+        if isinstance(dates.rfc822(info.modified), datetime.datetime):
+            info.modified_parsed = dates.rfc822(info.modified)
     return ret, info
 
 
-class Injector(object):
+class Injector:
     """
     Injector buffers read() calls to a file-like object in order to
     inject a DOCTYPE containing HTML entity definitions immediately
@@ -311,12 +284,12 @@ class Injector(object):
 
         # Inject the entity declarations into the cache
         entities = ''
-        for k, v in html_entities.name2codepoint.items():
+        for k, v in html.entities.name2codepoint.items():
             entities += '<!ENTITY {0} "&#{1};">'.format(k, v)
         # The '>' is deliberately missing; it will be appended by join()
         doctype = '<!DOCTYPE anyroot [{0}]'.format(entities)
         content = read.split(b'>', 1)
-        content.insert(1, b(doctype))
+        content.insert(1, doctype.encode('utf8'))
         self.cache = b'>'.join(content)
         self.injected = True
 
