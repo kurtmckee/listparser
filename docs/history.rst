@@ -5,12 +5,16 @@ History
 Unreleased changes
 ------------------
 
-    * Split the codebase into multiple files (drops Python 2.4 support)
-    * Use tox to automate testing across multiple interpreters and versions
-    * Drop support for IronPython for lack of ipy XML parsers
-    * Migrate to pytest for unit testing (affects Python version support)
-    * Drop support for Python 2.4, 2.5, 2.6, 3.0, 3.1, and 3.2
-    * Add support for Python 3.6
+*   Add support for Python 3.6 through Python 3.9.
+*   Drop support for Python 2.4 through Python 3.5.
+*   Drop support for Jython for lack of Python 3 compatibility.
+*   Drop support for IronPython for lack of ipy XML parsers.
+*   Split the codebase into multiple files.
+*   Use tox to automate testing across multiple interpreters and versions.
+*   Migrate to pytest for unit testing.
+*   Remove dependence on the six module.
+*   Add type annotations.
+*   Remove compatibility code.
 
 
 0.18

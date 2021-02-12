@@ -8,3 +8,5 @@ listparser.egg-info/
 .cache
 htmlcov/
 .coverage
+venv/
+.idea/

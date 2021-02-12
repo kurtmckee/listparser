@@ -4,7 +4,7 @@ What is listparser?
 listparser is a Python module that parses subscription lists (also called
 reading lists) and returns all of the feeds and subscription lists that it
 finds. It supports OPML, RDF+FOAF, and the iGoogle exported settings format,
-and runs in Python 2.7, Python 3.3 and up, PyPy, and Jython.
+and runs in Python 3.6 and up, and PyPy3.
 
 listparser is licensed under the terms of the GNU Lesser General Public License
 version 3 or higher.
@@ -28,11 +28,11 @@ A dictionary will be returned with several keys:
 Continuing the example:
 
 >>> result.meta.title
-u'listparser project feeds'
+'listparser project feeds'
 >>> len(result.feeds)
 2
 >>> result.feeds[0].url
-u'http://kurtmckee.livejournal.com/data/atom?tag=listparser'
+'https://kurtmckee.org/tag/listparser'
 
 More extensive documentation is available in the docs/ directory,
 or online at <https://pythonhosted.org/listparser/>.
@@ -48,4 +48,4 @@ that document as a test case, and then find and fix the problem.
 ...you can also just report the bug and leave it to someone else
 to fix the problem, but that won't be as much fun for you!
 
-Bugs can be reported at <http://github.com/kurtmckee/listparser/issues>.
+Bugs can be reported at <https://github.com/kurtmckee/listparser/issues>.

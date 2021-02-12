@@ -47,8 +47,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'listparser'
-copyright = u'2009-2017 Kurt McKee'
+project = 'listparser'
+copyright = '2009-2021 Kurt McKee'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -186,48 +186,3 @@ pygments_style = 'sphinx'
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'listparserdoc'
-
-
-# Options for LaTeX output
-# ------------------------
-
-# The paper size ('letter' or 'a4').
-#
-#     latex_paper_size = 'letter'
-
-# The font size ('10pt', '11pt' or '12pt').
-#
-#     latex_font_size = '10pt'
-
-# Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title, author, document class
-# [howto/manual]).
-latex_documents = [(
-    'index',
-    'listparser.tex',
-    u'listparser Documentation',
-    u'Kurt McKee',
-    'manual',
-)]
-
-# The name of an image file (relative to this directory) to place at the top of
-# the title page.
-#
-#     latex_logo = None
-
-# For "manual" documents, if this is true, then toplevel headings are parts,
-# not chapters.
-#
-#     latex_use_parts = False
-
-# Additional stuff for the LaTeX preamble.
-#
-#     latex_preamble = ''
-
-# Documents to append as an appendix to all manuals.
-#
-#     latex_appendices = []
-
-# If false, no module index is generated.
-#
-#     latex_use_modindex = True

@@ -1,5 +1,5 @@
 # lptest.py - Run unit tests against listparser.py
-# Copyright 2009-2017 Kurt McKee <contactme@kurtmckee.org>
+# Copyright 2009-2021 Kurt McKee <contactme@kurtmckee.org>
 #
 # This file is part of listparser.
 #
@@ -22,18 +22,9 @@ import os
 import threading
 
 import pytest
-import six
-import six.moves.BaseHTTPServer as BaseHTTPServer
-import six.moves.SimpleHTTPServer as SimpleHTTPServer
+import http.server
 
 import listparser.dates
-
-
-def u(obj):
-    """u(str or unicode) -> unicode"""
-    if isinstance(obj, six.binary_type):
-        return obj.decode('utf-8')
-    return obj
 
 
 def test_useragent_invalid():
@@ -78,13 +69,13 @@ def test_return_guarantees():
     assert result.bozo
 
 
-doc = '<?xml version="1.0"?><opml />'
+empty_doc = '<?xml version="1.0"?><opml />'
 testfile = os.path.join('tests', 'filename.xml')
 
 
 @pytest.mark.parametrize('obj', [
-    doc,  # string input
-    io.BytesIO(listparser.b(doc)),  # file-like object
+    empty_doc,  # string input
+    io.BytesIO(empty_doc.encode('utf8')),  # file-like object
     testfile,  # relative path
     os.path.abspath(testfile),  # absolute path
 ])
@@ -99,7 +90,7 @@ def test_good_mkfile(obj):
     True,  # unparsable object
     'xxx://badurl.com/',  # bad protocol
     'http://badurl.com.INVALID/',  # URL unreachable
-    'totally made up and bogus /\:',  # bogus filename
+    r'totally made up and bogus /\:',  # bogus filename
 ])
 def test_bad_mkfile(obj):
     n, sdict = listparser._mkfile(obj, 'agent', None, None)
@@ -110,7 +101,7 @@ def test_bad_mkfile(obj):
 @pytest.fixture(params=[1, 20])
 def injector_fixture(request):
     size = request.param
-    doc = listparser.b("""<?xml version="1.0"?><rdf:RDF
+    doc = b"""<?xml version="1.0"?><rdf:RDF
             xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
             xmlns:foaf="http://xmlns.com/foaf/0.1/"
             xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
@@ -119,7 +110,7 @@ def injector_fixture(request):
             <foaf:Document rdf:about="http://domain/"><rdfs:seeAlso>
             <rss:channel rdf:about="http://domain/feed" />
             </rdfs:seeAlso></foaf:Document></foaf:weblog></foaf:Agent>
-            </rdf:RDF>""")
+            </rdf:RDF>"""
     idoc = listparser.Injector(io.BytesIO(doc))
     tmp = []
     while 1:
@@ -129,7 +120,7 @@ def injector_fixture(request):
         else:
             idoc.close()
             break
-    return u(b''.join(tmp))
+    return b''.join(tmp).decode('utf8')
 
 
 def test_injector(injector_fixture):
@@ -148,7 +139,7 @@ def test_injector(injector_fixture):
 ])
 def test_format_variations(date, expected_values):
     keys = ('year', 'month', 'day', 'hour', 'minute', 'second')
-    result = listparser.dates._rfc822(date)
+    result = listparser.dates.rfc822(date)
     for key, expected_value in zip(keys, expected_values):
         assert getattr(result, key) == expected_value
 
@@ -160,7 +151,7 @@ def test_format_variations(date, expected_values):
     ('Mon, 21 Jun 99 12:00:00 GMT', 1999),
 ])
 def test_two_digit_years(date, expected_year):
-    assert listparser.dates._rfc822(date).year == expected_year
+    assert listparser.dates.rfc822(date).year == expected_year
 
 
 @pytest.mark.parametrize('date,expected_month', [
@@ -178,7 +169,7 @@ def test_two_digit_years(date, expected_year):
     ('21 Dec 2009 12:00:00 GMT', 12),
 ])
 def test_month_names(date, expected_month):
-    assert listparser.dates._rfc822(date).month == expected_month
+    assert listparser.dates.rfc822(date).month == expected_month
 
 
 @pytest.mark.parametrize('date,hour,minute,day', [
@@ -203,7 +194,7 @@ def test_month_names(date, expected_month):
     ('Mon, 22 Jun 2009 13:15:17 Etc/', 13, 15, 22),
 ])
 def test_timezones(date, hour, minute, day):
-    result = listparser.dates._rfc822(date)
+    result = listparser.dates.rfc822(date)
     assert result.hour == hour
     assert result.minute == minute
     assert result.day == day
@@ -228,7 +219,7 @@ def test_timezones(date, hour, minute, day):
     'Sun, 16 Dec 2012 11:47:32 -00:zz',  # bad negative timezone minute
 ])
 def test_invalid_dates(date):
-    assert listparser.dates._rfc822(date) is None
+    assert listparser.dates.rfc822(date) is None
 
 
 http_test_count = 0
@@ -276,7 +267,7 @@ for filename in filenames:
     tests.append([filename, etag, modified, assertions])
     if modified:
         # Create a datetime test for `modified`.
-        modified = listparser.dates._rfc822(modified)
+        modified = listparser.dates.rfc822(modified)
         tests.append([filename, etag, modified, assertions])
 
 
@@ -292,11 +283,10 @@ def test_file(filename, etag, modified, assertions):
         assert eval(assertion)
 
 
-class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         status = 200
         location = etag = modified = None
-        reply = b''
         end_directives = False
         filename = os.path.dirname(os.path.abspath(__file__)) + self.path
         with open(filename, 'rb') as f:
@@ -340,7 +330,7 @@ class ServerThread(threading.Thread):
         self.ready = threading.Event()
 
     def run(self):
-        httpd = BaseHTTPServer.HTTPServer(('127.0.0.1', 8091), Handler)
+        httpd = http.server.HTTPServer(('127.0.0.1', 8091), Handler)
         self.ready.set()
         for i in range(self.http_test_count):
             httpd.handle_request()
