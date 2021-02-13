@@ -1,8 +1,0 @@
-# The listparser documentation is written in a source format called
-# ReStructured Text. It can be compiled into an output format (like
-# HTML) using the Sphinx module.
-#
-# You can prepare your system to build the listparser documentation
-# by passing this requirements file in to the ``pip install`` command.
-
-sphinx
