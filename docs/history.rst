@@ -15,6 +15,7 @@ Unreleased changes
 *   Remove dependence on the six module.
 *   Add type annotations.
 *   Remove compatibility code.
+*   Migrate to Poetry and `pyproject.toml` for project configuration.
 
 
 0.18
