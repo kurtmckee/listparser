@@ -34,8 +34,8 @@ Continuing the example:
 >>> result.feeds[0].url
 'https://kurtmckee.org/tag/listparser'
 
-More extensive documentation is available in the docs/ directory,
-or online at <https://pythonhosted.org/listparser/>.
+More extensive documentation is available in the ``docs/`` directory
+and online at <https://listparser.readthedocs.io/en/stable/>.
 
 
 Bugs
