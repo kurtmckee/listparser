@@ -15,7 +15,7 @@ Contents
 ..  toctree::
     :maxdepth: 1
 
-    history
+    changelog
 
 ..  toctree::
     :maxdepth: 2
