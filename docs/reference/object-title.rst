@@ -25,7 +25,7 @@ not normalized except for the stripping of whitespace.
 
     And here is the title returned by listparser:
 
-    ..  code-block:: python
+    ..  code-block:: pycon
 
         >>> result.feeds[0].title
         'Hal Tucker'
