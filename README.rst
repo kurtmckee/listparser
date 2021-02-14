@@ -3,11 +3,11 @@ What is listparser?
 
 listparser is a Python module that parses subscription lists (also called
 reading lists) and returns all of the feeds and subscription lists that it
-finds. It supports OPML, RDF+FOAF, and the iGoogle exported settings format,
+finds.
+
+It supports OPML, RDF+FOAF, and the iGoogle exported settings format,
 and runs in Python 3.6 and up, and PyPy3.
 
-listparser is licensed under the terms of the GNU Lesser General Public License
-version 3 or higher.
 
 
 Usage
