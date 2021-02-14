@@ -1,0 +1,4 @@
+Changed
+-------
+
+*   Migrate to Read the Docs for documentation hosting.
