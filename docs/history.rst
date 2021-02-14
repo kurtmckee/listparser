@@ -16,6 +16,7 @@ Unreleased changes
 *   Add type annotations.
 *   Remove compatibility code.
 *   Migrate to Poetry and `pyproject.toml` for project configuration.
+*   Change the license from LGPLv3 to MIT.
 
 
 0.18
