@@ -21,6 +21,7 @@ python = "^3.6"
 [tool.poetry.dev-dependencies]
 tox = "^3.21.4"
 Sphinx = "^3.4.3"
+scriv = "^0.10.0"
 
 
 [build-system]
