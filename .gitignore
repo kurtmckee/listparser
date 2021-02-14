@@ -10,3 +10,4 @@ htmlcov/
 .coverage
 venv/
 .idea/
+poetry.lock
