@@ -15,7 +15,7 @@ Unreleased changes
 
 Please see the fragment files in the `changelog.d directory`_.
 
-..  _changelog.d directory: https://github.com/kurtmckee/listparser/tree/master/changelog.d
+..  _changelog.d directory: https://github.com/kurtmckee/listparser/tree/develop/changelog.d
 
 
 ..  scriv-insert-here
