@@ -3,19 +3,18 @@
 # SPDX-License-Identifier: MIT
 #
 
-import datetime
+import html.entities
 import io
 import sys
-from typing import Dict, IO, Union
+from typing import Dict, Optional, Tuple, Union
 import xml.sax
 
-import html.entities
-import http.client
-import urllib.error
-import urllib.request
+try:
+    import requests
+except ImportError:
+    requests = None
 
 from . import common
-from . import dates
 from . import foaf
 from . import igoogle
 from . import opml
@@ -26,14 +25,8 @@ __url__ = 'https://github.com/kurtmckee/listparser'
 __version__ = '0.18'
 
 
-USER_AGENT = 'listparser/{0} +{1}'.format(__version__, __url__)
-
-
 def parse(
-        parse_obj: Union[str, IO],
-        agent: str = None,
-        etag: str = None,
-        modified: Union[str, datetime.datetime] = None,
+        parse_obj: Union[str, bytes],
         inject: bool = False,
 ) -> Dict:
     """Parse a subscription list and return a dict containing the results.
@@ -41,18 +34,7 @@ def parse(
     *parse_obj* must be one of the following:
 
     *   a string containing a URL
-    *   a string containing an absolute or relative filename
-    *   a string containing an XML document
-    *   an open file object
-
-    If *parse_obj* is a URL, the *agent* will identify the software
-    making the request, *etag* will identify the last HTTP ETag
-    header returned by the webserver, and *modified* will
-    identify the last HTTP Last-Modified header returned by the
-    webserver.
-
-    If *agent* is not provided, the :py:data:`~listparser.USER_AGENT` global
-    variable will be used by default.
+    *   a string or bytes object containing an XML document
 
     If *inject* is True, HTML character references will be injected into
     the XML document before it is parsed.
@@ -69,9 +51,9 @@ def parse(
         'meta': common.SuperDict(),
         'version': '',
     })
-    fileobj, info = _mkfile(parse_obj, (agent or USER_AGENT), etag, modified)
+    content, info = get_content(parse_obj)
     guarantees.update(info)
-    if not fileobj:
+    if not content:
         return guarantees
 
     handler = Handler()
@@ -81,21 +63,21 @@ def parse(
     parser.setContentHandler(handler)
     parser.setErrorHandler(handler)
     if inject:
-        fileobj = Injector(fileobj)
+        content_file = Injector(io.BytesIO(content))
+    else:
+        content_file = io.BytesIO(content)
     try:
-        parser.parse(fileobj)
+        parser.parse(content_file)
     except (xml.sax.SAXParseException, IOError):  # noqa: E501  # pragma: no cover
         err = sys.exc_info()[1]
         handler.harvest.bozo = 1
         handler.harvest.bozo_exception = err
-    finally:
-        fileobj.close()
 
     # Test if a DOCTYPE injection is needed
     if hasattr(handler.harvest, 'bozo_exception'):
         if 'entity' in handler.harvest.bozo_exception.__str__():
             if not inject:
-                return parse(parse_obj, agent, etag, modified, True)
+                return parse(content, inject=True)
     # Make it clear that the XML file is broken
     # (if no other exception has been assigned)
     if inject and not handler.harvest.bozo:
@@ -174,78 +156,35 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler,
             self._characters += content
 
 
-class HTTPRedirectHandler(urllib.request.HTTPRedirectHandler):
-    def http_error_301(self, req, fp, code, msg, hdrs):
-        result = urllib.request.HTTPRedirectHandler.http_error_301(
-            self, req, fp, code, msg, hdrs
-        )
-        result.status = code
-        result.newurl = result.geturl()
-        return result
-    # The default implementations in urllib2.HTTPRedirectHandler
-    # are identical, so hardcoding a http_error_301 call above
-    # won't affect anything
-    http_error_302 = http_error_303 = http_error_307 = http_error_301
-
-
-class HTTPErrorHandler(urllib.request.HTTPDefaultErrorHandler):
-    def http_error_default(self, req, fp, code, msg, hdrs):
-        # The default implementation just raises HTTPError.
-        # Forget that.
-        fp.status = code
-        return fp
-
-
-def _mkfile(obj, agent, etag, modified):
-    if hasattr(obj, 'read') and hasattr(obj, 'close'):
-        # It's file-like
+def get_content(obj) -> Tuple[Optional[bytes], Dict]:
+    if isinstance(obj, bytes):
         return obj, common.SuperDict()
-    elif not isinstance(obj, (str, bytes)):
-        # This isn't a known-parsable object
-        err = ListError('parse() called with unparsable object')
-        return None, common.SuperDict({'bozo': 1, 'bozo_exception': err})
-    elif not (obj.startswith('http://') or obj.startswith('https://') or
-              obj.startswith('ftp://') or obj.startswith('file://')):
-        # It's not a URL; test if it's an XML document
-        if obj.lstrip().startswith('<'):
-            return io.BytesIO(obj.encode('utf8')), common.SuperDict()
-        # Try dealing with it as a file
-        try:
-            return open(obj, 'rb'), common.SuperDict()
-        except IOError:
-            err = sys.exc_info()[1]
-            return None, common.SuperDict({'bozo': 1, 'bozo_exception': err})
-    # It's a URL
-    headers = {}
-    if isinstance(agent, str):
-        headers['User-Agent'] = agent
-    if isinstance(etag, str):
-        headers['If-None-Match'] = etag
-    if isinstance(modified, str):
-        headers['If-Modified-Since'] = modified
-    elif isinstance(modified, datetime.datetime):
-        # It is assumed that `modified` is in UTC time
-        headers['If-Modified-Since'] = dates.to_rfc822(modified)
-    request = urllib.request.Request(obj, headers=headers)
-    opener = urllib.request.build_opener(HTTPRedirectHandler, HTTPErrorHandler)
-    try:
-        ret = opener.open(request)
-    except (urllib.error.URLError, http.client.HTTPException):
-        err = sys.exc_info()[1]
-        return None, common.SuperDict({'bozo': 1, 'bozo_exception': err})
+    elif not isinstance(obj, str):
+        # Only str and bytes objects can be parsed.
+        error = ListError('parse() called with unparsable object')
+        return None, common.SuperDict({'bozo': 1, 'bozo_exception': error})
+    elif not obj.startswith(('http://', 'https://')):
+        # It's not a URL, so it must be treated as an XML document.
+        return obj.encode('utf8'), common.SuperDict()
 
-    info = common.SuperDict({'status': getattr(ret, 'status', 200)})
-    info.href = getattr(ret, 'newurl', obj)
-    info.headers = common.SuperDict(getattr(ret, 'headers', {}))
-    # Python 3 doesn't normalize header names; Python 2 does
-    if info.headers.get('ETag') or info.headers.get('etag'):
-        info.etag = info.headers.get('ETag') or info.headers.get('etag')
-    if info.headers.get('Last-Modified') or info.headers.get('last-modified'):
-        info.modified = info.headers.get('Last-Modified') or \
-                        info.headers.get('last-modified')  # noqa: E126
-        if isinstance(dates.rfc822(info.modified), datetime.datetime):
-            info.modified_parsed = dates.rfc822(info.modified)
-    return ret, info
+    # It's a URL. Confirm requests is installed.
+    elif requests is None:
+        message = f"requests is not installed so {obj} cannot be retrieved"
+        return None, common.SuperDict({
+            'bozo': 1,
+            'bozo_exception': ListError(message),
+        })
+
+    headers = {'user-agent': f'listparser/{__version__} +{__url__}'}
+    try:
+        response = requests.get(obj, headers=headers, timeout=30)
+    except (
+            requests.exceptions.RequestException,
+            requests.exceptions.BaseHTTPError,
+    ) as error:
+        return None, common.SuperDict({'bozo': 1, 'bozo_exception': error})
+
+    return response.text.encode('utf8'), common.SuperDict()
 
 
 class Injector:

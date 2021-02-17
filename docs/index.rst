@@ -33,21 +33,14 @@ Reference
     :maxdepth: 2
 
     reference/parse
-    reference/user_agent
 
 ..  toctree::
     :maxdepth: 2
 
     reference/bozo
     reference/bozo_exception
-    reference/etag
     reference/feeds
-    reference/headers
-    reference/href
     reference/lists
     reference/meta
-    reference/modified
-    reference/modified_parsed
     reference/opportunities
-    reference/status
     reference/version

@@ -6,43 +6,18 @@
 import datetime  # noqa: F401 (required by evals)
 import io
 import os
+import pathlib
 import threading
 
 import pytest
 import http.server
 
+try:
+    import requests
+except ImportError:
+    requests = None
+
 import listparser.dates
-
-
-def test_useragent_invalid():
-    url = 'http://localhost:8091/tests/http/useragent.xml'
-    obj, sdict = listparser._mkfile(url, True, None, None)
-    obj.close()
-    assert sdict.status == 200
-
-
-def test_useragent_default():
-    url = 'http://localhost:8091/tests/http/useragent.xml'
-    result = listparser.parse(url)
-    assert not result.bozo
-    assert result.headers.get('x-agent') == listparser.USER_AGENT
-
-
-def test_useragent_custom():
-    url = 'http://localhost:8091/tests/http/useragent.xml'
-    result = listparser.parse(url, agent='CustomAgent')
-    assert not result.bozo
-    assert result.headers.get('x-agent') == 'CustomAgent'
-
-
-def test_useragent_global_override():
-    url = 'http://localhost:8091/tests/http/useragent.xml'
-    tmp = listparser.USER_AGENT
-    listparser.USER_AGENT = 'NewGlobalAgent'
-    result = listparser.parse(url)
-    listparser.USER_AGENT = tmp
-    assert not result.bozo
-    assert result.headers.get('x-agent') == 'NewGlobalAgent'
 
 
 def test_image():
@@ -61,28 +36,26 @@ testfile = os.path.join('tests', 'filename.xml')
 
 
 @pytest.mark.parametrize('obj', [
-    empty_doc,  # string input
-    io.BytesIO(empty_doc.encode('utf8')),  # file-like object
-    testfile,  # relative path
-    os.path.abspath(testfile),  # absolute path
+    empty_doc,  # str
+    empty_doc.encode('utf8'),  # bytes
 ])
-def test_good_mkfile(obj):
-    f, sdict = listparser._mkfile(obj, 'agent', None, None)
-    f.close()
-    assert f is not None
-    assert not sdict
+def test_get_content_good(obj):
+    content, info = listparser.get_content(obj)
+    assert content is not None
+    assert not info
 
 
-@pytest.mark.parametrize('obj', [
-    True,  # unparsable object
-    'xxx://badurl.com/',  # bad protocol
-    'http://badurl.com.INVALID/',  # URL unreachable
-    r'totally made up and bogus /\:',  # bogus filename
-])
-def test_bad_mkfile(obj):
-    n, sdict = listparser._mkfile(obj, 'agent', None, None)
-    assert n is None
-    assert sdict.bozo == 1
+@pytest.mark.parametrize(
+    'src',
+    [
+        True,  # unparsable object
+        'http://',  # URL unreachable
+    ],
+)
+def test_get_content_bad(src):
+    content, info = listparser.get_content(src)
+    assert content is None
+    assert info.bozo == 1
 
 
 @pytest.fixture(params=[1, 20])
@@ -209,35 +182,26 @@ def test_invalid_dates(date):
     assert listparser.dates.rfc822(date) is None
 
 
-http_test_count = 0
+tests_path = pathlib.Path(__file__).parent / 'tests/'
+_http_test_count = 0
 tests = []
-tests_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tests/')
-filenames = (
-    os.path.join(root, filename).replace(tests_path, '', 1)
-    for root, directories, files in os.walk(tests_path)
-    for filename in files
-    if filename.endswith('.xml')
-)
-for filename in filenames:
-    info = {}
-    assertions = []
-    with open(os.path.join('tests', filename), 'rb') as f:
-        blob = f.read().decode('utf8', 'replace')
-    for line in blob.splitlines():  # pragma: no branch
-        if '-->' in line:
+for _file in tests_path.rglob('**/*.xml'):
+    _info = {}
+    _assertions = []
+    blob = _file.read_bytes().decode('utf8', errors='replace')
+    for _line in blob.splitlines():  # pragma: no branch
+        if '-->' in _line:
             break
-        if line.lstrip().startswith('Eval:'):
-            assertions.append(line.split(': ', 1)[1].strip())
-        elif ': ' in line:
-            key, value = line.strip().split(': ', 1)
-            info[key] = value
-    description = info.get('Description', '')
-    etag = info.get('ETag', None)
-    modified = info.get('Modified', None)
-    if 'http' in filename:
-        http_test_count += int(info.get('Requests', 1))
+        if _line.lstrip().startswith('Eval:'):
+            _assertions.append(_line.partition(':')[2].strip())
+        elif ': ' in _line:
+            _key, _, _value = _line.strip().partition(': ')
+            _info[_key] = _value
+    description = _info.get('Description', '')
+    if 'http' in str(_file):
+        _http_test_count += int(_info.get('Requests', 1))
 
-    if 'No-Eval' in info:
+    if 'No-Eval' in _info:
         # No-Eval files are requested over HTTP (generally representing
         # an HTTP redirection destination) and contain no testcases.
         # They probably have a Requests directive, though, which is why
@@ -247,25 +211,32 @@ for filename in filenames:
     if not description:  # pragma: no cover
         message = 'Description not found in test {}'.format(testfile)
         raise ValueError(message)
-    if not assertions:  # pragma: no cover
+    if not _assertions:  # pragma: no cover
         message = 'Eval not found in test {}'.format(testfile)
         raise ValueError(message)
 
-    tests.append([filename, etag, modified, assertions])
-    if modified:
-        # Create a datetime test for `modified`.
-        modified = listparser.dates.rfc822(modified)
-        tests.append([filename, etag, modified, assertions])
-
-
-@pytest.mark.parametrize('filename,etag,modified,assertions', tests)
-def test_file(filename, etag, modified, assertions):
-    if 'http' in filename:
-        path = 'http://localhost:8091/tests/' + filename
+    if 'http' in str(_file):
+        # If requests is installed the test should pass.
+        if requests:
+            tests.append([_file, _assertions])
+        else:
+            tests.append(pytest.param(
+                _file, _assertions,
+                marks=pytest.mark.xfail,
+            ))
     else:
-        path = os.path.join('tests', filename)
+        tests.append([_file, _assertions])
+
+
+@pytest.mark.parametrize('filename, assertions', tests)
+def test_file(filename, assertions):
+    if 'http' in str(filename):
+        path = str(filename.relative_to(tests_path)).replace('\\', '/')
+        src = 'http://localhost:8091/tests/' + path
+    else:
+        src = filename.read_bytes()
     # `result` must exist in the local scope for the assertions to run.
-    result = listparser.parse(path, etag=etag, modified=modified)  # noqa: F841
+    result = listparser.parse(src)  # noqa: F841
     for assertion in assertions:
         assert eval(assertion)
 
@@ -273,7 +244,7 @@ def test_file(filename, etag, modified, assertions):
 class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         status = 200
-        location = etag = modified = None
+        location = None
         end_directives = False
         filename = os.path.dirname(os.path.abspath(__file__)) + self.path
         with open(filename, 'rb') as f:
@@ -286,21 +257,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     status = int(line.strip()[7:])
                 elif 'Location:' in line:
                     location = line.strip()[9:].strip()
-                elif 'Server-ETag:' in line:
-                    etag = line.split(': ', 1)[1].strip()
-                    if self.headers.get('if-none-match') == etag:
-                        status = 304
-                elif 'Server-Modified:' in line:
-                    modified = line.split(': ', 1)[1].strip()
-                    if self.headers.get('if-modified-since') == modified:
-                        status = 304
         self.send_response(status)
         if location:
             self.send_header('Location', location)
-        if etag:
-            self.send_header('ETag', etag)
-        if modified:
-            self.send_header('Last-Modified', modified)
         self.send_header('Content-type', 'text/xml')
         self.send_header('x-agent', self.headers.get('user-agent'))
         self.end_headers()
@@ -323,9 +282,10 @@ class ServerThread(threading.Thread):
             httpd.handle_request()
 
 
-server = ServerThread(http_test_count)
-server.daemon = True
-server.start()
+if requests is not None:
+    server = ServerThread(_http_test_count)
+    server.daemon = True
+    server.start()
 
-# Wait for the server thread to signal that it's ready
-server.ready.wait()
+    # Wait for the server thread to signal that it's ready
+    server.ready.wait()

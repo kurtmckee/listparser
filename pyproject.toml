@@ -16,6 +16,11 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.6"
+requests = {version = "^2.25.1", optional = true}
+
+
+[tool.poetry.extras]
+http = ['requests']
 
 
 [tool.poetry.dev-dependencies]
@@ -33,14 +38,20 @@ build-backend = "poetry.core.masonry.api"
 legacy_tox_ini = """
 
 [tox]
-envlist = py{39, 38, 37, 36}, pypy3, flake8, docs
+envlist =
+    py{39, 38, 37, 36, py3}-{,requests}
+    flake8
+    docs
+
 skip_missing_interpreters = True
 isolated_build = True
 
 [testenv]
 deps =
+    requests: requests
     pytest
     pytest-cov
+
 commands =
     {envpython} -m pytest --cov --cov-append --cov-report=html lptest.py
 
@@ -48,12 +59,14 @@ commands =
 deps =
     pytest
     pytest-flake8
+
 commands =
     {envpython} -m pytest --flake8
 
 [testenv:docs]
 deps =
     sphinx
+
 commands =
     {envpython} -m sphinx -aWEqb html docs/ build/trash
 

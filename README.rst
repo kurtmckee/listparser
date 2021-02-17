@@ -13,26 +13,30 @@ and runs in Python 3.6 and up, and PyPy3.
 Usage
 =====
 
->>> import listparser
->>> result = listparser.parse('project.opml')
+..  code-block:: pycon
+
+    >>> import listparser
+    >>> result = listparser.parse('project.opml')
 
 A dictionary will be returned with several keys:
 
-* ``meta``: a dictionary of information about the subscription list
-* ``feeds``: a list of feeds
-* ``lists``: a list of subscription lists
-* ``version``: a file format identifier
-* ``bozo``: 1 if there is a problem with the list, 0 otherwise
-* ``bozo_exception``: (if ``bozo`` is 1) a description of the problem
+*   ``meta``: a dictionary of information about the subscription list
+*   ``feeds``: a list of feeds
+*   ``lists``: a list of subscription lists
+*   ``version``: a file format identifier
+*   ``bozo``: 1 if there is a problem with the list, 0 otherwise
+*   ``bozo_exception``: (if ``bozo`` is 1) a description of the problem
 
 Continuing the example:
 
->>> result.meta.title
-'listparser project feeds'
->>> len(result.feeds)
-2
->>> result.feeds[0].url
-'https://kurtmckee.org/tag/listparser'
+..  code-block:: pycon
+
+    >>> result.meta.title
+    'listparser project feeds'
+    >>> len(result.feeds)
+    2
+    >>> result.feeds[0].url
+    'https://kurtmckee.org/tag/listparser'
 
 More extensive documentation is available in the ``docs/`` directory
 and online at <https://listparser.readthedocs.io/en/stable/>.

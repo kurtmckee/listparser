@@ -1,7 +1,16 @@
 Getting started
 ===============
 
-You can install listparser using pip.
+Use pip to install listparser.
+
+To support retrieving and parsing of URL's, add ``[http]``
+so the requests package will be installed as well.
+
+..  code-block:: shell
+
+    pip install listparser[http]
+
+
 listparser has a single public function, :py:func:`~listparser.parse`.
 
 ..  code-block:: pycon

@@ -4,7 +4,7 @@
 #
 
 import datetime
-from typing import Dict, Optional, Set, Tuple
+from typing import Dict, Optional, Set
 
 
 day_names: Set[str] = {
@@ -144,49 +144,3 @@ def rfc822(date: str) -> Optional[datetime.datetime]:
         return stamp - delta
     except OverflowError:
         return None
-
-
-rfc822_month_names: Tuple[str, ...] = (
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-)
-
-rfc822_day_names: Tuple[str, ...] = (
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-    'Sat',
-    'Sun',
-)
-
-rfc822_pattern = '{day}, {d:02} {month} {y:04} {h:02}:{m:02}:{s:02} GMT'
-
-
-def to_rfc822(date: datetime.datetime) -> str:
-    """Convert a datetime object to an RFC822-formatted string.
-
-    The datetime `strftime` method is subject to locale-specific
-    day and month names, so this function hardcodes the conversion.
-    """
-
-    return rfc822_pattern.format(
-        day=rfc822_day_names[date.weekday()],
-        d=date.day,
-        month=rfc822_month_names[date.month - 1],
-        y=date.year,
-        h=date.hour,
-        m=date.minute,
-        s=date.second,
-    )
