@@ -1,16 +1,13 @@
 <?xml version="1.0"?>
 <!--
-    destination.xml is the target of four redirected requests,
-    but despite being the final destination, it contains no tests.
-    Its tests are all determined by the original testfile.
+    destination.xml confirms that listparser can retrieve HTTP content.
 
-    Description: Redirection destination
-    No-Eval: True
-    Requests: 4
+    Description: Test HTTP functionality
+    Eval: result['meta']['title'] == 'HTTP test'
 -->
 <opml version="2.0">
     <head>
-        <title>Redirection destination</title>
+        <title>HTTP test</title>
     </head>
     <body>
         <outline text="node" />
