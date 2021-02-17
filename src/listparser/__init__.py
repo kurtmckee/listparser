@@ -5,7 +5,6 @@
 
 import html.entities
 import io
-import sys
 from typing import Dict, Optional, Tuple, Union
 import xml.sax
 
@@ -66,12 +65,7 @@ def parse(
         content_file = Injector(io.BytesIO(content))
     else:
         content_file = io.BytesIO(content)
-    try:
-        parser.parse(content_file)
-    except (xml.sax.SAXParseException, IOError):  # noqa: E501  # pragma: no cover
-        err = sys.exc_info()[1]
-        handler.harvest.bozo = 1
-        handler.harvest.bozo_exception = err
+    parser.parse(content_file)
 
     # Test if a DOCTYPE injection is needed
     if hasattr(handler.harvest, 'bozo_exception'):
@@ -144,12 +138,6 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler,
             # reduce code duplication in the _end_opml_* functions
             self.expect = False
             self._characters = str()
-
-    def normchars(self):
-        # Jython parsers split characters() calls between the bytes of
-        # multibyte characters. Thus, decoding has to be put off until
-        # all of the bytes are collected and the text node has ended.
-        return self._characters.encode('utf8').decode('utf8').strip()
 
     def characters(self, content):
         if self.expect:

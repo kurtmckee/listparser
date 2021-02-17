@@ -101,11 +101,12 @@ class FoafMixin(common.CommonMixin):
     _start_foaf_name = common.CommonMixin._expect_characters
 
     def _end_foaf_name(self):
+        value = self._characters.strip()
         if self.flag_feed and self.flag_new_title:
-            self.foaf_name.append(self.normchars())
+            self.foaf_name.append(value)
             self.flag_new_title = False
-        elif self.flag_group and self.normchars():
-            self.hierarchy.append(self.normchars())
+        elif self.flag_group and value:
+            self.hierarchy.append(value)
             self.flag_group = False
 
     _start_foaf_member_name = common.CommonMixin._expect_characters
