@@ -42,6 +42,7 @@ envlist =
     py{39, 38, 37, 36, py3}-{,requests}
     flake8
     docs
+    coverage-report
 
 skip_missing_interpreters = True
 isolated_build = True
@@ -53,7 +54,7 @@ deps =
     pytest-cov
 
 commands =
-    {envpython} -m pytest --cov --cov-append --cov-report=html lptest.py
+    {envpython} -m pytest --cov=listparser --cov-append lptest.py
 
 [testenv:flake8]
 deps =
@@ -70,12 +71,23 @@ deps =
 commands =
     {envpython} -m sphinx -aWEqb html docs/ build/trash
 
+[testenv:coverage-report]
+deps = coverage[toml]
+skip_install = true
+commands = coverage html -d htmlcov
+
 """
 
 
 [tool.coverage.run]
 branch = true
-source = ["listparser", "lptest.py"]
+
+
+[tool.coverage.paths]
+source = [
+    "src",
+    ".tox/*/site-packages",
+]
 
 
 [tool.scriv]
