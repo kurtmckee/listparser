@@ -1,0 +1,5 @@
+Fixed
+-----
+
+*   Fix some coverage messages that were output during testing.
+*   Fix the combined coverage HTML report's paths.

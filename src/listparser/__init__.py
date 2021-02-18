@@ -5,7 +5,6 @@
 
 import html.entities
 import io
-import sys
 from typing import Dict, Optional, Tuple, Union
 import xml.sax
 
@@ -44,7 +43,8 @@ def parse(
     """
 
     guarantees = common.SuperDict({
-        'bozo': 0,
+        'bozo': False,
+        'bozo_exception': None,
         'feeds': [],
         'lists': [],
         'opportunities': [],
@@ -63,26 +63,21 @@ def parse(
     parser.setContentHandler(handler)
     parser.setErrorHandler(handler)
     if inject:
-        content_file = Injector(io.BytesIO(content))
+        content_file = Injector(content)
     else:
         content_file = io.BytesIO(content)
-    try:
-        parser.parse(content_file)
-    except (xml.sax.SAXParseException, IOError):  # noqa: E501  # pragma: no cover
-        err = sys.exc_info()[1]
-        handler.harvest.bozo = 1
-        handler.harvest.bozo_exception = err
+    parser.parse(content_file)
 
     # Test if a DOCTYPE injection is needed
-    if hasattr(handler.harvest, 'bozo_exception'):
-        if 'entity' in handler.harvest.bozo_exception.__str__():
+    if handler.harvest['bozo_exception']:
+        if 'entity' in handler.harvest['bozo_exception'].__str__():
             if not inject:
                 return parse(content, inject=True)
     # Make it clear that the XML file is broken
     # (if no other exception has been assigned)
-    if inject and not handler.harvest.bozo:
-        handler.harvest.bozo = 1
-        handler.harvest.bozo_exception = ListError('undefined entity found')
+    if inject and not handler.harvest['bozo']:
+        handler.harvest['bozo'] = True
+        handler.harvest['bozo_exception'] = ListError('undefined entity found')
     return handler.harvest
 
 
@@ -109,11 +104,11 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler,
         self.foaf_name = []
 
     def raise_bozo(self, err):
-        self.harvest.bozo = 1
+        self.harvest['bozo'] = True
         if isinstance(err, str):
-            self.harvest.bozo_exception = ListError(err)
+            self.harvest['bozo_exception'] = ListError(err)
         else:
-            self.harvest.bozo_exception = err
+            self.harvest['bozo_exception'] = err
 
     # ErrorHandler functions
     def warning(self, exception):
@@ -145,12 +140,6 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler,
             self.expect = False
             self._characters = str()
 
-    def normchars(self):
-        # Jython parsers split characters() calls between the bytes of
-        # multibyte characters. Thus, decoding has to be put off until
-        # all of the bytes are collected and the text node has ended.
-        return self._characters.encode('utf8').decode('utf8').strip()
-
     def characters(self, content):
         if self.expect:
             self._characters += content
@@ -158,20 +147,23 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler,
 
 def get_content(obj) -> Tuple[Optional[bytes], Dict]:
     if isinstance(obj, bytes):
-        return obj, common.SuperDict()
+        return obj, common.SuperDict({'bozo': False, 'bozo_exception': None})
     elif not isinstance(obj, str):
         # Only str and bytes objects can be parsed.
         error = ListError('parse() called with unparsable object')
-        return None, common.SuperDict({'bozo': 1, 'bozo_exception': error})
+        return None, common.SuperDict({'bozo': True, 'bozo_exception': error})
     elif not obj.startswith(('http://', 'https://')):
         # It's not a URL, so it must be treated as an XML document.
-        return obj.encode('utf8'), common.SuperDict()
+        return obj.encode('utf8'), common.SuperDict({
+            'bozo': False,
+            'bozo_exception': None,
+        })
 
     # It's a URL. Confirm requests is installed.
     elif requests is None:
         message = f"requests is not installed so {obj} cannot be retrieved"
         return None, common.SuperDict({
-            'bozo': 1,
+            'bozo': True,
             'bozo_exception': ListError(message),
         })
 
@@ -182,9 +174,12 @@ def get_content(obj) -> Tuple[Optional[bytes], Dict]:
             requests.exceptions.RequestException,
             requests.exceptions.BaseHTTPError,
     ) as error:
-        return None, common.SuperDict({'bozo': 1, 'bozo_exception': error})
+        return None, common.SuperDict({'bozo': True, 'bozo_exception': error})
 
-    return response.text.encode('utf8'), common.SuperDict()
+    return response.text.encode('utf8'), common.SuperDict({
+        'bozo': False,
+        'bozo_exception': None,
+    })
 
 
 class Injector:
@@ -193,16 +188,16 @@ class Injector:
     inject a DOCTYPE containing HTML entity definitions immediately
     following the XML declaration.
     """
-    def __init__(self, obj):
-        self.obj = obj
+    def __init__(self, content: bytes):
+        self.content = io.BytesIO(content)
         self.injected = False
         self.cache = b''
 
-    def read(self, size):
+    def read(self, size: int):
         # Read from the cache (and the object if necessary)
         read = self.cache[:size]
         if len(self.cache) < size:
-            read += self.obj.read(size - len(self.cache))
+            read += self.content.read(size - len(self.cache))
         self.cache = self.cache[size:]
 
         if self.injected or b'>' not in read:
@@ -224,9 +219,9 @@ class Injector:
         return ret
 
     def __getattr__(self, name):
-        return getattr(self.obj, name)
+        return getattr(self.content, name)
 
 
 class ListError(Exception):
-    """Used when a specification deviation is encountered in an XML file"""
+    """Used when a specification deviation is encountered in an XML file."""
     pass

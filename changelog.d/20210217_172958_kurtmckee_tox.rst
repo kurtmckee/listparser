@@ -1,0 +1,4 @@
+Removed
+-------
+
+*   Remove some ancient Jython compatibility code.

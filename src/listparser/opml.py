@@ -85,35 +85,40 @@ class OpmlMixin(common.CommonMixin):
     _start_opml_title = common.CommonMixin._expect_characters
 
     def _end_opml_title(self):
-        if self.normchars():
-            self.harvest.meta.title = self.normchars()
+        value = self._characters.strip()
+        if value:
+            self.harvest.meta.title = value
 
     _start_opml_ownerId = common.CommonMixin._expect_characters
 
     def _end_opml_ownerId(self):
-        if self.normchars():
+        value = self._characters.strip()
+        if value:
             self.harvest.meta.setdefault('author', common.SuperDict())
-            self.harvest.meta.author.url = self.normchars()
+            self.harvest.meta.author.url = value
 
     _start_opml_ownerEmail = common.CommonMixin._expect_characters
 
     def _end_opml_ownerEmail(self):
-        if self.normchars():
+        value = self._characters.strip()
+        if value:
             self.harvest.meta.setdefault('author', common.SuperDict())
-            self.harvest.meta.author.email = self.normchars()
+            self.harvest.meta.author.email = value
 
     _start_opml_ownerName = common.CommonMixin._expect_characters
 
     def _end_opml_ownerName(self):
-        if self.normchars():
+        value = self._characters.strip()
+        if value:
             self.harvest.meta.setdefault('author', common.SuperDict())
-            self.harvest.meta.author.name = self.normchars()
+            self.harvest.meta.author.name = value
 
     _start_opml_dateCreated = common.CommonMixin._expect_characters
 
     def _end_opml_dateCreated(self):
-        if self.normchars():
-            self.harvest.meta.created = self.normchars()
+        value = self._characters.strip()
+        if value:
+            self.harvest.meta.created = value
             d = dates.rfc822(self.harvest.meta.created)
             if isinstance(d, datetime.datetime):
                 self.harvest.meta.created_parsed = d
@@ -123,8 +128,9 @@ class OpmlMixin(common.CommonMixin):
     _start_opml_dateModified = common.CommonMixin._expect_characters
 
     def _end_opml_dateModified(self):
-        if self.normchars():
-            self.harvest.meta.modified = self.normchars()
+        value = self._characters.strip()
+        if value:
+            self.harvest.meta.modified = value
             d = dates.rfc822(self.harvest.meta.modified)
             if isinstance(d, datetime.datetime):
                 self.harvest.meta.modified_parsed = d
