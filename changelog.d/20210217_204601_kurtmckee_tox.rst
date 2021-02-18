@@ -1,0 +1,7 @@
+Changed
+-------
+
+*   The unit tests no longer launch an HTTP server.
+*   Coverage data is now erased before the unit tests begin.
+*   ``bozo`` is now ``True`` or ``False``, not ``1`` or ``0``.
+*   ``bozo_exception`` is guaranteed to exist in the return dict.

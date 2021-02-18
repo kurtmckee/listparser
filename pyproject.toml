@@ -39,10 +39,11 @@ legacy_tox_ini = """
 
 [tox]
 envlist =
+    coverage_erase
     py{39, 38, 37, 36, py3}-{,requests}
     flake8
     docs
-    coverage-report
+    coverage_report
 
 skip_missing_interpreters = True
 isolated_build = True
@@ -71,7 +72,12 @@ deps =
 commands =
     {envpython} -m sphinx -aWEqb html docs/ build/trash
 
-[testenv:coverage-report]
+[testenv:coverage_erase]
+deps = coverage[toml]
+skip_install = true
+commands = coverage erase
+
+[testenv:coverage_report]
 deps = coverage[toml]
 skip_install = true
 commands = coverage html -d htmlcov

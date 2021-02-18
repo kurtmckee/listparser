@@ -4,13 +4,11 @@
 #
 
 import datetime  # noqa: F401 (required by evals)
-import io
 import os
 import pathlib
-import threading
+import unittest.mock
 
 import pytest
-import http.server
 
 try:
     import requests
@@ -35,27 +33,56 @@ empty_doc = '<?xml version="1.0"?><opml />'
 testfile = os.path.join('tests', 'filename.xml')
 
 
-@pytest.mark.parametrize('obj', [
+@pytest.mark.parametrize('src', [
     empty_doc,  # str
     empty_doc.encode('utf8'),  # bytes
 ])
-def test_get_content_good(obj):
-    content, info = listparser.get_content(obj)
-    assert content is not None
-    assert not info
-
-
-@pytest.mark.parametrize(
-    'src',
-    [
-        True,  # unparsable object
-        'http://',  # URL unreachable
-    ],
-)
-def test_get_content_bad(src):
+def test_get_content_good(src):
     content, info = listparser.get_content(src)
+    assert content is not None
+    assert not info['bozo']
+
+
+def test_get_content_bad():
+    content, info = listparser.get_content(123)
     assert content is None
-    assert info.bozo == 1
+    assert info['bozo']
+
+
+@pytest.fixture
+def http():
+    def get(url, *args, **kwargs):
+        if url == 'http://':
+            raise requests.exceptions.InvalidURL('no host supplied')
+        else:
+            mock = unittest.mock.Mock()
+            mock.text = empty_doc
+            return mock
+
+    with unittest.mock.patch('listparser.requests.get', get):
+        yield
+
+
+@pytest.mark.skipif(requests is None, reason='requests is not installed')
+def test_requests_success(http):
+    content, info = listparser.get_content('http://example')
+    assert content
+    assert not info['bozo']
+
+
+@pytest.mark.skipif(requests is None, reason='requests is not installed')
+def test_requests_error(http):
+    content, info = listparser.get_content('http://')
+    assert not content
+    assert info['bozo']
+
+
+@pytest.mark.skipif(requests, reason='requests must not be installed')
+def test_requests_not_present():
+    content, info = listparser.get_content('http://example')
+    assert not content
+    assert info['bozo']
+    assert isinstance(info['bozo_exception'], listparser.ListError)
 
 
 @pytest.fixture(params=[1, 20])
@@ -71,7 +98,7 @@ def injector_fixture(request):
             <rss:channel rdf:about="http://domain/feed" />
             </rdfs:seeAlso></foaf:Document></foaf:weblog></foaf:Agent>
             </rdf:RDF>"""
-    idoc = listparser.Injector(io.BytesIO(doc))
+    idoc = listparser.Injector(doc)
     tmp = []
     while 1:
         i = idoc.read(size)
@@ -86,8 +113,7 @@ def injector_fixture(request):
 def test_injector(injector_fixture):
     result = listparser.parse(injector_fixture)
     assert not result.bozo
-    assert len(result.feeds) == 1
-    assert ord(result.feeds[0].title) == 225  # \u00e1
+    assert result.feeds[0].title == 'á'  # &aacute;
 
 
 @pytest.mark.parametrize('date,expected_values', [
@@ -183,7 +209,6 @@ def test_invalid_dates(date):
 
 
 tests_path = pathlib.Path(__file__).parent / 'tests/'
-_http_test_count = 0
 tests = []
 for _file in tests_path.rglob('**/*.xml'):
     _info = {}
@@ -198,15 +223,6 @@ for _file in tests_path.rglob('**/*.xml'):
             _key, _, _value = _line.strip().partition(': ')
             _info[_key] = _value
     description = _info.get('Description', '')
-    if 'http' in str(_file):
-        _http_test_count += int(_info.get('Requests', 1))
-
-    if 'No-Eval' in _info:
-        # No-Eval files are requested over HTTP (generally representing
-        # an HTTP redirection destination) and contain no testcases.
-        # They probably have a Requests directive, though, which is why
-        # the `continue` here appears after http_test_count is incremented.
-        continue
 
     if not description:  # pragma: no cover
         message = 'Description not found in test {}'.format(testfile)
@@ -215,25 +231,10 @@ for _file in tests_path.rglob('**/*.xml'):
         message = 'Eval not found in test {}'.format(testfile)
         raise ValueError(message)
 
-    if 'http' in str(_file):
-        _path = str(_file.relative_to(tests_path)).replace('\\', '/')
-        _src = 'http://localhost:8091/tests/' + _path
-        if requests:
-            tests.append(pytest.param(
-                _src, _assertions,
-                id=str(_file.relative_to(tests_path)),
-            ))
-        else:
-            tests.append(pytest.param(
-                _src, _assertions,
-                id=str(_file.relative_to(tests_path)),
-                marks=pytest.mark.xfail,
-            ))
-    else:
-        tests.append(pytest.param(
-            blob, _assertions,
-            id=str(_file.relative_to(tests_path)),
-        ))
+    tests.append(pytest.param(
+        blob, _assertions,
+        id=str(_file.relative_to(tests_path)),
+    ))
 
 
 @pytest.mark.parametrize('src, assertions', tests)
@@ -242,53 +243,3 @@ def test_file(src, assertions):
     result = listparser.parse(src)  # noqa: F841
     for assertion in assertions:
         assert eval(assertion)
-
-
-class Handler(http.server.SimpleHTTPRequestHandler):
-    def do_GET(self):
-        status = 200
-        location = None
-        end_directives = False
-        filename = os.path.dirname(os.path.abspath(__file__)) + self.path
-        with open(filename, 'rb') as f:
-            reply = f.read()
-        for line in reply.decode('utf8', 'replace').splitlines():
-            if not end_directives:
-                if line.strip() == '-->':
-                    end_directives = True
-                elif 'Status:' in line:
-                    status = int(line.strip()[7:])
-                elif 'Location:' in line:
-                    location = line.strip()[9:].strip()
-        self.send_response(status)
-        if location:
-            self.send_header('Location', location)
-        self.send_header('Content-type', 'text/xml')
-        self.send_header('x-agent', self.headers.get('user-agent'))
-        self.end_headers()
-        self.wfile.write(reply)
-
-    def log_request(self, *arg, **karg):
-        pass
-
-
-class ServerThread(threading.Thread):
-    def __init__(self, http_test_count):
-        super(ServerThread, self).__init__()
-        self.http_test_count = http_test_count
-        self.ready = threading.Event()
-
-    def run(self):
-        httpd = http.server.HTTPServer(('127.0.0.1', 8091), Handler)
-        self.ready.set()
-        for i in range(self.http_test_count):
-            httpd.handle_request()
-
-
-if requests is not None:
-    server = ServerThread(_http_test_count)
-    server.daemon = True
-    server.start()
-
-    # Wait for the server thread to signal that it's ready
-    server.ready.wait()
