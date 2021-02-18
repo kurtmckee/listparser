@@ -188,8 +188,8 @@ tests = []
 for _file in tests_path.rglob('**/*.xml'):
     _info = {}
     _assertions = []
-    blob = _file.read_bytes().decode('utf8', errors='replace')
-    for _line in blob.splitlines():  # pragma: no branch
+    blob = _file.read_bytes()
+    for _line in blob.decode('utf8', errors='replace').splitlines():
         if '-->' in _line:
             break
         if _line.lstrip().startswith('Eval:'):
@@ -216,25 +216,28 @@ for _file in tests_path.rglob('**/*.xml'):
         raise ValueError(message)
 
     if 'http' in str(_file):
-        # If requests is installed the test should pass.
+        _path = str(_file.relative_to(tests_path)).replace('\\', '/')
+        _src = 'http://localhost:8091/tests/' + _path
         if requests:
-            tests.append([_file, _assertions])
+            tests.append(pytest.param(
+                _src, _assertions,
+                id=str(_file.relative_to(tests_path)),
+            ))
         else:
             tests.append(pytest.param(
-                _file, _assertions,
+                _src, _assertions,
+                id=str(_file.relative_to(tests_path)),
                 marks=pytest.mark.xfail,
             ))
     else:
-        tests.append([_file, _assertions])
+        tests.append(pytest.param(
+            blob, _assertions,
+            id=str(_file.relative_to(tests_path)),
+        ))
 
 
-@pytest.mark.parametrize('filename, assertions', tests)
-def test_file(filename, assertions):
-    if 'http' in str(filename):
-        path = str(filename.relative_to(tests_path)).replace('\\', '/')
-        src = 'http://localhost:8091/tests/' + path
-    else:
-        src = filename.read_bytes()
+@pytest.mark.parametrize('src, assertions', tests)
+def test_file(src, assertions):
     # `result` must exist in the local scope for the assertions to run.
     result = listparser.parse(src)  # noqa: F841
     for assertion in assertions:
