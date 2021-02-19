@@ -8,7 +8,7 @@ just two.
 
 ..  seealso::
 
-    * :doc:`meta-modified_parsed`
+    *   :doc:`meta-modified_parsed`
 
 ..  rubric:: Comes from
 
