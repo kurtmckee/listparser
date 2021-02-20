@@ -1,0 +1,5 @@
+Changed
+-------
+
+*   The RFC 822 parser now returns timezone-aware ``datetime`` objects
+    instead of converting to UTC and losing timezone info.

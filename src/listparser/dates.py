@@ -4,18 +4,8 @@
 #
 
 import datetime
-from typing import Dict, Optional, Set
+from typing import Dict, Optional
 
-
-day_names: Set[str] = {
-    'mon',
-    'tue',
-    'wed',
-    'thu',
-    'fri',
-    'sat',
-    'sun',
-}
 
 months: Dict[str, int] = {
     'jan': 1,
@@ -32,59 +22,75 @@ months: Dict[str, int] = {
     'dec': 12,
 }
 
-timezone_names: Dict[str, int] = {
+timezones: Dict[str, int] = {
+    # Universal Time
     'ut': 0,
+    'utc': 0,
     'gmt': 0,
-    'z': 0,
-    'adt': -3,
-    'ast': -4,
-    'at': -4,
-    'edt': -4,
+
+    # North America
     'est': -5,
-    'et': -5,
-    'cdt': -5,
+    'edt': -4,
     'cst': -6,
-    'ct': -6,
-    'mdt': -6,
+    'cdt': -5,
     'mst': -7,
-    'mt': -7,
-    'pdt': -7,
+    'mdt': -6,
     'pst': -8,
-    'pt': -8,
+    'pdt': -7,
+
+    # Military
+    'z': 0,
     'a': -1,
-    'n': 1,
+    'n': +1,
     'm': -12,
-    'y': 12,
+    'y': +12,
 }
 
 
-def rfc822(date: str) -> Optional[datetime.datetime]:
+def parse_rfc822(date: str) -> Optional[datetime.datetime]:
     """Parse RFC 822 dates and times.
 
-    http://tools.ietf.org/html/rfc822#section-5
+    https://tools.ietf.org/html/rfc822#section-5
 
-    There are some formatting differences that are accounted for:
-    1. Years may be two or four digits.
-    2. The month and day can be swapped.
-    3. Additional timezone names are supported.
-    4. A default time and timezone are assumed if only a date is present.
+    The basic format is:
+
+    ..  code-block:: text
+
+        [ day "," ] dd mmm [yy]yy hh:mm[:ss] zzz
+
+    Note that RFC 822 only specifies an explicit comma,
+    but fails to make whitespace mandatory.
+
+    Some non-standard formatting differences are allowed:
+
+    *   Whitespace is assumed to separate each part of the timestamp.
+    *   Years may be two or four digits.
+        This is explicitly allowed in the OPML specification.
+    *   The month name and day can be swapped.
+    *   Timezones may be prefixed with "Etc/".
+    *   If the time and/or timezone are missing,
+        midnight and GMT will be assumed.
+    *   "UTC" is supported as a timezone name.
+
     """
 
-    parts = date.lower().split()
-    if len(parts) < 5:
-        # Assume that the time and timezone are missing
-        parts.extend(('00:00:00', '0000'))
-    # Remove the day name
-    if parts[0][:3] in day_names:
-        parts = parts[1:]
-    if len(parts) < 5:
-        # If there are still fewer than five parts, there's not enough
-        # information to interpret this
+    parts = date.rpartition(',')[2].lower().split()
+    if len(parts) == 3:
+        # Assume that the time is missing.
+        parts.append('00:00:00')
+    if len(parts) == 4:
+        # Assume that the timezone is missing.
+        parts.append('gmt')
+    elif len(parts) != 5:
+        # If there are not exactly five parts then this isn't an
+        # RFC 822 date and time.
         return None
+
+    # Parse the day and month.
     try:
         day = int(parts[0])
     except ValueError:
-        # Check if the day and month are swapped
+        # Check if the day and month are swapped.
         if months.get(parts[0][:3]):
             try:
                 day = int(parts[1])
@@ -95,52 +101,72 @@ def rfc822(date: str) -> Optional[datetime.datetime]:
         else:
             return None
     month = months.get(parts[1][:3])
-    if not month:
+    if month is None:
         return None
+
+    # Parse the year.
     try:
         year = int(parts[2])
     except ValueError:
         return None
     # Normalize two-digit years:
-    # Anything in the 90's is interpreted as 1990 and on
-    # Anything 89 or less is interpreted as 2089 or before
-    if len(parts[2]) <= 2:
-        year += (1900, 2000)[year < 90]
+    #
+    # * Anything in the 90's is interpreted as the 1990's.
+    # * Anything 89 or before is interpreted as 2089 or before.
+    #
+    if year < 100:
+        if year >= 90:
+            year += 1900
+        else:
+            year += 2000
+
+    # Parse the time.
     time_parts = parts[3].split(':')
-    time_parts = time_parts + (['0'] * (3 - len(time_parts)))
+    time_parts += ['0'] * (3 - len(time_parts))
     try:
-        (hour, minute, second) = map(int, time_parts)
+        hour, minute, second = map(int, time_parts)
     except ValueError:
         return None
+
+    # Parse named timezones.
     tz_min = 0
-    # Strip 'Etc/' from the timezone
-    if parts[4].startswith('etc/'):
-        parts[4] = parts[4][4:]
+    # Strip 'Etc/' from the timezone name.
+    timezone = parts[4]
+    if timezone.startswith('etc/'):
+        timezone = timezone[4:] or 'gmt'
     # Normalize timezones that start with 'gmt':
-    # GMT-05:00 => -0500
-    # GMT => GMT
-    if parts[4].startswith('gmt'):
-        parts[4] = ''.join(parts[4][3:].split(':')) or 'gmt'
-    # Handle timezones like '-0500', '+0500', and 'EST'
-    if parts[4] and parts[4][0] in ('-', '+'):
+    #
+    # * gmt-05:00 => -05:00
+    # * gmt => gmt
+    #
+    if timezone.startswith('gmt'):
+        timezone = timezone[3:] or 'gmt'
+    tz_hour = timezones.get(timezone)
+
+    # Parse numeric timezones like '-0500' and '+0500'.
+    if tz_hour is None:
         try:
-            tz_hour = int(parts[4][1:3])
-            tz_min = int(parts[4][3:])
+            tz_left, tz_right = timezone.split(':')
+            tz_hour = int(tz_left)
+            tz_min = int(tz_right)
         except ValueError:
-            return None
-        if parts[4].startswith('-'):
-            tz_hour = tz_hour * -1
+            # Perhaps there was no ':' in *timezone*.
+            try:
+                tz_hour = int(timezone[:-2])
+                tz_min = int(timezone[-2:])
+            except ValueError:
+                return None
+        if tz_hour < 0:
             tz_min = tz_min * -1
-    else:
-        tz_hour = timezone_names.get(parts[4], 0)
-    # Create the datetime object and timezone delta objects
+
+    # Create the datetime and timezone offset return values.
     try:
-        stamp = datetime.datetime(year, month, day, hour, minute, second)
-    except ValueError:
-        return None
-    delta = datetime.timedelta(0, 0, 0, 0, tz_min, tz_hour)
-    # Return the date and timestamp in a UTC 9-tuple
-    try:
-        return stamp - delta
-    except OverflowError:
+        return datetime.datetime(
+            year, month, day,
+            hour, minute, second,
+            tzinfo=datetime.timezone(
+                datetime.timedelta(minutes=(tz_hour * 60) + tz_min)
+            ),
+        )
+    except (ValueError, OverflowError):
         return None

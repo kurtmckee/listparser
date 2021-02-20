@@ -4,7 +4,6 @@
 #
 
 import copy
-import datetime
 
 from . import common
 from . import dates
@@ -119,9 +118,9 @@ class OpmlMixin(common.CommonMixin):
         value = self._characters.strip()
         if value:
             self.harvest.meta.created = value
-            d = dates.rfc822(self.harvest.meta.created)
-            if isinstance(d, datetime.datetime):
-                self.harvest.meta.created_parsed = d
+            timestamp = dates.parse_rfc822(self.harvest.meta.created)
+            if timestamp:
+                self.harvest.meta.created_parsed = timestamp
             else:
                 self.raise_bozo('dateCreated is not an RFC 822 datetime')
 
@@ -131,8 +130,8 @@ class OpmlMixin(common.CommonMixin):
         value = self._characters.strip()
         if value:
             self.harvest.meta.modified = value
-            d = dates.rfc822(self.harvest.meta.modified)
-            if isinstance(d, datetime.datetime):
-                self.harvest.meta.modified_parsed = d
+            timestamp = dates.parse_rfc822(self.harvest.meta.modified)
+            if timestamp:
+                self.harvest.meta.modified_parsed = timestamp
             else:
                 self.raise_bozo('dateModified is not an RFC 822 datetime')
