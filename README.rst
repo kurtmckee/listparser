@@ -16,7 +16,7 @@ Usage
 ..  code-block:: pycon
 
     >>> import listparser
-    >>> result = listparser.parse('project.opml')
+    >>> result = listparser.parse('feeds.opml')
 
 A dictionary will be returned with several keys:
 

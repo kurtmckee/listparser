@@ -41,9 +41,9 @@ legacy_tox_ini = """
 envlist =
     coverage_erase
     py{39, 38, 37, 36, py3}-{,requests}
+    coverage_report
     flake8
     docs
-    coverage_report
 
 skip_missing_interpreters = True
 isolated_build = True
@@ -55,17 +55,20 @@ deps =
     pytest-cov
 
 commands =
-    {envpython} -m pytest --cov=listparser --cov-append lptest.py
+    {envpython} -m pytest --cov=listparser --cov=tests --cov-append
 
 [testenv:flake8]
+skipsdist = true
+skip_install = true
 deps =
-    pytest
-    pytest-flake8
+    flake8
 
 commands =
-    {envpython} -m pytest --flake8
+    {envpython} -m flake8 src tests docs
 
 [testenv:docs]
+skipsdist = true
+skip_install = true
 deps =
     sphinx
 
@@ -73,13 +76,15 @@ commands =
     {envpython} -m sphinx -aWEqb html docs/ build/trash
 
 [testenv:coverage_erase]
-deps = coverage[toml]
+skipsdist = true
 skip_install = true
+deps = coverage[toml]
 commands = coverage erase
 
 [testenv:coverage_report]
-deps = coverage[toml]
+skipsdist = true
 skip_install = true
+deps = coverage[toml]
 commands = coverage html -d htmlcov
 
 """

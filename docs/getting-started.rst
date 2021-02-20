@@ -16,7 +16,7 @@ listparser has a single public function, :py:func:`~listparser.parse`.
 ..  code-block:: pycon
 
     >>> import listparser
-    >>> result = listparser.parse('https://github.com/kurtmckee/listparser/raw/develop/project.opml')
+    >>> result = listparser.parse('https://github.com/kurtmckee/listparser/raw/develop/feeds.opml')
 
 :py:func:`~listparser.parse` can be given a URL, an open file handle,
 or even an in-memory string.
