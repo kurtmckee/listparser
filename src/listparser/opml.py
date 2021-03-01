@@ -11,11 +11,11 @@ from . import dates
 
 class OpmlMixin(common.CommonMixin):
     def _start_opml_opml(self, attrs):
-        self.harvest.version = 'opml'
+        self.harvest['version'] = 'opml'
         if attrs.get((None, 'version')) in ('1.0', '1.1'):
-            self.harvest.version = 'opml1'
+            self.harvest['version'] = 'opml1'
         elif attrs.get((None, 'version')) == '2.0':
-            self.harvest.version = 'opml2'
+            self.harvest['version'] = 'opml2'
 
     def _start_opml_outline(self, attrs):
         url = None
@@ -68,13 +68,13 @@ class OpmlMixin(common.CommonMixin):
         if (None, 'category') in attrs.keys():
             for i in attrs[(None, 'category')].split(','):
                 tmp = [j.strip() for j in i.split('/') if j.strip()]
-                if tmp and tmp not in obj.categories:
-                    obj.categories.append(tmp)
+                if tmp and tmp not in obj['categories']:
+                    obj['categories'].append(tmp)
         # Copy the current hierarchy into `categories`
-        if self.hierarchy and self.hierarchy not in obj.categories:
-            obj.categories.append(copy.copy(self.hierarchy))
+        if self.hierarchy and self.hierarchy not in obj['categories']:
+            obj['categories'].append(copy.copy(self.hierarchy))
         # Copy all single-element `categories` into `tags`
-        obj.tags = [i[0] for i in obj.categories if len(i) == 1]
+        obj['tags'] = [i[0] for i in obj['categories'] if len(i) == 1]
 
         self.hierarchy.append('')
 
@@ -86,41 +86,41 @@ class OpmlMixin(common.CommonMixin):
     def _end_opml_title(self):
         value = self._characters.strip()
         if value:
-            self.harvest.meta.title = value
+            self.harvest['meta']['title'] = value
 
     _start_opml_ownerId = common.CommonMixin._expect_characters
 
     def _end_opml_ownerId(self):
         value = self._characters.strip()
         if value:
-            self.harvest.meta.setdefault('author', common.SuperDict())
-            self.harvest.meta.author.url = value
+            self.harvest['meta'].setdefault('author', common.SuperDict())
+            self.harvest['meta']['author']['url'] = value
 
     _start_opml_ownerEmail = common.CommonMixin._expect_characters
 
     def _end_opml_ownerEmail(self):
         value = self._characters.strip()
         if value:
-            self.harvest.meta.setdefault('author', common.SuperDict())
-            self.harvest.meta.author.email = value
+            self.harvest['meta'].setdefault('author', common.SuperDict())
+            self.harvest['meta']['author']['email'] = value
 
     _start_opml_ownerName = common.CommonMixin._expect_characters
 
     def _end_opml_ownerName(self):
         value = self._characters.strip()
         if value:
-            self.harvest.meta.setdefault('author', common.SuperDict())
-            self.harvest.meta.author.name = value
+            self.harvest['meta'].setdefault('author', common.SuperDict())
+            self.harvest['meta']['author']['name'] = value
 
     _start_opml_dateCreated = common.CommonMixin._expect_characters
 
     def _end_opml_dateCreated(self):
         value = self._characters.strip()
         if value:
-            self.harvest.meta.created = value
-            timestamp = dates.parse_rfc822(self.harvest.meta.created)
+            self.harvest['meta']['created'] = value
+            timestamp = dates.parse_rfc822(value)
             if timestamp:
-                self.harvest.meta.created_parsed = timestamp
+                self.harvest['meta']['created_parsed'] = timestamp
             else:
                 self.raise_bozo('dateCreated is not an RFC 822 datetime')
 
@@ -129,9 +129,9 @@ class OpmlMixin(common.CommonMixin):
     def _end_opml_dateModified(self):
         value = self._characters.strip()
         if value:
-            self.harvest.meta.modified = value
-            timestamp = dates.parse_rfc822(self.harvest.meta.modified)
+            self.harvest['meta']['modified'] = value
+            timestamp = dates.parse_rfc822(value)
             if timestamp:
-                self.harvest.meta.modified_parsed = timestamp
+                self.harvest['meta']['modified_parsed'] = timestamp
             else:
                 self.raise_bozo('dateModified is not an RFC 822 datetime')

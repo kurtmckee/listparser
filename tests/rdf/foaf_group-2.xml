@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Description: RDF | Use foaf:Group as category and tag (2)
-    Eval: result.bozo == 0
-    Eval: "Planet X" in result.feeds[0].tags
-    Eval: ["Planet X"] in result.feeds[0].categories
-    Eval: result.feeds[0].title == "User"
+    Eval: result['bozo'] == 0
+    Eval: "Planet X" in result['feeds'][0]['tags']
+    Eval: ["Planet X"] in result['feeds'][0]['categories']
+    Eval: result['feeds'][0]['title'] == "User"
 -->
 <rdf:RDF
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"

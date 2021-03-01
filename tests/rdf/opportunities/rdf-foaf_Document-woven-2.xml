@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Description: RDF | Handle opportunity URLs woven with feeds (2)
-    Eval: result.bozo == 0
-    Eval: len(result.feeds) == 2
-    Eval: len(result.opportunities) == 1
-    Eval: "http://domain1/feed" in (result.feeds[0].url, result.feeds[1].url)
-    Eval: "http://domain3/feed" in (result.feeds[0].url, result.feeds[1].url)
-    Eval: result.opportunities[0].url == "http://domain2/"
+    Eval: result['bozo'] == 0
+    Eval: len(result['feeds']) == 2
+    Eval: len(result['opportunities']) == 1
+    Eval: "http://domain1/feed" in (result['feeds'][0]['url'], result['feeds'][1]['url'])
+    Eval: "http://domain3/feed" in (result['feeds'][0]['url'], result['feeds'][1]['url'])
+    Eval: result['opportunities'][0]['url'] == "http://domain2/"
 -->
 <rdf:RDF
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"

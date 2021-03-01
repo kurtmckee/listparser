@@ -10,7 +10,7 @@ from . import common
 
 class IgoogleMixin(common.CommonMixin):
     def _start_gtml_GadgetTabML(self, attrs):
-        self.harvest.version = 'igoogle'
+        self.harvest['version'] = 'igoogle'
 
     def _start_gtml_Tab(self, attrs):
         if attrs.get((None, 'title'), '').strip():
@@ -30,9 +30,9 @@ class IgoogleMixin(common.CommonMixin):
     def _start_iGoogle_ModulePrefs(self, attrs):
         if self.flag_feed and attrs.get((None, 'xmlUrl'), '').strip():
             obj = common.SuperDict({'url': attrs[(None, 'xmlUrl')].strip()})
-            obj.title = ''
+            obj['title'] = ''
             if self.hierarchy:
-                obj.categories = [copy.copy(self.hierarchy)]
+                obj['categories'] = [copy.copy(self.hierarchy)]
             if len(self.hierarchy) == 1:
-                obj.tags = copy.copy(self.hierarchy)
-            self.harvest.feeds.append(obj)
+                obj['tags'] = copy.copy(self.hierarchy)
+            self.harvest['feeds'].append(obj)

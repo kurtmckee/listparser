@@ -2,12 +2,12 @@
 <!--
     Description: //outline/@category (tags 2)
     Eval: result['bozo'] == 0
-    Eval: len(result.feeds[0].categories) == 2
-    Eval: len(result.feeds[0].tags) == 2
-    Eval: 'tag1' in result.feeds[0].tags
-    Eval: 'tag2' in result.feeds[0].tags
-    Eval: ['tag1'] in result.feeds[0].categories
-    Eval: ['tag2'] in result.feeds[0].categories
+    Eval: len(result['feeds'][0]['categories']) == 2
+    Eval: len(result['feeds'][0]['tags']) == 2
+    Eval: 'tag1' in result['feeds'][0]['tags']
+    Eval: 'tag2' in result['feeds'][0]['tags']
+    Eval: ['tag1'] in result['feeds'][0]['categories']
+    Eval: ['tag2'] in result['feeds'][0]['categories']
 -->
 <opml version="2.0">
     <head></head>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Description: RDF | Find feed title in foaf:Agent (2)
-    Eval: result.bozo == 0
-    Eval: len(result.feeds) == 1
-    Eval: result.feeds[0].title == "User"
+    Eval: result['bozo'] == 0
+    Eval: len(result['feeds']) == 1
+    Eval: result['feeds'][0]['title'] == "User"
 -->
 <rdf:RDF
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
