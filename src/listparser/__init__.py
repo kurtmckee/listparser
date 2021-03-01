@@ -27,7 +27,7 @@ __version__ = '0.18'
 def parse(
         parse_obj: Union[str, bytes],
         inject: bool = False,
-) -> Dict:
+) -> common.SuperDict:
     """Parse a subscription list and return a dict containing the results.
 
     *parse_obj* must be one of the following:
@@ -42,7 +42,7 @@ def parse(
     webserver HTTP response headers, and any exception encountered.
     """
 
-    guarantees = common.SuperDict({
+    guarantees = {
         'bozo': False,
         'bozo_exception': None,
         'feeds': [],
@@ -50,11 +50,11 @@ def parse(
         'opportunities': [],
         'meta': common.SuperDict(),
         'version': '',
-    })
+    }
     content, info = get_content(parse_obj)
     guarantees.update(info)
     if not content:
-        return guarantees
+        return common.SuperDict(guarantees)
 
     handler = Handler()
     handler.harvest.update(guarantees)
@@ -78,14 +78,14 @@ def parse(
     if inject and not handler.harvest['bozo']:
         handler.harvest['bozo'] = True
         handler.harvest['bozo_exception'] = ListError('undefined entity found')
-    return handler.harvest
+    return common.SuperDict(handler.harvest)
 
 
 class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler,
               foaf.FoafMixin, igoogle.IgoogleMixin, opml.OpmlMixin):
     def __init__(self):
         xml.sax.handler.ContentHandler.__init__(self)
-        self.harvest = common.SuperDict()
+        self.harvest = {}
         self.expect = False
         self._characters = str()
         self.hierarchy = []
@@ -95,13 +95,16 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler,
         self.flag_opportunity = False
         self.flag_group = False
         # found_urls = {url: (append_to_key, obj)}
-        self.found_urls = common.SuperDict()
+        self.found_urls = {}
         # group_objs = [(append_to_key, obj)]
         self.group_objs = []
         self.agent_feeds = []
         self.agent_lists = []
         self.agent_opps = []
         self.foaf_name = []
+
+        self.start_methods = {}
+        self.end_methods = {}
 
     def raise_bozo(self, err):
         self.harvest['bozo'] = True
@@ -119,24 +122,35 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler,
 
     # ContentHandler functions
     def startElementNS(self, name, qname, attrs):
-        fn = ''
-        if name[0] in common.namespaces:
-            fn = '_start_{0}_{1}'.format(common.namespaces[name[0]], name[1])
-        elif name[0] is None:
-            fn = '_start_opml_{0}'.format(name[1])
-        if hasattr(getattr(self, fn, None), '__call__'):
-            getattr(self, fn)(attrs)
+        try:
+            method = self.start_methods[name]
+        except KeyError:
+            fn = ''
+            if name[0] in common.namespaces:
+                fn = f'_start_{common.namespaces[name[0]]}_{name[1]}'
+            elif name[0] is None:
+                fn = f'_start_opml_{name[1]}'
+            self.start_methods[name] = method = getattr(self, fn, None)
+
+        if method:
+            method(attrs)
 
     def endElementNS(self, name, qname):
-        fn = ''
-        if name[0] in common.namespaces:
-            fn = '_end_{0}_{1}'.format(common.namespaces[name[0]], name[1])
-        elif name[0] is None:
-            fn = '_end_opml_{0}'.format(name[1])
-        if hasattr(getattr(self, fn, None), '__call__'):
-            getattr(self, fn)()
+        try:
+            method = self.end_methods[name]
+        except KeyError:
+            fn = ''
+            if name[0] in common.namespaces:
+                fn = f'_end_{common.namespaces[name[0]]}_{name[1]}'
+            elif name[0] is None:
+                fn = f'_end_opml_{name[1]}'
+            self.end_methods[name] = method = getattr(self, fn, None)
+
+        if method:
+            method()
+
             # Always disable and reset character capture in order to
-            # reduce code duplication in the _end_opml_* functions
+            # reduce code duplication in the _end_opml_* functions.
             self.expect = False
             self._characters = str()
 
@@ -147,25 +161,25 @@ class Handler(xml.sax.handler.ContentHandler, xml.sax.handler.ErrorHandler,
 
 def get_content(obj) -> Tuple[Optional[bytes], Dict]:
     if isinstance(obj, bytes):
-        return obj, common.SuperDict({'bozo': False, 'bozo_exception': None})
+        return obj, {'bozo': False, 'bozo_exception': None}
     elif not isinstance(obj, str):
         # Only str and bytes objects can be parsed.
         error = ListError('parse() called with unparsable object')
-        return None, common.SuperDict({'bozo': True, 'bozo_exception': error})
+        return None, {'bozo': True, 'bozo_exception': error}
     elif not obj.startswith(('http://', 'https://')):
         # It's not a URL, so it must be treated as an XML document.
-        return obj.encode('utf8'), common.SuperDict({
+        return obj.encode('utf8'), {
             'bozo': False,
             'bozo_exception': None,
-        })
+        }
 
     # It's a URL. Confirm requests is installed.
     elif requests is None:
         message = f"requests is not installed so {obj} cannot be retrieved"
-        return None, common.SuperDict({
+        return None, {
             'bozo': True,
             'bozo_exception': ListError(message),
-        })
+        }
 
     headers = {'user-agent': f'listparser/{__version__} +{__url__}'}
     try:
@@ -174,12 +188,12 @@ def get_content(obj) -> Tuple[Optional[bytes], Dict]:
             requests.exceptions.RequestException,
             requests.exceptions.BaseHTTPError,
     ) as error:
-        return None, common.SuperDict({'bozo': True, 'bozo_exception': error})
+        return None, {'bozo': True, 'bozo_exception': error}
 
-    return response.text.encode('utf8'), common.SuperDict({
+    return response.text.encode('utf8'), {
         'bozo': False,
         'bozo_exception': None,
-    })
+    }
 
 
 class Injector:

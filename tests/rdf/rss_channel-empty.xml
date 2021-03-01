@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Description: RDF | Empty rss:channel feed attribute
-    Eval: result.bozo == 0
-    Eval: not result.feeds
+    Eval: result['bozo'] == 0
+    Eval: not result['feeds']
 -->
 <rdf:RDF
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"

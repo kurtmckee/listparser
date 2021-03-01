@@ -10,7 +10,7 @@ from . import common
 
 class FoafMixin(common.CommonMixin):
     def _start_rdf_RDF(self, attrs):
-        self.harvest.version = 'rdf'
+        self.harvest['version'] = 'rdf'
 
     def _start_rss_channel(self, attrs):
         if attrs.get((common._ns['rdf'], 'about'), '').strip():
@@ -79,19 +79,19 @@ class FoafMixin(common.CommonMixin):
         self.flag_group = False
         for key, obj in self.group_objs:
             # Check for duplicates
-            if obj.url in self.found_urls:
-                obj = self.found_urls[obj.url][1]
+            if obj['url'] in self.found_urls:
+                obj = self.found_urls[obj['url']][1]
             else:
-                self.found_urls[obj.url] = (key, obj)
+                self.found_urls[obj['url']] = (key, obj)
                 self.harvest[key].append(obj)
             # Create or consolidate categories and tags
             obj.setdefault('categories', [])
             obj.setdefault('tags', [])
-            if self.hierarchy and self.hierarchy not in obj.categories:
-                obj.categories.append(copy.copy(self.hierarchy))
+            if self.hierarchy and self.hierarchy not in obj['categories']:
+                obj['categories'].append(copy.copy(self.hierarchy))
             if len(self.hierarchy) == 1 and \
-               self.hierarchy[0] not in obj.tags:
-                obj.tags.extend(copy.copy(self.hierarchy))
+               self.hierarchy[0] not in obj['tags']:
+                obj['tags'].extend(copy.copy(self.hierarchy))
         self.group_objs = []
         # Maintain the hierarchy
         if self.hierarchy:

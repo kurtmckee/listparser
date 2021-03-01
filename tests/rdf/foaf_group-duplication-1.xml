@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Description: RDF | Handle duplicate feeds (1)
-    Eval: result.bozo == 0
-    Eval: len(result.feeds) == 1
-    Eval: "i18n" in result.feeds[0].tags
-    Eval: "L10n" in result.feeds[0].tags
-    Eval: ["i18n"] in result.feeds[0].categories
-    Eval: ["L10n"] in result.feeds[0].categories
+    Eval: result['bozo'] == 0
+    Eval: len(result['feeds']) == 1
+    Eval: "i18n" in result['feeds'][0]['tags']
+    Eval: "L10n" in result['feeds'][0]['tags']
+    Eval: ["i18n"] in result['feeds'][0]['categories']
+    Eval: ["L10n"] in result['feeds'][0]['categories']
 -->
 <rdf:RDF
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"

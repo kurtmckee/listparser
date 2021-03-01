@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Description: RDF | Test foaf:member_name in foaf:knows
-    Eval: result.bozo == 0
-    Eval: result.lists[0].title == "member"
+    Eval: result['bozo'] == 0
+    Eval: result['lists'][0]['title'] == "member"
 -->
 <rdf:RDF
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"

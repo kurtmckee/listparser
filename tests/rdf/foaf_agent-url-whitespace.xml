@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Description: RDF | Find feed URL in foaf:Agent and strip whitespace
-    Eval: result.bozo == 0
-    Eval: len(result.feeds) == 1
-    Eval: result.feeds[0].url == "http://domain/feed"
-    Eval: result.feeds[0].title == ""
+    Eval: result['bozo'] == 0
+    Eval: len(result['feeds']) == 1
+    Eval: result['feeds'][0]['url'] == "http://domain/feed"
+    Eval: result['feeds'][0]['title'] == ""
 -->
 <rdf:RDF
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"

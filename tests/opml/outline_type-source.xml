@@ -5,9 +5,9 @@
     useful for differentiation between feeds and subscription lists.
 
     Description: //outline[type="source"] indicates a subscription list
-    Eval: result.bozo == 0
-    Eval: len(result.feeds) == 0
-    Eval: result.lists[0].url == "http://localhost/list"
+    Eval: result['bozo'] == 0
+    Eval: len(result['feeds']) == 0
+    Eval: result['lists'][0]['url'] == "http://localhost/list"
 -->
 <opml version="2.0">
     <head></head>

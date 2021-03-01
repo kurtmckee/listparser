@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Description: RDF | foaf:Agent with multiple weblogs
-    Eval: result.bozo == 0
-    Eval: len(result.feeds) == 3
-    Eval: "http://domain/work/feed" in (result.feeds[0].url, result.feeds[1].url, result.feeds[2].url)
-    Eval: "http://domain/play/feed" in (result.feeds[0].url, result.feeds[1].url, result.feeds[2].url)
-    Eval: "http://domain/misc/feed" in (result.feeds[0].url, result.feeds[1].url, result.feeds[2].url)
-    Eval: result.feeds[0].title == "User"
-    Eval: result.feeds[1].title == "User"
-    Eval: result.feeds[2].title == "User"
+    Eval: result['bozo'] == 0
+    Eval: len(result['feeds']) == 3
+    Eval: "http://domain/work/feed" in (result['feeds'][0]['url'], result['feeds'][1]['url'], result['feeds'][2]['url'])
+    Eval: "http://domain/play/feed" in (result['feeds'][0]['url'], result['feeds'][1]['url'], result['feeds'][2]['url'])
+    Eval: "http://domain/misc/feed" in (result['feeds'][0]['url'], result['feeds'][1]['url'], result['feeds'][2]['url'])
+    Eval: result['feeds'][0]['title'] == "User"
+    Eval: result['feeds'][1]['title'] == "User"
+    Eval: result['feeds'][2]['title'] == "User"
 -->
 <rdf:RDF
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
