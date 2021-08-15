@@ -1,0 +1,23 @@
+Added
+-----
+
+*   Add ``lxml`` as an optional dependency.
+    This is currently the only way to parse malformed XML files.
+
+
+Changed
+-------
+
+*   Change the name of the ``ListError`` to ``ListparserError``.
+
+
+Removed
+-------
+
+*   HTML entities are no longer automatically injected into the DTD.
+
+    If lxml is installed and undeclared HTML entities are encountered,
+    they will be ignored.
+
+    If lxml is not installed and undeclared HTML entities are encountered,
+    Python's ``xml.sax`` parser will fail to parse the document.

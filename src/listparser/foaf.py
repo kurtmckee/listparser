@@ -8,23 +8,28 @@ import copy
 from . import common
 
 
+# Attribute key constants
+RDF_ABOUT = '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about'
+RDF_RESOURCE = '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource'
+
+
 class FoafMixin(common.CommonMixin):
     def _start_rdf_RDF(self, attrs):
         self.harvest['version'] = 'rdf'
 
     def _start_rss_channel(self, attrs):
-        if attrs.get((common._ns['rdf'], 'about'), '').strip():
-            # We now have a feed URL, so forget about any opportunity URL
+        if attrs.get(RDF_ABOUT, '').strip():
+            # We now have a feed URL, so forget about any opportunity URL.
             if self.flag_opportunity:
                 self.flag_opportunity = False
                 self.agent_opps.pop()
-            agent_feed = attrs.get((common._ns['rdf'], 'about')).strip()
+            agent_feed = attrs[RDF_ABOUT].strip()
             self.agent_feeds.append(agent_feed)
 
     def _start_ya_feed(self, attrs):
-        if attrs.get((common._ns['rdf'], 'resource'), '').strip():
+        if attrs.get(RDF_RESOURCE, '').strip():
             # This is a feed URL
-            agent_feed = attrs[(common._ns['rdf'], 'resource')].strip()
+            agent_feed = attrs[RDF_RESOURCE].strip()
             self.agent_feeds.append(agent_feed)
 
     def _clean_found_objs(self):
@@ -67,9 +72,9 @@ class FoafMixin(common.CommonMixin):
     _end_foaf_Person = _end_foaf_Agent
 
     def _start_rdfs_seeAlso(self, attrs):
-        if attrs.get((common._ns['rdf'], 'resource'), '').strip():
+        if attrs.get(RDF_RESOURCE, '').strip():
             # This is a subscription list URL
-            agent_list = attrs[(common._ns['rdf'], 'resource')].strip()
+            agent_list = attrs[RDF_RESOURCE].strip()
             self.agent_lists.append(agent_list)
 
     def _start_foaf_Group(self, attrs):
@@ -89,8 +94,10 @@ class FoafMixin(common.CommonMixin):
             obj.setdefault('tags', [])
             if self.hierarchy and self.hierarchy not in obj['categories']:
                 obj['categories'].append(copy.copy(self.hierarchy))
-            if len(self.hierarchy) == 1 and \
-               self.hierarchy[0] not in obj['tags']:
+            if (
+                len(self.hierarchy) == 1
+                and self.hierarchy[0] not in obj['tags']
+            ):
                 obj['tags'].extend(copy.copy(self.hierarchy))
         self.group_objs = []
         # Maintain the hierarchy
@@ -113,8 +120,8 @@ class FoafMixin(common.CommonMixin):
     _end_foaf_member_name = _end_foaf_name
 
     def _start_foaf_Document(self, attrs):
-        if attrs.get((common._ns['rdf'], 'about'), '').strip():
-            # Flag this as an opportunity (but ignore if a feed URL is found)
+        if attrs.get(RDF_ABOUT, '').strip():
+            # Flag this as an opportunity (but ignore if a feed URL is found).
             self.flag_opportunity = True
-            agent_opp = attrs.get((common._ns['rdf'], 'about')).strip()
+            agent_opp = attrs[RDF_ABOUT].strip()
             self.agent_opps.append(agent_opp)

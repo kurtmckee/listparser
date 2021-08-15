@@ -12,43 +12,43 @@ from . import dates
 class OpmlMixin(common.CommonMixin):
     def _start_opml_opml(self, attrs):
         self.harvest['version'] = 'opml'
-        if attrs.get((None, 'version')) in ('1.0', '1.1'):
+        if attrs.get('version') in ('1.0', '1.1'):
             self.harvest['version'] = 'opml1'
-        elif attrs.get((None, 'version')) == '2.0':
+        elif attrs.get('version') == '2.0':
             self.harvest['version'] = 'opml2'
 
     def _start_opml_outline(self, attrs):
         url = None
         # Find an appropriate title in @text or @title (else empty)
-        if attrs.get((None, 'text'), '').strip():
-            title = attrs[(None, 'text')].strip()
+        if attrs.get('text', '').strip():
+            title = attrs['text'].strip()
         else:
-            title = attrs.get((None, 'title'), '').strip()
+            title = attrs.get('title', '').strip()
 
         # Search for the URL regardless of xmlUrl's case
         for k, v in attrs.items():
-            if k[1].lower() == 'xmlurl':
+            if k.lower() == 'xmlurl':
                 url = v.strip()
                 break
         # Determine whether the outline is a feed or subscription list
         if url is not None:
             # It's a feed
             append_to = 'feeds'
-            if attrs.get((None, 'type'), '').strip().lower() == 'source':
+            if attrs.get('type', '').strip().lower() == 'source':
                 # Actually, it's a subscription list!
                 append_to = 'lists'
-        elif attrs.get((None, 'type'), '').lower() in ('link', 'include'):
+        elif attrs.get('type', '').lower() in ('link', 'include'):
             # It's a subscription list
             append_to = 'lists'
-            url = attrs.get((None, 'url'), '').strip()
+            url = attrs.get('url', '').strip()
         elif title:
             # Assume that this is a grouping node
             self.hierarchy.append(title)
             return
         # Look for an opportunity URL
-        if not url and 'htmlurl' in (k[1].lower() for k in attrs.keys()):
+        if not url and 'htmlurl' in (k.lower() for k in attrs.keys()):
             for k, v in attrs.items():
-                if k[1].lower() == 'htmlurl':
+                if k.lower() == 'htmlurl':
                     url = v.strip()
             append_to = 'opportunities'
         if not url:
@@ -65,8 +65,8 @@ class OpmlMixin(common.CommonMixin):
 
         # Handle categories and tags
         obj.setdefault('categories', [])
-        if (None, 'category') in attrs.keys():
-            for i in attrs[(None, 'category')].split(','):
+        if 'category' in attrs.keys():
+            for i in attrs['category'].split(','):
                 tmp = [j.strip() for j in i.split('/') if j.strip()]
                 if tmp and tmp not in obj['categories']:
                     obj['categories'].append(tmp)
