@@ -77,5 +77,6 @@ for _file in tests_path.rglob('**/*.xml'):
 def test_file(use_dict, src, assertions):
     # `result` must exist in the local scope for the assertions to run.
     result = listparser.parse(src)  # noqa: F841
+    lxml = listparser.parsers.lxml  # noqa: F841
     for assertion in assertions:
         assert eval(assertion)
