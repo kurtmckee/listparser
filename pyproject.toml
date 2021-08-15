@@ -42,7 +42,7 @@ legacy_tox_ini = """
 [tox]
 envlist =
     coverage_erase
-    py{39, 38, 37, 36, py3}-{,requests}-{,lxml}
+    py{39, 38, 37, 36}-{,requests}-{,lxml}, pypy3-{,requests}
     coverage_report
     flake8
     docs
