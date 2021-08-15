@@ -14,8 +14,6 @@ namespaces = {
     'http://purl.org/rss/1.0/': 'rss',
     'http://blogs.yandex.ru/schema/foaf/': 'ya',
 }
-# Provide a shorthand to save space in-code, e.g. _ns['rdf']
-_ns = dict((v, k) for k, v in namespaces.items())
 
 
 class SuperDict(dict):
