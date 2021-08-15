@@ -40,10 +40,6 @@ class SuperDict(dict):
         else:
             return dict.__getattribute__(self, name)
 
-    def __setattr__(self, name, value):
-        self[name] = value
-        return value
-
 
 class CommonMixin:
     def __init__(self):
