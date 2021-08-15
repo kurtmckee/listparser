@@ -51,4 +51,4 @@ def test_requests_not_present():
     content, info = listparser.get_content('http://example')
     assert not content
     assert info['bozo']
-    assert isinstance(info['bozo_exception'], listparser.ListError)
+    assert isinstance(info['bozo_exception'], listparser.ListparserError)

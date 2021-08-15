@@ -1,9 +1,11 @@
 import os
+import pathlib
 import sys
 
-sys.path.append(os.path.abspath('../src'))
+import toml
 
-import listparser  # noqa: E402
+# Allow autodoc to import listparser.
+sys.path.append(os.path.abspath('../src'))
 
 
 # General configuration
@@ -27,10 +29,8 @@ copyright = '2009-2021 Kurt McKee'
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-# The short X.Y version.
-version = listparser.__version__
-# The full version, including alpha/beta/rc tags.
-release = listparser.__version__
+info = toml.load(pathlib.Path(__file__) / '../../pyproject.toml')
+version = release = info['tool']['poetry']['version']
 
 # List of directories, relative to source directory, that shouldn't be searched
 # for source files.

@@ -17,10 +17,12 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.6"
 requests = {version = "^2.25.1", optional = true}
+lxml = {version = "^4.6.2", optional = true}
 
 
 [tool.poetry.extras]
 http = ['requests']
+lxml = ['lxml']
 
 
 [tool.poetry.dev-dependencies]
@@ -40,7 +42,7 @@ legacy_tox_ini = """
 [tox]
 envlist =
     coverage_erase
-    py{39, 38, 37, 36, py3}-{,requests}
+    py{39, 38, 37, 36, py3}-{,requests}-{,lxml}
     coverage_report
     flake8
     docs
@@ -50,6 +52,7 @@ isolated_build = True
 
 [testenv]
 deps =
+    lxml: lxml
     requests: requests
     pytest
     pytest-cov
@@ -70,7 +73,9 @@ commands =
 skipsdist = true
 skip_install = true
 deps =
+    lxml
     sphinx
+    toml
 
 commands =
     {envpython} -m sphinx -aWEqb html docs/ build/trash

@@ -21,12 +21,6 @@ def use_dict():
         yield
 
 
-def test_image(use_dict):
-    path = tests_path / '1x1.gif'
-    result = listparser.parse(str(path))
-    assert result['bozo']
-
-
 def test_return_guarantees(use_dict):
     result = listparser.parse(0)
     assert result['bozo']
@@ -49,37 +43,6 @@ def test_get_content_bad(use_dict):
     content, info = listparser.get_content(123)
     assert content is None
     assert info['bozo']
-
-
-@pytest.fixture(params=[1, 20])
-def injector_fixture(request):
-    size = request.param
-    doc = b"""<?xml version="1.0"?><rdf:RDF
-            xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-            xmlns:foaf="http://xmlns.com/foaf/0.1/"
-            xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-            xmlns:rss="http://purl.org/rss/1.0/">
-            <foaf:Agent><foaf:name>&aacute;</foaf:name><foaf:weblog>
-            <foaf:Document rdf:about="http://domain/"><rdfs:seeAlso>
-            <rss:channel rdf:about="http://domain/feed" />
-            </rdfs:seeAlso></foaf:Document></foaf:weblog></foaf:Agent>
-            </rdf:RDF>"""
-    idoc = listparser.Injector(doc)
-    tmp = []
-    while 1:
-        i = idoc.read(size)
-        if i:
-            tmp.append(i)
-        else:
-            idoc.close()
-            break
-    return b''.join(tmp).decode('utf8')
-
-
-def test_injector(use_dict, injector_fixture):
-    result = listparser.parse(injector_fixture)
-    assert not result['bozo']
-    assert result['feeds'][0]['title'] == 'á'  # &aacute;
 
 
 tests = []

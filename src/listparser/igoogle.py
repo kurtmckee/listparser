@@ -13,23 +13,23 @@ class IgoogleMixin(common.CommonMixin):
         self.harvest['version'] = 'igoogle'
 
     def _start_gtml_Tab(self, attrs):
-        if attrs.get((None, 'title'), '').strip():
-            self.hierarchy.append(attrs[(None, 'title')].strip())
+        if attrs.get('title', '').strip():
+            self.hierarchy.append(attrs['title'].strip())
 
     def _end_gtml_Tab(self):
         if self.hierarchy:
             self.hierarchy.pop()
 
     def _start_iGoogle_Module(self, attrs):
-        if attrs.get((None, 'type'), '').strip().lower() == 'rss':
+        if attrs.get('type', '').strip().lower() == 'rss':
             self.flag_feed = True
 
     def _end_iGoogle_Module(self):
         self.flag_feed = False
 
     def _start_iGoogle_ModulePrefs(self, attrs):
-        if self.flag_feed and attrs.get((None, 'xmlUrl'), '').strip():
-            obj = common.SuperDict({'url': attrs[(None, 'xmlUrl')].strip()})
+        if self.flag_feed and attrs.get('xmlUrl', '').strip():
+            obj = common.SuperDict({'url': attrs['xmlUrl'].strip()})
             obj['title'] = ''
             if self.hierarchy:
                 obj['categories'] = [copy.copy(self.hierarchy)]
