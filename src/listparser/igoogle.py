@@ -9,25 +9,25 @@ from . import common
 
 
 class IgoogleMixin(common.CommonMixin):
-    def _start_gtml_GadgetTabML(self, attrs):
+    def start_gtml_GadgetTabML(self, _):
         self.harvest['version'] = 'igoogle'
 
-    def _start_gtml_Tab(self, attrs):
+    def start_gtml_Tab(self, attrs):
         if attrs.get('title', '').strip():
             self.hierarchy.append(attrs['title'].strip())
 
-    def _end_gtml_Tab(self):
+    def end_gtml_Tab(self):
         if self.hierarchy:
             self.hierarchy.pop()
 
-    def _start_iGoogle_Module(self, attrs):
+    def start_iGoogle_Module(self, attrs):
         if attrs.get('type', '').strip().lower() == 'rss':
             self.flag_feed = True
 
-    def _end_iGoogle_Module(self):
+    def end_iGoogle_Module(self):
         self.flag_feed = False
 
-    def _start_iGoogle_ModulePrefs(self, attrs):
+    def start_iGoogle_ModulePrefs(self, attrs):
         if self.flag_feed and attrs.get('xmlUrl', '').strip():
             obj = common.SuperDict({'url': attrs['xmlUrl'].strip()})
             obj['title'] = ''
