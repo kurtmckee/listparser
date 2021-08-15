@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 #
 
-from typing import Callable, Dict, Tuple, Union
+from typing import Dict, Tuple
 import xml.sax
 
 try:
@@ -12,52 +12,12 @@ except ImportError:
     lxml = None
 
 from . import common
-from . import exceptions
 from . import foaf
 from . import igoogle
 from . import opml
 
 
-class BaseHandler(foaf.FoafMixin, igoogle.IgoogleMixin, opml.OpmlMixin):
-    def __init__(self):
-        super().__init__()
-        self.harvest = {}
-        self.expect = False
-        self._characters = str()
-        self.hierarchy = []
-        self.flag_agent = False
-        self.flag_feed = False
-        self.flag_new_title = False
-        self.flag_opportunity = False
-        self.flag_group = False
-        # found_urls = {url: (append_to_key, obj)}
-        self.found_urls = {}
-        # group_objs = [(append_to_key, obj)]
-        self.group_objs = []
-        self.agent_feeds = []
-        self.agent_lists = []
-        self.agent_opps = []
-        self.foaf_name = []
-
-        # Cache element-to-method name lookups.
-        #
-        # The dictionary key types vary between parsers:
-        #
-        # If LXML is the parser, the keys will be strings.
-        # If xml.sax is the parser, the keys will be tuples of strings.
-        #
-        self.start_methods: Dict[Union[Tuple[str, str], str], Callable] = {}
-        self.end_methods: Dict[Union[Tuple[str, str], str], Callable] = {}
-
-    def raise_bozo(self, error: str):
-        self.harvest['bozo'] = True
-        if isinstance(error, str):
-            self.harvest['bozo_exception'] = exceptions.ListparserError(error)
-        else:
-            self.harvest['bozo_exception'] = error
-
-
-class LxmlHandler(BaseHandler):
+class LxmlHandler(foaf.FoafMixin, igoogle.IgoogleMixin, opml.OpmlMixin):
     def start(self, name: str, attrs: Dict):
         """Handle the start of an XML element."""
 
@@ -67,9 +27,9 @@ class LxmlHandler(BaseHandler):
             namespace, _, tag = name.rpartition('}')
             namespace = namespace[1:]
             try:
-                function = f'_start_{common.namespaces[namespace]}_{tag}'
+                function = f'start_{common.namespaces[namespace]}_{tag}'
             except KeyError:
-                function = f'_start_opml_{tag}'
+                function = f'start_opml_{tag}'
             self.start_methods[name] = method = getattr(self, function, None)
 
         if method:
@@ -84,31 +44,28 @@ class LxmlHandler(BaseHandler):
             namespace, _, tag = name.rpartition('}')
             namespace = namespace[1:]
             try:
-                function = f'_end_{common.namespaces[namespace]}_{tag}'
+                function = f'end_{common.namespaces[namespace]}_{tag}'
             except KeyError:
-                function = f'_end_opml_{tag}'
+                function = f'end_opml_{tag}'
             self.end_methods[name] = method = getattr(self, function, None)
 
         if method:
             method()
 
-            # Always disable and reset character capture in order to
-            # reduce code duplication in the _end_opml_* functions.
-            self.expect = False
-            self._characters = str()
-
     def data(self, data: str):
         """Handle text content of an element."""
 
-        if self.expect:
-            self._characters += data
+        if self.flag_expect_text:
+            self.text.append(data)
 
     def close(self):
         pass
 
 
 class XmlSaxHandler(
-    BaseHandler,
+    foaf.FoafMixin,
+    igoogle.IgoogleMixin,
+    opml.OpmlMixin,
     xml.sax.handler.ContentHandler,
     xml.sax.handler.ErrorHandler,
 ):
@@ -122,7 +79,6 @@ class XmlSaxHandler(
 
     def warning(self, exception):
         self.raise_bozo(exception)
-        return
 
     error = warning
     fatalError = warning
@@ -134,7 +90,7 @@ class XmlSaxHandler(
         """Handle the start of an XML element.
 
         Attribute keys will be converted from tuples of strings
-        to strings to match the format that LXML uses.
+        to strings to match the format that lxml uses.
         """
 
         try:
@@ -142,9 +98,9 @@ class XmlSaxHandler(
         except KeyError:
             fn = ''
             if name[0] in common.namespaces:
-                fn = f'_start_{common.namespaces[name[0]]}_{name[1]}'
+                fn = f'start_{common.namespaces[name[0]]}_{name[1]}'
             elif name[0] is None:
-                fn = f'_start_opml_{name[1]}'
+                fn = f'start_opml_{name[1]}'
             self.start_methods[name] = method = getattr(self, fn, None)
 
         if not method:
@@ -170,22 +126,17 @@ class XmlSaxHandler(
         except KeyError:
             fn = ''
             if name[0] in common.namespaces:
-                fn = f'_end_{common.namespaces[name[0]]}_{name[1]}'
+                fn = f'end_{common.namespaces[name[0]]}_{name[1]}'
             elif name[0] is None:
-                fn = f'_end_opml_{name[1]}'
+                fn = f'end_opml_{name[1]}'
             self.end_methods[name] = method = getattr(self, fn, None)
 
         if method:
             method()
 
-            # Always disable and reset character capture in order to
-            # reduce code duplication in the _end_opml_* functions.
-            self.expect = False
-            self._characters = str()
-
     def characters(self, content):
-        if self.expect:
-            self._characters += content
+        if self.flag_expect_text:
+            self.text.append(content)
 
 
 if lxml:

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!--
+    Description: Test malformed XML
+    Eval: (result['bozo'] is False) if lxml else (result['bozo'] is True)
+    Eval: (len(result['feeds']) == 1) if lxml else (len(result['feeds']) == 0)
+-->
+<opml version="2.0">
+    <body>
+        <outline text="&nbsp;" type="rss" xmlUrl="http://domain/feed" />
+    </body>
+</opml

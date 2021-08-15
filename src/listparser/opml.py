@@ -10,14 +10,14 @@ from . import dates
 
 
 class OpmlMixin(common.CommonMixin):
-    def _start_opml_opml(self, attrs):
+    def start_opml_opml(self, attrs):
         self.harvest['version'] = 'opml'
         if attrs.get('version') in ('1.0', '1.1'):
             self.harvest['version'] = 'opml1'
         elif attrs.get('version') == '2.0':
             self.harvest['version'] = 'opml2'
 
-    def _start_opml_outline(self, attrs):
+    def start_opml_outline(self, attrs):
         url = None
         # Find an appropriate title in @text or @title (else empty)
         if attrs.get('text', '').strip():
@@ -30,6 +30,9 @@ class OpmlMixin(common.CommonMixin):
             if k.lower() == 'xmlurl':
                 url = v.strip()
                 break
+
+        append_to = None
+
         # Determine whether the outline is a feed or subscription list
         if url is not None:
             # It's a feed
@@ -55,7 +58,7 @@ class OpmlMixin(common.CommonMixin):
             # Maintain the hierarchy
             self.hierarchy.append('')
             return
-        if url not in self.found_urls:
+        if url not in self.found_urls and append_to:
             # This is a brand new URL
             obj = common.SuperDict({'url': url, 'title': title})
             self.found_urls[url] = (append_to, obj)
@@ -78,44 +81,44 @@ class OpmlMixin(common.CommonMixin):
 
         self.hierarchy.append('')
 
-    def _end_opml_outline(self):
+    def end_opml_outline(self):
         self.hierarchy.pop()
 
-    _start_opml_title = common.CommonMixin._expect_characters
+    start_opml_title = common.CommonMixin.expect_text
 
-    def _end_opml_title(self):
-        value = self._characters.strip()
+    def end_opml_title(self):
+        value = self.get_text()
         if value:
             self.harvest['meta']['title'] = value
 
-    _start_opml_ownerId = common.CommonMixin._expect_characters
+    start_opml_ownerId = common.CommonMixin.expect_text
 
-    def _end_opml_ownerId(self):
-        value = self._characters.strip()
+    def end_opml_ownerId(self):
+        value = self.get_text()
         if value:
             self.harvest['meta'].setdefault('author', common.SuperDict())
             self.harvest['meta']['author']['url'] = value
 
-    _start_opml_ownerEmail = common.CommonMixin._expect_characters
+    start_opml_ownerEmail = common.CommonMixin.expect_text
 
-    def _end_opml_ownerEmail(self):
-        value = self._characters.strip()
+    def end_opml_ownerEmail(self):
+        value = self.get_text()
         if value:
             self.harvest['meta'].setdefault('author', common.SuperDict())
             self.harvest['meta']['author']['email'] = value
 
-    _start_opml_ownerName = common.CommonMixin._expect_characters
+    start_opml_ownerName = common.CommonMixin.expect_text
 
-    def _end_opml_ownerName(self):
-        value = self._characters.strip()
+    def end_opml_ownerName(self):
+        value = self.get_text()
         if value:
             self.harvest['meta'].setdefault('author', common.SuperDict())
             self.harvest['meta']['author']['name'] = value
 
-    _start_opml_dateCreated = common.CommonMixin._expect_characters
+    start_opml_dateCreated = common.CommonMixin.expect_text
 
-    def _end_opml_dateCreated(self):
-        value = self._characters.strip()
+    def end_opml_dateCreated(self):
+        value = self.get_text()
         if value:
             self.harvest['meta']['created'] = value
             timestamp = dates.parse_rfc822(value)
@@ -124,10 +127,10 @@ class OpmlMixin(common.CommonMixin):
             else:
                 self.raise_bozo('dateCreated is not an RFC 822 datetime')
 
-    _start_opml_dateModified = common.CommonMixin._expect_characters
+    start_opml_dateModified = common.CommonMixin.expect_text
 
-    def _end_opml_dateModified(self):
-        value = self._characters.strip()
+    def end_opml_dateModified(self):
+        value = self.get_text()
         if value:
             self.harvest['meta']['modified'] = value
             timestamp = dates.parse_rfc822(value)

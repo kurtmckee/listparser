@@ -32,7 +32,7 @@ def parse(parse_obj: Union[str, bytes]) -> common.SuperDict:
     *   a string or bytes object containing an XML document
 
     The dictionary returned will contain all of the parsed information,
-    webserver HTTP response headers, and any exception encountered.
+    HTTP response headers (if applicable), and any exception encountered.
     """
 
     guarantees = {

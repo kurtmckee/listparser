@@ -17,9 +17,3 @@ def test_attr_get():
 def test_attr_get_error():
     with pytest.raises(AttributeError):
         assert SuperDict().bogus
-
-
-def test_attr_set():
-    sample = SuperDict()
-    sample.a = 1
-    assert dict.__getitem__(sample, 'a') == 1

@@ -3,7 +3,7 @@ name = "listparser"
 version = "0.18"
 description = "Parse OPML subscription lists"
 authors = ["Kurt McKee <contactme@kurtmckee.org>"]
-license = "LGPLv3"
+license = "MIT"
 readme = "README.rst"
 repository = "https://github.com/kurtmckee/listparser/"
 documentation = "https://listparser.readthedocs.io/en/stable/"
@@ -42,7 +42,7 @@ legacy_tox_ini = """
 [tox]
 envlist =
     coverage_erase
-    py{39, 38, 37, 36, py3}-{,requests}-{,lxml}
+    py{39, 38, 37, 36}-{,requests}-{,lxml}, pypy3-{,requests}
     coverage_report
     flake8
     docs
