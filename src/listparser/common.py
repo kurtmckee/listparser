@@ -45,7 +45,7 @@ class CommonMixin:
     def __init__(self):
         super().__init__()
         self.harvest = {}
-        self.flag_expect_text = False
+        self.flag_expect_text: bool = False
         self.text: List[str] = []
         self.hierarchy = []
         self.flag_agent = False
@@ -53,10 +53,12 @@ class CommonMixin:
         self.flag_new_title = False
         self.flag_opportunity = False
         self.flag_group = False
+
         # found_urls = {url: (append_to_key, obj)}
-        self.found_urls = {}
+        self.found_urls: Dict[str, Tuple[str, Dict]] = {}
+
         # group_objs = [(append_to_key, obj)]
-        self.group_objs = []
+        self.group_objs: List[Tuple[str, Dict]] = []
         self.agent_feeds = []
         self.agent_lists = []
         self.agent_opps = []
@@ -79,15 +81,18 @@ class CommonMixin:
         else:
             self.harvest['bozo_exception'] = error
 
-    def expect_text(self, attrs):
-        """Flag that text content is anticipated."""
+    def expect_text(self, _):
+        """Flag that text content is anticipated.
 
-        # Most start_opml_* functions only need to set these two variables,
-        # so this function exists to reduce significant code duplication.
+        Many start_* methods only need to prepare for text content.
+        This method exists so those start_* methods can be declared
+        as aliases for this method.
+        """
+
         self.flag_expect_text = True
-        self.text: List[str] = []
+        self.text = []
 
-    def get_text(self):
+    def get_text(self) -> str:
         """Get text content."""
 
         text = ''.join(self.text).strip()
