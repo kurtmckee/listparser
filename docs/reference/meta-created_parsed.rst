@@ -3,7 +3,7 @@ meta.created_parsed
 
 A Python ``datetime`` object representing the date and time at which
 the subscription list was originally created. The ``datetime``
-object will be timezone-aware.
+object is timezone-aware.
 
 ``meta.created_parsed`` is parsed from the ``meta.created`` string.
 

@@ -1,8 +1,7 @@
 lists
 =====
 
-The ``lists`` attribute contains a list of all of the subscription
-lists in the parsed subscription list.
+The ``lists`` attribute is a list of all of the subscription lists in the parsed subscription list.
 
 ..  seealso::
 

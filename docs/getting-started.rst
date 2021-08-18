@@ -3,12 +3,17 @@ Getting started
 
 Use pip to install listparser.
 
-To support retrieving and parsing of URL's, add ``[http]``
+To support retrieving and parsing of URL's, add ``[http]`` to the command
 so the requests package will be installed as well.
+
+To parse broken XML, add ``[lxml]`` to the command
+so the lxml package will be installed as well.
 
 ..  code-block:: shell
 
-    pip install listparser[http]
+    python -m pip install listparser[http,lxml]
+
+You don't have to install lxml or requests but it will reduce listparser's functionality.
 
 
 listparser has a single public function, :py:func:`~listparser.parse`.
@@ -37,7 +42,7 @@ modified, and who maintains the subscription list.
     >>> result.meta.title
     'listparser project feeds'
     >>> result.meta.author.keys()
-    ['url', 'name', 'email']
+    dict_keys(['name', 'email', 'url'])
 
 
 The ``feeds`` key
