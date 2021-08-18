@@ -1,12 +1,16 @@
-What is listparser?
-===================
+listparser
+==========
 
-listparser is a Python module that parses subscription lists (also called
-reading lists) and returns all of the feeds and subscription lists that it
-finds.
+*Parse OPML subscription lists in Python.*
 
+-------------------------------------------------------------------------------
+
+If you're building a feed reader and you need to parse OPML subscription lists,
+you've come to the right place!
+
+listparser makes it easy to parse and use subscription lists in multiple formats.
 It supports OPML, RDF+FOAF, and the iGoogle exported settings format,
-and runs in Python 3.6 and up, and PyPy3.
+and runs on Python 3.6+ and on PyPy 3.7.
 
 
 
@@ -16,16 +20,18 @@ Usage
 ..  code-block:: pycon
 
     >>> import listparser
-    >>> result = listparser.parse('feeds.opml')
+    >>> result = listparser.parse(open('feeds.opml').read())
 
 A dictionary will be returned with several keys:
 
 *   ``meta``: a dictionary of information about the subscription list
 *   ``feeds``: a list of feeds
 *   ``lists``: a list of subscription lists
-*   ``version``: a file format identifier
-*   ``bozo``: 1 if there is a problem with the list, 0 otherwise
+*   ``version``: a format identifier like "opml2"
+*   ``bozo``: True if there is a problem with the list, False otherwise
 *   ``bozo_exception``: (if ``bozo`` is 1) a description of the problem
+
+For convenience, the result dictionary supports attribute access for its keys.
 
 Continuing the example:
 
@@ -35,8 +41,8 @@ Continuing the example:
     'listparser project feeds'
     >>> len(result.feeds)
     2
-    >>> result.feeds[0].url
-    'https://kurtmckee.org/tag/listparser'
+    >>> result.feeds[0].title, result.feeds[0].url
+    ('listparser blog', 'https://kurtmckee.org/tag/listparser')
 
 More extensive documentation is available in the ``docs/`` directory
 and online at <https://listparser.readthedocs.io/en/stable/>.

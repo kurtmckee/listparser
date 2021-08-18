@@ -11,13 +11,13 @@ opml1
     `OPML 1.0 and 1.1 <http://dev.opml.org/spec1.html>`_ [#opml11]_
 
 opml2
-    `OPML version 2.0 <http://www.opml.org/spec2.html>`_
+    `OPML version 2.0 <http://dev.opml.org/spec2.html>`_
 
 opml
     An OPML file with an unknown or unspecified version
 
 rdf
-    `RDF+FOAF <https://www.ibm.com/developerworks/xml/library/x-pblog/>`_
+    `RDF+FOAF <http://xmlns.com/foaf/spec/>`_
 
 igoogle
     iGoogle exported settings format [#igoog_export]_

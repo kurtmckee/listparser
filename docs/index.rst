@@ -1,13 +1,13 @@
-Welcome to listparser's documentation!
-======================================
+listparser - Parse subscription lists in Python
+===============================================
 
-listparser is a Python module that parses subscription lists (also
-called reading lists) and returns all of the feeds and subscription
-lists that it finds.
+If you're building a feed reader and you need to import OPML subscription lists,
+you've come to the right place!
 
-It supports OPML, RDF+FOAF, and the iGoogle exported settings format.
+listparser makes it easy to parse and use subscription lists in multiple formats.
+It supports OPML, RDF+FOAF, and the iGoogle exported settings format,
+and runs on Python 3.6+ and on PyPy 3.7.
 
-listparser runs on Python 3.6 and higher.
 
 Contents
 --------

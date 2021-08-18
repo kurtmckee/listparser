@@ -13,22 +13,22 @@ not normalized except for the stripping of whitespace.
     element's ``text`` attribute should contain the user's preferred
     title, and the ``title`` attribute should contain the original title.
 
-    In practice, however, some softwares don't use the ``text``
+    In practice, however, some software doesn't use the ``text``
     attribute at all. Therefore, ``feeds[i].title`` is filled from the
     ``text`` attribute or, if that isn't available, the ``title``
     attribute. For example:
 
     ..  code-block:: xml
 
-        <outline text="Hal Tucker" title="Confessions of a Cliffhanger"
-            type="rss" xmlUrl="http://capt-hottub.xanga.com/rss" />
+        <outline text="*text* attribute" title="*title* attribute"
+            type="rss" xmlUrl="https://domain.example/feed" />
 
     And here is the title returned by listparser:
 
     ..  code-block:: pycon
 
         >>> result.feeds[0].title
-        'Hal Tucker'
+        '*text* attribute'
 
 ..  rubric:: Comes from
 
