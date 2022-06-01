@@ -26,9 +26,9 @@ lxml = ['lxml']
 
 
 [tool.poetry.dev-dependencies]
-tox = "^3.21.4"
-Sphinx = "^3.4.3"
-scriv = "^0.10.0"
+tox = "^3.25.0"
+Sphinx = "^5.0.0"
+scriv = "^0.15.0"
 
 
 [build-system]
