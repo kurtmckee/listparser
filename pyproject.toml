@@ -15,7 +15,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.7"
 requests = {version = "^2.25.1", optional = true}
 lxml = {version = "^4.6.2", optional = true}
 
@@ -26,9 +26,9 @@ lxml = ['lxml']
 
 
 [tool.poetry.dev-dependencies]
-tox = "^3.21.4"
-Sphinx = "^3.4.3"
-scriv = "^0.10.0"
+tox = "^3.25.0"
+Sphinx = "^5.0.0"
+scriv = "^0.15.0"
 
 
 [build-system]
@@ -42,7 +42,7 @@ legacy_tox_ini = """
 [tox]
 envlist =
     coverage_erase
-    py{39, 38, 37, 36}-{,requests}-{,lxml}, pypy3-{,requests}
+    py{310, 39, 38, 37}{-requests,}{-lxml,}, pypy3{-requests,}
     coverage_report
     flake8
     docs
