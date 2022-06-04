@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Description: RDF | Detect opportunity URL in foaf:Document
-    Eval: result.bozo == 0
-    Eval: len(result.opportunities) == 1
-    Eval: result.opportunities[0].url == "http://domain/"
-    Eval: result.opportunities[0].title == "opportunity"
+    Eval: result['bozo'] == 0
+    Eval: len(result['opportunities']) == 1
+    Eval: result['opportunities'][0]['url'] == "http://domain/"
+    Eval: result['opportunities'][0]['title'] == "opportunity"
 -->
 <rdf:RDF
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"

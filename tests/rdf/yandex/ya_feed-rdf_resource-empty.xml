@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Description: RDF | Empty ya:feed @rdf:resource
+    Eval: result['bozo'] == 0
+    Eval: len(result['feeds']) == 0
+-->
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:foaf="http://xmlns.com/foaf/0.1/"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:ya="http://blogs.yandex.ru/schema/foaf/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+>
+
+<foaf:Person>
+    <ya:blogActivity>
+        <ya:Posts>
+            <ya:feed rdf:resource="" />
+        </ya:Posts>
+    </ya:blogActivity>
+</foaf:Person>
+
+</rdf:RDF>

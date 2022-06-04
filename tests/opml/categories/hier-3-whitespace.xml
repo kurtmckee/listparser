@@ -2,8 +2,8 @@
 <!--
     Description: Hierarchy 3 (whitespace stripped)
     Eval: result['bozo'] == 0
-    Eval: 'grouping' in result.feeds[0].tags
-    Eval: ['grouping'] in result.feeds[0].categories
+    Eval: 'grouping' in result['feeds'][0]['tags']
+    Eval: ['grouping'] in result['feeds'][0]['categories']
 -->
 <opml version="2.0">
     <head></head>

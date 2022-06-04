@@ -1,12 +1,21 @@
-Welcome to listparser's documentation!
-======================================
+listparser - Parse subscription lists in Python
+===============================================
 
-listparser is a Python module that parses subscription lists (also called reading lists) and returns all of the feeds and subscription lists that it finds. It supports OPML, RDF+FOAF, and the iGoogle exported settings format.
+If you're building a feed reader and you need to import OPML subscription lists,
+you've come to the right place!
 
-listparser has been tested and runs on Python 2.4 and up, Python 3.0 and up, Jython 2.5.2 and up, PyPy 1.8.0, and IronPython 2.6.2.
+listparser makes it easy to parse and use subscription lists in multiple formats.
+It supports OPML, RDF+FOAF, and the iGoogle exported settings format,
+and runs on Python 3.6+ and on PyPy 3.7.
+
 
 Contents
 --------
+
+..  toctree::
+    :maxdepth: 1
+
+    changelog
 
 ..  toctree::
     :maxdepth: 2
@@ -24,21 +33,14 @@ Reference
     :maxdepth: 2
 
     reference/parse
-    reference/user_agent
 
 ..  toctree::
     :maxdepth: 2
 
     reference/bozo
     reference/bozo_exception
-    reference/etag
     reference/feeds
-    reference/headers
-    reference/href
     reference/lists
     reference/meta
-    reference/modified
-    reference/modified_parsed
     reference/opportunities
-    reference/status
     reference/version

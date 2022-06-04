@@ -1,41 +1,51 @@
-What is listparser?
-===================
+listparser
+==========
 
-listparser is a Python module that parses subscription lists (also called
-reading lists) and returns all of the feeds and subscription lists that it
-finds. It supports OPML, RDF+FOAF, and the iGoogle exported settings format,
-and runs in Python 2.4 through Python 3.3.
+*Parse OPML subscription lists in Python.*
 
-listparser is licensed under the terms of the GNU Lesser General Public License
-version 3 or higher.
+-------------------------------------------------------------------------------
+
+If you're building a feed reader and you need to parse OPML subscription lists,
+you've come to the right place!
+
+listparser makes it easy to parse and use subscription lists in multiple formats.
+It supports OPML, RDF+FOAF, and the iGoogle exported settings format,
+and runs on Python 3.7+ and on PyPy 3.7.
+
 
 
 Usage
 =====
 
->>> import listparser
->>> result = listparser.parse('project.opml')
+..  code-block:: pycon
+
+    >>> import listparser
+    >>> result = listparser.parse(open('feeds.opml').read())
 
 A dictionary will be returned with several keys:
 
-* ``meta``: a dictionary of information about the subscription list
-* ``feeds``: a list of feeds
-* ``lists``: a list of subscription lists
-* ``version``: a file format identifier
-* ``bozo``: 1 if there is a problem with the list, 0 otherwise
-* ``bozo_exception``: (if ``bozo`` is 1) a description of the problem
+*   ``meta``: a dictionary of information about the subscription list
+*   ``feeds``: a list of feeds
+*   ``lists``: a list of subscription lists
+*   ``version``: a format identifier like "opml2"
+*   ``bozo``: True if there is a problem with the list, False otherwise
+*   ``bozo_exception``: (if ``bozo`` is 1) a description of the problem
+
+For convenience, the result dictionary supports attribute access for its keys.
 
 Continuing the example:
 
->>> result.meta.title
-u'listparser project feeds'
->>> len(result.feeds)
-2
->>> result.feeds[0].url
-u'http://kurtmckee.livejournal.com/data/atom?tag=listparser'
+..  code-block:: pycon
 
-More extensive documentation is available in the docs/ directory,
-or online at <https://pythonhosted.org/listparser/>.
+    >>> result.meta.title
+    'listparser project feeds'
+    >>> len(result.feeds)
+    2
+    >>> result.feeds[0].title, result.feeds[0].url
+    ('listparser blog', 'https://kurtmckee.org/tag/listparser')
+
+More extensive documentation is available in the ``docs/`` directory
+and online at <https://listparser.readthedocs.io/en/stable/>.
 
 
 Bugs
@@ -48,4 +58,4 @@ that document as a test case, and then find and fix the problem.
 ...you can also just report the bug and leave it to someone else
 to fix the problem, but that won't be as much fun for you!
 
-Bugs can be reported at <http://github.com/kurtmckee/listparser/issues>.
+Bugs can be reported at <https://github.com/kurtmckee/listparser/issues>.

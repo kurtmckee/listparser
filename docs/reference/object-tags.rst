@@ -1,11 +1,11 @@
 objects[i].tags
 ===============
 
-A list of all of the tags associated with the feed, subscription list, or opportunity object. They are copied from the ``categories`` key if the category is one level deep. As an example:
+A list of all of the tags associated with the feed, subscription list, 
+or opportunity object. They are copied from the ``categories`` key if 
+the category is one level deep. As an example:
 
-..  highlight:: xml
-
-::
+..  code-block:: xml
 
     <outline text="sports">
         <outline type="rss" text="ESPN" xmlUrl="http://espn.com/feed" />

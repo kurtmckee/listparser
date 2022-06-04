@@ -1,0 +1,117 @@
+[tool.poetry]
+name = "listparser"
+version = "0.19"
+description = "Parse OPML subscription lists"
+authors = ["Kurt McKee <contactme@kurtmckee.org>"]
+license = "MIT"
+readme = "README.rst"
+repository = "https://github.com/kurtmckee/listparser/"
+documentation = "https://listparser.readthedocs.io/en/stable/"
+keywords = ["opml", "foaf", "igoogle", "feed"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Text Processing :: Markup :: XML",
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+requests = {version = "^2.25.1", optional = true}
+lxml = {version = "^4.6.2", optional = true}
+
+
+[tool.poetry.extras]
+http = ['requests']
+lxml = ['lxml']
+
+
+[tool.poetry.dev-dependencies]
+tox = "^3.25.0"
+Sphinx = "^5.0.0"
+scriv = "^0.15.0"
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.tox]
+legacy_tox_ini = """
+
+[tox]
+envlist =
+    coverage_erase
+    py{310, 39, 38, 37}{-requests,}{-lxml,}, pypy3{-requests,}
+    coverage_report
+    flake8
+    docs
+
+skip_missing_interpreters = True
+isolated_build = True
+
+[testenv]
+deps =
+    lxml: lxml
+    requests: requests
+    pytest
+    pytest-cov
+
+commands =
+    {envpython} -m pytest --cov=listparser --cov=tests --cov-append
+
+[testenv:flake8]
+skipsdist = true
+skip_install = true
+deps =
+    flake8
+
+commands =
+    {envpython} -m flake8 src tests docs
+
+[testenv:docs]
+skipsdist = true
+skip_install = true
+deps =
+    lxml
+    sphinx
+    toml
+
+commands =
+    {envpython} -m sphinx -aWEqb html docs/ build/trash
+
+[testenv:coverage_erase]
+skipsdist = true
+skip_install = true
+deps = coverage[toml]
+commands = coverage erase
+
+[testenv:coverage_report]
+skipsdist = true
+skip_install = true
+deps = coverage[toml]
+commands = coverage html -d htmlcov
+
+"""
+
+
+[tool.coverage.run]
+branch = true
+
+
+[tool.coverage.paths]
+source = [
+    "src",
+    ".tox/*/site-packages",
+]
+
+
+[tool.scriv]
+version = "literal: pyproject.toml: tool.poetry.version"
+categories = ["Added", "Fixed", "Removed", "Changed", "Deprecated", "Security"]
+entry_title_template = "{{ version }} - {{ date.strftime('%Y-%m-%d') }}"
+format = "rst"
+fragment_directory = "changelog.d"
+insert_marker = "scriv-insert-here"
+main_branches = ["develop", "master"]
+new_fragment_template = "file: fragment-template.rst.txt"

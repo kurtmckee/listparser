@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Description: RDF | Ensure foaf:knows entries don't override feed name
-    Eval: result.bozo == 0
-    Eval: len(result.feeds) == 1
-    Eval: len(result.lists) == 1
-    Eval: result.feeds[0].url == "http://domain/feed"
-    Eval: result.feeds[0].title == "name"
-    Eval: result.lists[0].url == "http://friend/foaf"
-    Eval: result.lists[0].title == "friend"
+    Eval: result['bozo'] == 0
+    Eval: len(result['feeds']) == 1
+    Eval: len(result['lists']) == 1
+    Eval: result['feeds'][0]['url'] == "http://domain/feed"
+    Eval: result['feeds'][0]['title'] == "name"
+    Eval: result['lists'][0]['url'] == "http://friend/foaf"
+    Eval: result['lists'][0]['title'] == "friend"
 -->
 <rdf:RDF
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
