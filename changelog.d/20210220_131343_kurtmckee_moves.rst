@@ -1,8 +1,0 @@
-Changed
--------
-
-*   Moved and split ``lptest.py`` into the ``tests/`` subdirectory
-    and into specific ``test_*`` files.
-*   Increased test coverage reporting to include test runners.
-*   Decreased the number of tox environments where listparser must
-    be built and installed.
