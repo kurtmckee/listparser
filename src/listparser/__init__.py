@@ -20,7 +20,7 @@ from . import parsers
 
 __author__ = 'Kurt McKee <contactme@kurtmckee.org>'
 __url__ = 'https://github.com/kurtmckee/listparser'
-__version__ = '0.18'
+__version__ = '0.19'
 
 
 def parse(parse_obj: Union[str, bytes]) -> common.SuperDict:

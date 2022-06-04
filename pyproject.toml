@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "listparser"
-version = "0.18"
+version = "0.19"
 description = "Parse OPML subscription lists"
 authors = ["Kurt McKee <contactme@kurtmckee.org>"]
 license = "MIT"
@@ -107,7 +107,7 @@ source = [
 
 
 [tool.scriv]
-version = "literal: src/listparser/__init__.py: __version__"
+version = "literal: pyproject.toml: tool.poetry.version"
 categories = ["Added", "Fixed", "Removed", "Changed", "Deprecated", "Security"]
 entry_title_template = "{{ version }} - {{ date.strftime('%Y-%m-%d') }}"
 format = "rst"

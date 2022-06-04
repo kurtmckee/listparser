@@ -20,6 +20,72 @@ Please see the fragment files in the `changelog.d directory`_.
 
 ..  scriv-insert-here
 
+.. _changelog-0.19:
+
+0.19 - 2022-06-04
+=================
+
+*"Spring cleaning"*
+
+Added
+-----
+
+*   Add ``requests`` as an optional dependency.
+*   Add ``lxml`` as an optional dependency.
+    This is currently the only way to parse malformed XML files.
+*   Add support for Python 3.7 through Python 3.10.
+
+Removed
+-------
+
+*   Drop support for CPython 3.6 and lower.
+*   Drop support for IronPython.
+*   Drop support for Jython.
+*   Remove some ancient Jython compatibility code.
+*   HTML entities are no longer automatically injected into the DTD.
+
+    If ``lxml`` is installed and undeclared HTML entities are encountered,
+    they will be ignored.
+
+    If lxml is not installed and undeclared HTML entities are encountered,
+    Python's ``xml.sax`` parser will fail to parse the document.
+
+Fixed
+-----
+
+*   Fix some coverage messages that were output during testing.
+*   Fix the combined coverage HTML report's paths.
+
+Changed
+-------
+
+*   Migrate to a ``src/``-based directory structure.
+*   Migrate to Read the Docs for documentation hosting.
+*   ``parse()`` no longer accepts *etag*, *modified*, or *agent* arguments.
+*   HTTP response information is no longer available in the return dictionary.
+*   The unit tests no longer launch an HTTP server.
+*   Coverage data is now erased before the unit tests begin.
+*   ``bozo`` is now ``True`` or ``False``, not ``1`` or ``0``.
+*   ``bozo_exception`` is guaranteed to exist in the return dict.
+*   The RFC 822 parser now returns timezone-aware ``datetime`` objects
+    instead of converting to UTC and losing timezone info.
+*   Move and split ``lptest.py`` into the ``tests/`` subdirectory
+    and into specific ``test_*`` files.
+*   Increased test coverage reporting to include test runners.
+*   Decreased the number of ``tox`` environments where listparser must be built and installed.
+*   Internally rely on ``dict`` key-based lookups instead of ``SuperDict`` attribute-based lookups.
+*   Cache XML parsing method lookup results to avoid excessive string formatting.
+*   Change the name of the ``ListError`` to ``ListparserError``.
+*   Split the codebase into multiple files.
+*   Use ``tox`` to automate testing across multiple interpreters and versions.
+*   Migrate to ``pytest`` for unit testing.
+*   Remove dependence on the ``six`` package.
+*   Add type annotations.
+*   Remove compatibility code.
+*   Migrate to Poetry and ``pyproject.toml`` for project configuration.
+*   Change the license from LGPLv3 to MIT.
+*   Use scriv to manage the CHANGELOG.
+
 
 0.18 - 2015-04-21
 =================
