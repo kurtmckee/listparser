@@ -17,5 +17,5 @@ If requests is not installed, listparser will return a dictionary with the follo
     >>> listparser.parse('https://domain.example/feeds.opml')
     {
         'bozo': 1,
-        'bozo_exception': ListError('requests is not installed...')
+        'bozo_exception': ListparserError('requests is not installed...')
     }
