@@ -3,5 +3,6 @@
 # SPDX-License-Identifier: MIT
 #
 
+
 class ListparserError(Exception):
     pass

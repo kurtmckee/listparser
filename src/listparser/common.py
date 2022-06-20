@@ -3,21 +3,20 @@
 # SPDX-License-Identifier: MIT
 #
 
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from .exceptions import ListparserError
 
-
 namespaces = {
-    'http://opml.org/spec2': 'opml',
-    'http://www.google.com/ig': 'iGoogle',
-    'http://schemas.google.com/GadgetTabML/2008': 'gtml',
-    'http://www.w3.org/1999/02/22-rdf-syntax-ns#': 'rdf',
-    'http://www.w3.org/2000/01/rdf-schema#': 'rdfs',
-    'http://xmlns.com/foaf/0.1/': 'foaf',
-    'http://purl.org/dc/elements/1.1/': 'dc',
-    'http://purl.org/rss/1.0/': 'rss',
-    'http://blogs.yandex.ru/schema/foaf/': 'ya',
+    "http://opml.org/spec2": "opml",
+    "http://www.google.com/ig": "iGoogle",
+    "http://schemas.google.com/GadgetTabML/2008": "gtml",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#": "rdf",
+    "http://www.w3.org/2000/01/rdf-schema#": "rdfs",
+    "http://xmlns.com/foaf/0.1/": "foaf",
+    "http://purl.org/dc/elements/1.1/": "dc",
+    "http://purl.org/rss/1.0/": "rss",
+    "http://blogs.yandex.ru/schema/foaf/": "ya",
 }
 
 
@@ -55,10 +54,10 @@ class CommonMixin:
         self.flag_group = False
 
         # found_urls = {url: (append_to_key, obj)}
-        self.found_urls: Dict[str, Tuple[str, Dict]] = {}
+        self.found_urls: Dict[str, Tuple[str, SuperDict]] = {}
 
         # group_objs = [(append_to_key, obj)]
-        self.group_objs: List[Tuple[str, Dict]] = []
+        self.group_objs: List[Tuple[str, SuperDict]] = []
         self.agent_feeds = []
         self.agent_lists = []
         self.agent_opps = []
@@ -71,15 +70,15 @@ class CommonMixin:
         # If lxml is the parser, the keys will be strings.
         # If xml.sax is the parser, the keys will be tuples of strings.
         #
-        self.start_methods: Dict[Union[Tuple[str, str], str], Callable] = {}
-        self.end_methods: Dict[Union[Tuple[str, str], str], Callable] = {}
+        self.start_methods: Dict[Union[Tuple[str, str], str], Optional[Callable]] = {}
+        self.end_methods: Dict[Union[Tuple[str, str], str], Optional[Callable]] = {}
 
     def raise_bozo(self, error: Union[Exception, str]):
-        self.harvest['bozo'] = True
+        self.harvest["bozo"] = True
         if isinstance(error, str):
-            self.harvest['bozo_exception'] = ListparserError(error)
+            self.harvest["bozo_exception"] = ListparserError(error)
         else:
-            self.harvest['bozo_exception'] = error
+            self.harvest["bozo_exception"] = error
 
     def expect_text(self, _):
         """Flag that text content is anticipated.
@@ -95,6 +94,6 @@ class CommonMixin:
     def get_text(self) -> str:
         """Get text content."""
 
-        text = ''.join(self.text).strip()
+        text = "".join(self.text).strip()
         self.text = []
         return text
