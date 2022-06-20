@@ -4,12 +4,13 @@
 #
 
 import xml.sax
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Type, Union
 
 try:
-    import lxml.etree
+    # lxml lacks mypy stubs at the time of writing.
+    import lxml.etree  # type: ignore
 except ImportError:
-    lxml = None
+    lxml = None  # type: ignore
 
 from . import common, foaf, igoogle, opml
 
@@ -136,6 +137,7 @@ class XmlSaxHandler(
             self.text.append(content)
 
 
+Handler: Union[Type[LxmlHandler], Type[XmlSaxHandler]]
 if lxml:
     Handler = LxmlHandler
 else:

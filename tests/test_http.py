@@ -12,7 +12,7 @@ import listparser
 try:
     import requests
 except ImportError:
-    requests = None
+    requests = None  # type: ignore
 
 
 empty_doc = '<?xml version="1.0"?><opml />'
@@ -46,7 +46,7 @@ def test_requests_error(http):
     assert info["bozo"]
 
 
-@pytest.mark.skipif(requests, reason="requests must NOT be installed")
+@pytest.mark.skipif(bool(requests), reason="requests must NOT be installed")
 def test_requests_not_present():
     content, info = listparser.get_content("http://example")
     assert not content

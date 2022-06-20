@@ -34,7 +34,7 @@ version = release = info["tool"]["poetry"]["version"]
 
 # List of directories, relative to source directory, that shouldn't be searched
 # for source files.
-exclude_trees = []
+exclude_trees = ()
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"

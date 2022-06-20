@@ -5,12 +5,14 @@
 
 import io
 import xml.sax
-from typing import Dict, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union
 
 try:
     import requests
+    import urllib3.exceptions
 except ImportError:
-    requests = None
+    requests = None  # type: ignore
+    urllib3 = None  # type: ignore
 
 from . import common, parsers
 from .exceptions import ListparserError
@@ -32,7 +34,7 @@ def parse(parse_obj: Union[str, bytes]) -> common.SuperDict:
     HTTP response headers (if applicable), and any exception encountered.
     """
 
-    guarantees = {
+    guarantees: Dict[str, Any] = {
         "bozo": False,
         "bozo_exception": None,
         "feeds": [],
@@ -90,7 +92,7 @@ def get_content(obj) -> Tuple[Optional[bytes], Dict]:
         response = requests.get(obj, headers=headers, timeout=30)
     except (
         requests.exceptions.RequestException,
-        requests.exceptions.BaseHTTPError,
+        urllib3.exceptions.HTTPError,
     ) as error:
         return None, {"bozo": True, "bozo_exception": error}
 

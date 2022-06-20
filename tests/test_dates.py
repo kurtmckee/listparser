@@ -25,6 +25,7 @@ def test_format_variations(date, expected_values):
     result = listparser.dates.parse_rfc822(date)
     for key, expected_value in zip(keys, expected_values):
         assert getattr(result, key) == expected_value
+    assert result is not None
     assert result.tzinfo == datetime.timezone(datetime.timedelta(0))
 
 
@@ -38,7 +39,9 @@ def test_format_variations(date, expected_values):
     ],
 )
 def test_two_digit_years(date, expected_year):
-    assert listparser.dates.parse_rfc822(date).year == expected_year
+    result = listparser.dates.parse_rfc822(date)
+    assert result is not None
+    assert result.year == expected_year
 
 
 @pytest.mark.parametrize(
@@ -59,7 +62,9 @@ def test_two_digit_years(date, expected_year):
     ],
 )
 def test_month_names(date, expected_month):
-    assert listparser.dates.parse_rfc822(date).month == expected_month
+    result = listparser.dates.parse_rfc822(date)
+    assert result is not None
+    assert result.month == expected_month
 
 
 @pytest.mark.parametrize(
@@ -95,6 +100,7 @@ def test_month_names(date, expected_month):
 )
 def test_timezones(date, hour, minute, offset):
     result = listparser.dates.parse_rfc822(date)
+    assert result is not None
     assert result.hour == hour
     assert result.minute == minute
     tz_info = datetime.timezone(datetime.timedelta(minutes=offset))

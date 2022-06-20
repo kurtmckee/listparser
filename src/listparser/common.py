@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 #
 
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from .exceptions import ListparserError
 
@@ -54,10 +54,10 @@ class CommonMixin:
         self.flag_group = False
 
         # found_urls = {url: (append_to_key, obj)}
-        self.found_urls: Dict[str, Tuple[str, Dict]] = {}
+        self.found_urls: Dict[str, Tuple[str, SuperDict]] = {}
 
         # group_objs = [(append_to_key, obj)]
-        self.group_objs: List[Tuple[str, Dict]] = []
+        self.group_objs: List[Tuple[str, SuperDict]] = []
         self.agent_feeds = []
         self.agent_lists = []
         self.agent_opps = []
@@ -70,8 +70,8 @@ class CommonMixin:
         # If lxml is the parser, the keys will be strings.
         # If xml.sax is the parser, the keys will be tuples of strings.
         #
-        self.start_methods: Dict[Union[Tuple[str, str], str], Callable] = {}
-        self.end_methods: Dict[Union[Tuple[str, str], str], Callable] = {}
+        self.start_methods: Dict[Union[Tuple[str, str], str], Optional[Callable]] = {}
+        self.end_methods: Dict[Union[Tuple[str, str], str], Optional[Callable]] = {}
 
     def raise_bozo(self, error: Union[Exception, str]):
         self.harvest["bozo"] = True
