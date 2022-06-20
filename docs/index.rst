@@ -44,3 +44,13 @@ Reference
     reference/meta
     reference/opportunities
     reference/version
+
+
+Specifications
+--------------
+
+..  toctree::
+    :maxdepth: 1
+
+    specifications/opml-1.0
+    specifications/opml-2.0
