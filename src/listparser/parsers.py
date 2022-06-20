@@ -3,18 +3,15 @@
 # SPDX-License-Identifier: MIT
 #
 
-from typing import Dict, Tuple
 import xml.sax
+from typing import Dict, Tuple
 
 try:
     import lxml.etree
 except ImportError:
     lxml = None
 
-from . import common
-from . import foaf
-from . import igoogle
-from . import opml
+from . import common, foaf, igoogle, opml
 
 
 class LxmlHandler(foaf.FoafMixin, igoogle.IgoogleMixin, opml.OpmlMixin):
@@ -24,12 +21,12 @@ class LxmlHandler(foaf.FoafMixin, igoogle.IgoogleMixin, opml.OpmlMixin):
         try:
             method = self.start_methods[name]
         except KeyError:
-            namespace, _, tag = name.rpartition('}')
+            namespace, _, tag = name.rpartition("}")
             namespace = namespace[1:]
             try:
-                function = f'start_{common.namespaces[namespace]}_{tag}'
+                function = f"start_{common.namespaces[namespace]}_{tag}"
             except KeyError:
-                function = f'start_opml_{tag}'
+                function = f"start_opml_{tag}"
             self.start_methods[name] = method = getattr(self, function, None)
 
         if method:
@@ -41,12 +38,12 @@ class LxmlHandler(foaf.FoafMixin, igoogle.IgoogleMixin, opml.OpmlMixin):
         try:
             method = self.end_methods[name]
         except KeyError:
-            namespace, _, tag = name.rpartition('}')
+            namespace, _, tag = name.rpartition("}")
             namespace = namespace[1:]
             try:
-                function = f'end_{common.namespaces[namespace]}_{tag}'
+                function = f"end_{common.namespaces[namespace]}_{tag}"
             except KeyError:
-                function = f'end_opml_{tag}'
+                function = f"end_opml_{tag}"
             self.end_methods[name] = method = getattr(self, function, None)
 
         if method:
@@ -96,11 +93,11 @@ class XmlSaxHandler(
         try:
             method = self.start_methods[name]
         except KeyError:
-            fn = ''
+            fn = ""
             if name[0] in common.namespaces:
-                fn = f'start_{common.namespaces[name[0]]}_{name[1]}'
+                fn = f"start_{common.namespaces[name[0]]}_{name[1]}"
             elif name[0] is None:
-                fn = f'start_opml_{name[1]}'
+                fn = f"start_opml_{name[1]}"
             self.start_methods[name] = method = getattr(self, fn, None)
 
         if not method:
@@ -114,7 +111,7 @@ class XmlSaxHandler(
         attributes = {}
         for (uri, localname), value in attrs.items():
             if uri:
-                attributes[f'{{{uri}}}{localname}'] = value
+                attributes[f"{{{uri}}}{localname}"] = value
             else:
                 attributes[localname] = value
 
@@ -124,11 +121,11 @@ class XmlSaxHandler(
         try:
             method = self.end_methods[name]
         except KeyError:
-            fn = ''
+            fn = ""
             if name[0] in common.namespaces:
-                fn = f'end_{common.namespaces[name[0]]}_{name[1]}'
+                fn = f"end_{common.namespaces[name[0]]}_{name[1]}"
             elif name[0] is None:
-                fn = f'end_opml_{name[1]}'
+                fn = f"end_opml_{name[1]}"
             self.end_methods[name] = method = getattr(self, fn, None)
 
         if method:

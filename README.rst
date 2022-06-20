@@ -59,3 +59,56 @@ that document as a test case, and then find and fix the problem.
 to fix the problem, but that won't be as much fun for you!
 
 Bugs can be reported at <https://github.com/kurtmckee/listparser/issues>.
+
+
+Git workflow
+============
+
+listparser basically follows the git-flow methodology:
+
+*   Features and changes are developed in branches off the ``main`` branch.
+    They merge back into the ``main`` branch.
+*   Feature releases branch off the ``main`` branch.
+    The project metadata is updated (like the version and copyright years),
+    and then the release branch merges into the ``releases`` branch.
+    The ``releases`` branch is then tagged, and then it is merged back into ``main``.
+*   Hotfixes branch off the ``releases`` branch.
+    As with feature releases, the project metadata is updated,
+    the hotfix branch merges back into the ``releases`` branch,
+    which is then tagged and merged back into ``main``.
+
+
+Development
+===========
+
+To set up a development environment, follow these steps at a command line:
+
+..  code-block:: shell
+
+    # Set up a virtual environment.
+    python -m venv .venv
+
+    # Activate the virtual environment in Linux:
+    . .venv/bin/activate
+
+    # ...or in Windows Powershell:
+    & .venv/Scripts/Activate.ps1
+
+    # Install dependencies.
+    python -m pip install -U pip setuptools wheel
+    python -m pip install poetry
+    poetry install -E lxml -E http
+
+    # Enable pre-commit.
+    pre-commit install
+
+
+When submitting a PR, be sure to create and edit a changelog fragment.
+
+..  code-block:: shell
+
+    scriv create
+
+
+The changelog fragment will be created in the ``changelog.d/`` directory.
+Edit the file to describe the changes you've made.

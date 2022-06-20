@@ -10,7 +10,7 @@ from listparser.common import SuperDict
 
 def test_attr_get():
     sample = SuperDict()
-    dict.__setitem__(sample, 'a', 1)
+    dict.__setitem__(sample, "a", 1)
     assert sample.a == 1
 
 

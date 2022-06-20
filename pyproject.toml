@@ -29,70 +29,15 @@ lxml = ['lxml']
 tox = "^3.25.0"
 Sphinx = "^5.0.0"
 scriv = "^0.15.0"
+black = "^22.3.0"
+isort = "^5.10.1"
+pre-commit = "^2.19.0"
 
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-
-[tool.tox]
-legacy_tox_ini = """
-
-[tox]
-envlist =
-    coverage_erase
-    py{310, 39, 38, 37}{-requests,}{-lxml,}, pypy3{-requests,}
-    coverage_report
-    flake8
-    docs
-
-skip_missing_interpreters = True
-isolated_build = True
-
-[testenv]
-deps =
-    lxml: lxml
-    requests: requests
-    pytest
-    pytest-cov
-
-commands =
-    {envpython} -m pytest --cov=listparser --cov=tests --cov-append
-
-[testenv:flake8]
-skipsdist = true
-skip_install = true
-deps =
-    flake8
-
-commands =
-    {envpython} -m flake8 src tests docs
-
-[testenv:docs]
-skipsdist = true
-skip_install = true
-deps =
-    lxml
-    sphinx
-    toml
-
-commands =
-    {envpython} -m sphinx -aWEqb html docs/ build/trash
-
-[testenv:coverage_erase]
-skipsdist = true
-skip_install = true
-deps = coverage[toml]
-commands = coverage erase
-
-[testenv:coverage_report]
-skipsdist = true
-skip_install = true
-deps = coverage[toml]
-commands = coverage html -d htmlcov
-
-"""
 
 
 [tool.coverage.run]
@@ -115,3 +60,7 @@ fragment_directory = "changelog.d"
 insert_marker = "scriv-insert-here"
 main_branches = ["develop", "master"]
 new_fragment_template = "file: fragment-template.rst.txt"
+
+
+[tool.isort]
+profile = "black"
