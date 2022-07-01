@@ -63,10 +63,10 @@ for _file in tests_path.rglob("**/*.xml"):
     description = _info.get("Description", "")
 
     if not description:  # pragma: no cover
-        message = "Description not found in test {}".format(_file)
+        message = f"Description not found in test {_file}"
         raise ValueError(message)
     if not _assertions:  # pragma: no cover
-        message = "Eval not found in test {}".format(_file)
+        message = f"Eval not found in test {_file}"
         raise ValueError(message)
 
     tests.append(

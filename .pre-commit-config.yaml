@@ -15,3 +15,10 @@ repos:
     hooks:
       - id: isort
         name: isort (python)
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.34.0
+    hooks:
+      - id: pyupgrade
+        name: "Enforce Python 3.7 idioms"
+        args: [--py37-plus]
