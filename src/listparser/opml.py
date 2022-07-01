@@ -17,24 +17,19 @@ class OpmlMixin(common.CommonMixin):
             self.harvest["version"] = "opml2"
 
     def start_opml_outline(self, attrs):
-        url = None
         # Find an appropriate title in @text or @title (else empty)
         if attrs.get("text", "").strip():
             title = attrs["text"].strip()
         else:
             title = attrs.get("title", "").strip()
 
-        # Search for the URL regardless of xmlUrl's case
-        for k, v in attrs.items():
-            if k.lower() == "xmlurl":
-                url = v.strip()
-                break
-
+        url = None
         append_to = None
 
         # Determine whether the outline is a feed or subscription list
-        if url is not None:
+        if "xmlurl" in attrs:
             # It's a feed
+            url = attrs.get("xmlurl", "").strip()
             append_to = "feeds"
             if attrs.get("type", "").strip().lower() == "source":
                 # Actually, it's a subscription list!
@@ -48,17 +43,15 @@ class OpmlMixin(common.CommonMixin):
             self.hierarchy.append(title)
             return
         # Look for an opportunity URL
-        if not url and "htmlurl" in (k.lower() for k in attrs.keys()):
-            for k, v in attrs.items():
-                if k.lower() == "htmlurl":
-                    url = v.strip()
+        if not url and "htmlurl" in attrs:
+            url = attrs["htmlurl"].strip()
             append_to = "opportunities"
         if not url:
             # Maintain the hierarchy
             self.hierarchy.append("")
             return
         if url not in self.found_urls and append_to:
-            # This is a brand new URL
+            # This is a brand-new URL
             obj = common.SuperDict({"url": url, "title": title})
             self.found_urls[url] = (append_to, obj)
             self.harvest[append_to].append(obj)
@@ -90,33 +83,33 @@ class OpmlMixin(common.CommonMixin):
         if value:
             self.harvest["meta"]["title"] = value
 
-    start_opml_ownerId = common.CommonMixin.expect_text
+    start_opml_ownerid = common.CommonMixin.expect_text
 
-    def end_opml_ownerId(self):
+    def end_opml_ownerid(self):
         value = self.get_text()
         if value:
             self.harvest["meta"].setdefault("author", common.SuperDict())
             self.harvest["meta"]["author"]["url"] = value
 
-    start_opml_ownerEmail = common.CommonMixin.expect_text
+    start_opml_owneremail = common.CommonMixin.expect_text
 
-    def end_opml_ownerEmail(self):
+    def end_opml_owneremail(self):
         value = self.get_text()
         if value:
             self.harvest["meta"].setdefault("author", common.SuperDict())
             self.harvest["meta"]["author"]["email"] = value
 
-    start_opml_ownerName = common.CommonMixin.expect_text
+    start_opml_ownername = common.CommonMixin.expect_text
 
-    def end_opml_ownerName(self):
+    def end_opml_ownername(self):
         value = self.get_text()
         if value:
             self.harvest["meta"].setdefault("author", common.SuperDict())
             self.harvest["meta"]["author"]["name"] = value
 
-    start_opml_dateCreated = common.CommonMixin.expect_text
+    start_opml_datecreated = common.CommonMixin.expect_text
 
-    def end_opml_dateCreated(self):
+    def end_opml_datecreated(self):
         value = self.get_text()
         if value:
             self.harvest["meta"]["created"] = value
@@ -126,9 +119,9 @@ class OpmlMixin(common.CommonMixin):
             else:
                 self.raise_bozo("dateCreated is not an RFC 822 datetime")
 
-    start_opml_dateModified = common.CommonMixin.expect_text
+    start_opml_datemodified = common.CommonMixin.expect_text
 
-    def end_opml_dateModified(self):
+    def end_opml_datemodified(self):
         value = self.get_text()
         if value:
             self.harvest["meta"]["modified"] = value

@@ -4,7 +4,6 @@
 #
 
 import io
-import xml.sax
 from typing import Any, Dict, Optional, Tuple, Union
 
 try:
@@ -13,6 +12,12 @@ try:
 except ImportError:
     requests = None  # type: ignore
     urllib3 = None  # type: ignore
+
+try:
+    # lxml lacks mypy stubs at the time of writing.
+    import lxml.etree  # type: ignore
+except ImportError:
+    lxml = None  # type: ignore
 
 from . import common, parsers
 from .exceptions import ListparserError
@@ -48,21 +53,23 @@ def parse(parse_obj: Union[str, bytes]) -> common.SuperDict:
     if not content:
         return common.SuperDict(guarantees)
 
-    handler = parsers.Handler()
-    handler.harvest.update(guarantees)
-    content_file = io.BytesIO(content)
-
-    if parsers.lxml:
-        parser = parsers.lxml.etree.XMLParser(target=handler, recover=True)
-        parsers.lxml.etree.parse(content_file, parser)
+    handler: Union[parsers.LxmlHandler, parsers.HTMLHandler]
+    if lxml is not None:
+        handler = parsers.LxmlHandler()
+        handler.harvest.update(guarantees)
+        content_file = io.BytesIO(content)
+        parser = lxml.etree.HTMLParser(target=handler, recover=True)
+        lxml.etree.parse(content_file, parser)
     else:
-        parser = xml.sax.make_parser()
-        parser.setFeature(xml.sax.handler.feature_namespaces, True)
-        parser.setContentHandler(handler)
-        parser.setErrorHandler(handler)
-        parser.parse(content_file)
+        handler = parsers.HTMLHandler()
+        handler.harvest.update(guarantees)
+        handler.feed(content.decode())
 
-    return common.SuperDict(handler.harvest)
+    harvest = common.SuperDict(handler.harvest)
+    handler.close()
+    del handler
+
+    return harvest
 
 
 def get_content(obj) -> Tuple[Optional[bytes], Dict]:
