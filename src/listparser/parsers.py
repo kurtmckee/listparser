@@ -3,49 +3,86 @@
 # SPDX-License-Identifier: MIT
 #
 
-import xml.sax
-from typing import Dict, Tuple, Type, Union
-
-try:
-    # lxml lacks mypy stubs at the time of writing.
-    import lxml.etree  # type: ignore
-except ImportError:
-    lxml = None  # type: ignore
+import html.parser
+from typing import Dict, List, Optional, Tuple
 
 from . import common, foaf, igoogle, opml
 
 
 class LxmlHandler(foaf.FoafMixin, igoogle.IgoogleMixin, opml.OpmlMixin):
-    def start(self, name: str, attrs: Dict):
+    def __init__(self):
+        super().__init__()
+
+        # {prefix: uri}
+        self.uris: Dict[str, str] = {}
+
+    def start(self, tag: str, attrs: Dict):
         """Handle the start of an XML element."""
 
+        # Extract XML namespaces from the attributes dictionary.
+        #
+        # The HTML parser converts attribute keys to lowercase.
+        #
+        # ========================= ===========================
+        # Deployed XML              Tuple in `attrs`
+        # ========================= ===========================
+        # <tag XMLNS="URI">         {"xmlns": "URI"}
+        # <tag xmlns:Prefix="uri">  {"xmlns:prefix": "uri"}
+        # <tag xmlns>               {"xmlns": None}
+        # ========================= ===========================
+        #
+        attrs_without_xmlns = {}
+        for key, value in attrs.items():
+            if key.startswith("xmlns"):
+                if value is not None:
+                    self.uris[key.partition(":")[2]] = value
+            else:
+                attrs_without_xmlns[key] = value
+
         try:
-            method = self.start_methods[name]
+            method = self.start_methods[tag]
         except KeyError:
-            namespace, _, tag = name.rpartition("}")
-            namespace = namespace[1:]
-            try:
-                function = f"start_{common.namespaces[namespace]}_{tag}"
-            except KeyError:
-                function = f"start_opml_{tag}"
-            self.start_methods[name] = method = getattr(self, function, None)
+            # The tag will be in the form "name" or "prefix:name".
+            deployed_prefix, _, name = tag.rpartition(":")
+
+            # The deployed prefix used in the XML document is arbitrary,
+            # but handler methods are named using standard prefix names.
+            # The code below tries to map from the deployed prefix
+            # to a declared URI (if any), and then to a standard prefix.
+            # However, if there's no URI associated with the prefix,
+            # the only identifier available is the deployed prefix itself
+            # (which might be an empty string).
+            identifier = self.uris.get(
+                deployed_prefix, common.uris.get(deployed_prefix, deployed_prefix)
+            )
+            standard_prefix = common.prefixes.get(identifier, deployed_prefix)
+            if standard_prefix:
+                method_name = f"start_{standard_prefix}_{name}"
+            else:
+                method_name = f"start_opml_{name}"
+            method = getattr(self, method_name, None)
+            self.start_methods[tag] = method
 
         if method:
-            method(attrs)
+            method(attrs_without_xmlns)
 
-    def end(self, name: str):
+    def end(self, tag: str):
         """Handle the end of an XML element."""
 
         try:
-            method = self.end_methods[name]
+            method = self.end_methods[tag]
         except KeyError:
-            namespace, _, tag = name.rpartition("}")
-            namespace = namespace[1:]
-            try:
-                function = f"end_{common.namespaces[namespace]}_{tag}"
-            except KeyError:
-                function = f"end_opml_{tag}"
-            self.end_methods[name] = method = getattr(self, function, None)
+            deployed_prefix, _, name = tag.rpartition(":")
+            identifier = self.uris.get(
+                deployed_prefix, common.uris.get(deployed_prefix, deployed_prefix)
+            )
+            standard_prefix = common.prefixes.get(identifier, deployed_prefix)
+            if standard_prefix:
+                method_name = f"end_{standard_prefix}_{name}"
+            else:
+                method_name = f"end_opml_{name}"
+            method = getattr(self, method_name, None)
+            self.end_methods[tag] = method
 
         if method:
             method()
@@ -57,88 +94,110 @@ class LxmlHandler(foaf.FoafMixin, igoogle.IgoogleMixin, opml.OpmlMixin):
             self.text.append(data)
 
     def close(self):
-        pass
+        """Reset the handler."""
+
+        super().close()
 
 
-class XmlSaxHandler(
+class HTMLHandler(
     foaf.FoafMixin,
     igoogle.IgoogleMixin,
     opml.OpmlMixin,
-    xml.sax.handler.ContentHandler,
-    xml.sax.handler.ErrorHandler,
+    html.parser.HTMLParser,
 ):
     def __init__(self):
         super().__init__()
-        xml.sax.handler.ContentHandler.__init__(self)
-        xml.sax.handler.ErrorHandler.__init__(self)
 
-    # ErrorHandler methods
-    # --------------------
+        # {prefix: uri}
+        self.uris: Dict[str, str] = {}
 
-    def warning(self, exception):
-        self.raise_bozo(exception)
+    def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
+        """Handle start tags.
 
-    error = warning
-    fatalError = warning
+        The HTML parser doesn't understand or handle XML namespaces,
+        so namespaces are registered as they're encountered.
 
-    # ContentHandler methods
-    # ----------------------
-
-    def startElementNS(self, name: Tuple[str, str], qname: str, attrs):
-        """Handle the start of an XML element.
-
-        Attribute keys will be converted from tuples of strings
-        to strings to match the format that lxml uses.
+        Note that XML namespaces are not strictly tracked;
+        after a namespace is encountered in a start tag,
+        it is never removed when the corresponding end tag is encountered.
         """
 
-        try:
-            method = self.start_methods[name]
-        except KeyError:
-            fn = ""
-            if name[0] in common.namespaces:
-                fn = f"start_{common.namespaces[name[0]]}_{name[1]}"
-            elif name[0] is None:
-                fn = f"start_opml_{name[1]}"
-            self.start_methods[name] = method = getattr(self, fn, None)
-
-        if not method:
-            return
-
-        # Convert the keys in *attrs* from tuples to strings:
+        # Extract XML namespaces from the attributes list.
         #
-        #     {(uri, localname): value}
-        #     {"{uri}localname": value}
+        # The HTML parser converts attribute keys to lowercase.
         #
-        attributes = {}
-        for (uri, localname), value in attrs.items():
-            if uri:
-                attributes[f"{{{uri}}}{localname}"] = value
+        # ========================= ===========================
+        # Deployed XML              Tuple in `attrs`
+        # ========================= ===========================
+        # <tag XMLNS="URI">         ("xmlns", "URI")
+        # <tag xmlns:Prefix="uri">  ("xmlns:prefix", "uri")
+        # <tag xmlns>               ("xmlns", None)
+        # ========================= ===========================
+        #
+        attrs_without_xmlns = {}
+        for key, value in attrs:
+            if key.startswith("xmlns"):
+                if value is not None:
+                    self.uris[key.partition(":")[2]] = value
             else:
-                attributes[localname] = value
+                attrs_without_xmlns[key] = value
 
-        method(attributes)
-
-    def endElementNS(self, name: Tuple[str, str], qname: str):
         try:
-            method = self.end_methods[name]
+            # Use a cached start method, if possible.
+            method = self.start_methods[tag]
         except KeyError:
-            fn = ""
-            if name[0] in common.namespaces:
-                fn = f"end_{common.namespaces[name[0]]}_{name[1]}"
-            elif name[0] is None:
-                fn = f"end_opml_{name[1]}"
-            self.end_methods[name] = method = getattr(self, fn, None)
+            # The tag will be in the form "name" or "prefix:name".
+            deployed_prefix, _, name = tag.rpartition(":")
+
+            # The deployed prefix used in the XML document is arbitrary,
+            # but handler methods are named using standard prefix names.
+            # The code below tries to map from the deployed prefix
+            # to a declared URI (if any), and then to a standard prefix.
+            # However, if there's no URI associated with the prefix,
+            # the only identifier available is the deployed prefix itself
+            # (which might be an empty string).
+            identifier = self.uris.get(
+                deployed_prefix, common.uris.get(deployed_prefix, deployed_prefix)
+            )
+            standard_prefix = common.prefixes.get(identifier, deployed_prefix)
+            if standard_prefix:
+                method_name = f"start_{standard_prefix}_{name}"
+            else:
+                method_name = f"start_opml_{name}"
+            method = getattr(self, method_name, None)
+            self.start_methods[tag] = method
+
+        if method:
+            method(attrs_without_xmlns)
+
+    def handle_endtag(self, tag: str) -> None:
+        """Handle end tags."""
+
+        try:
+            method = self.end_methods[tag]
+        except KeyError:
+            deployed_prefix, _, name = tag.rpartition(":")
+            identifier = self.uris.get(
+                deployed_prefix, common.uris.get(deployed_prefix, deployed_prefix)
+            )
+            standard_prefix = common.prefixes.get(identifier, deployed_prefix)
+            if standard_prefix:
+                method_name = f"end_{standard_prefix}_{name}"
+            else:
+                method_name = f"end_opml_{name}"
+            method = getattr(self, method_name, None)
+            self.end_methods[tag] = method
 
         if method:
             method()
 
-    def characters(self, content):
+    def handle_data(self, data: str) -> None:
+        """Handle text content of an element."""
+
         if self.flag_expect_text:
-            self.text.append(content)
+            self.text.append(data)
 
+    def close(self) -> None:
+        """Reset the parser / handler."""
 
-Handler: Union[Type[LxmlHandler], Type[XmlSaxHandler]]
-if lxml:
-    Handler = LxmlHandler
-else:
-    Handler = XmlSaxHandler
+        super().close()

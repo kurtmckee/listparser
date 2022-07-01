@@ -8,12 +8,12 @@ import copy
 from . import common
 
 # Attribute key constants
-RDF_ABOUT = "{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about"
-RDF_RESOURCE = "{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource"
+RDF_ABOUT = "rdf:about"
+RDF_RESOURCE = "rdf:resource"
 
 
 class FoafMixin(common.CommonMixin):
-    def start_rdf_RDF(self, _):
+    def start_rdf_rdf(self, _):
         self.harvest["version"] = "rdf"
 
     def start_rss_channel(self, attrs):
@@ -46,12 +46,12 @@ class FoafMixin(common.CommonMixin):
             obj = common.SuperDict({"url": url, "title": title})
             self.group_objs.append(("opportunities", obj))
 
-    def start_foaf_Agent(self, _):
+    def start_foaf_agent(self, _):
         self.flag_agent = True
         self.flag_feed = True
         self.flag_new_title = True
 
-    def end_foaf_Agent(self):
+    def end_foaf_agent(self):
         if self.flag_agent:
             self.flag_agent = False
         self._clean_found_objs()
@@ -64,23 +64,23 @@ class FoafMixin(common.CommonMixin):
         self.flag_feed = False
         self.flag_opportunity = False
 
-    def start_foaf_Person(self, _):
+    def start_foaf_person(self, _):
         self.flag_feed = True
         self.flag_new_title = True
         self._clean_found_objs()
 
-    end_foaf_Person = end_foaf_Agent
+    end_foaf_person = end_foaf_agent
 
-    def start_rdfs_seeAlso(self, attrs):
+    def start_rdfs_seealso(self, attrs):
         if attrs.get(RDF_RESOURCE, "").strip():
             # This is a subscription list URL
             agent_list = attrs[RDF_RESOURCE].strip()
             self.agent_lists.append(agent_list)
 
-    def start_foaf_Group(self, _):
+    def start_foaf_group(self, _):
         self.flag_group = True
 
-    def end_foaf_Group(self):
+    def end_foaf_group(self):
         self.flag_group = False
         for key, obj in self.group_objs:
             # Check for duplicates
@@ -101,7 +101,7 @@ class FoafMixin(common.CommonMixin):
         if self.hierarchy:
             self.hierarchy.pop()
 
-    end_rdf_RDF = end_foaf_Group
+    end_rdf_rdf = end_foaf_group
 
     start_foaf_name = common.CommonMixin.expect_text
 
@@ -117,7 +117,7 @@ class FoafMixin(common.CommonMixin):
     start_foaf_member_name = common.CommonMixin.expect_text
     end_foaf_member_name = end_foaf_name
 
-    def start_foaf_Document(self, attrs):
+    def start_foaf_document(self, attrs):
         if attrs.get(RDF_ABOUT, "").strip():
             # Flag this as an opportunity (but ignore if a feed URL is found).
             self.flag_opportunity = True

@@ -7,9 +7,9 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from .exceptions import ListparserError
 
-namespaces = {
+prefixes = {
     "http://opml.org/spec2": "opml",
-    "http://www.google.com/ig": "iGoogle",
+    "http://www.google.com/ig": "igoogle",
     "http://schemas.google.com/GadgetTabML/2008": "gtml",
     "http://www.w3.org/1999/02/22-rdf-syntax-ns#": "rdf",
     "http://www.w3.org/2000/01/rdf-schema#": "rdfs",
@@ -18,6 +18,8 @@ namespaces = {
     "http://purl.org/rss/1.0/": "rss",
     "http://blogs.yandex.ru/schema/foaf/": "ya",
 }
+
+uris = {v: k for k, v in prefixes.items()}
 
 
 class SuperDict(dict):
@@ -67,7 +69,7 @@ class CommonMixin:
         #
         # The dictionary key types vary between parsers:
         #
-        # If lxml is the parser, the keys will be strings.
+        # If html.parser.HTMLParser is the parser, the keys will be strings.
         # If xml.sax is the parser, the keys will be tuples of strings.
         #
         self.start_methods: Dict[Union[Tuple[str, str], str], Optional[Callable]] = {}
@@ -97,3 +99,25 @@ class CommonMixin:
         text = "".join(self.text).strip()
         self.text = []
         return text
+
+    def close(self):
+        self.flag_expect_text = False
+        self.text = []
+        self.hierarchy = []
+        self.flag_agent = False
+        self.flag_feed = False
+        self.flag_new_title = False
+        self.flag_opportunity = False
+        self.flag_group = False
+        self.found_urls = {}
+        self.group_objs = []
+        self.agent_feeds = []
+        self.agent_lists = []
+        self.agent_opps = []
+        self.foaf_name = []
+        self.start_methods = {}
+        self.end_methods = {}
+
+        parent_close = getattr(super(), "close", None)
+        if callable(parent_close):
+            parent_close()

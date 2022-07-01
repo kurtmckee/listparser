@@ -9,27 +9,27 @@ from . import common
 
 
 class IgoogleMixin(common.CommonMixin):
-    def start_gtml_GadgetTabML(self, _):
+    def start_gtml_gadgettabml(self, _):
         self.harvest["version"] = "igoogle"
 
-    def start_gtml_Tab(self, attrs):
+    def start_gtml_tab(self, attrs):
         if attrs.get("title", "").strip():
             self.hierarchy.append(attrs["title"].strip())
 
-    def end_gtml_Tab(self):
+    def end_gtml_tab(self):
         if self.hierarchy:
             self.hierarchy.pop()
 
-    def start_iGoogle_Module(self, attrs):
+    def start_igoogle_module(self, attrs):
         if attrs.get("type", "").strip().lower() == "rss":
             self.flag_feed = True
 
-    def end_iGoogle_Module(self):
+    def end_igoogle_module(self):
         self.flag_feed = False
 
-    def start_iGoogle_ModulePrefs(self, attrs):
-        if self.flag_feed and attrs.get("xmlUrl", "").strip():
-            obj = common.SuperDict({"url": attrs["xmlUrl"].strip()})
+    def start_igoogle_moduleprefs(self, attrs):
+        if self.flag_feed and attrs.get("xmlurl", "").strip():
+            obj = common.SuperDict({"url": attrs["xmlurl"].strip()})
             obj["title"] = ""
             if self.hierarchy:
                 obj["categories"] = [copy.copy(self.hierarchy)]

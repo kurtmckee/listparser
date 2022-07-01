@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+    Description: Undefined entity reference (text node 2)
+    Eval: result['bozo'] is False
+    Eval: result['meta']['title'] == result['meta']['author']['name']
+-->
+<opml version="2.0">
+    <head>
+        <title>1 &mu;s is brief</title>
+        <ownerName>1 &#956;s is brief</ownerName>
+    </head>
+    <body>
+        <outline text="node" />
+    </body>
+</opml>
