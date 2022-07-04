@@ -29,7 +29,7 @@ copyright = "2009-2022 Kurt McKee"
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-info = toml.load(pathlib.Path(__file__) / "../../pyproject.toml")
+info = toml.load(pathlib.Path(__file__).parent.parent / "pyproject.toml")
 version = release = info["tool"]["poetry"]["version"]
 
 # List of directories, relative to source directory, that shouldn't be searched
