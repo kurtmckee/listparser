@@ -45,7 +45,7 @@ Continuing the example:
     ('listparser blog', 'https://kurtmckee.org/tag/listparser')
 
 More extensive documentation is available in the ``docs/`` directory
-and online at <https://listparser.readthedocs.io/en/stable/>.
+`and online <https://listparser.readthedocs.io/en/stable/>`_.
 
 
 Bugs
@@ -58,7 +58,7 @@ that document as a test case, and then find and fix the problem.
 ...you can also just report the bug and leave it to someone else
 to fix the problem, but that won't be as much fun for you!
 
-Bugs can be reported at <https://github.com/kurtmckee/listparser/issues>.
+`Bugs can be reported on GitHub <https://github.com/kurtmckee/listparser/issues>`_.
 
 
 Git workflow
@@ -101,6 +101,9 @@ To set up a development environment, follow these steps at a command line:
 
     # Enable pre-commit.
     pre-commit install
+
+    # Run the unit tests.
+    tox
 
 
 When submitting a PR, be sure to create and edit a changelog fragment.
