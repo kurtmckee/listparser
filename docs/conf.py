@@ -2,7 +2,11 @@ import os
 import pathlib
 import sys
 
-import toml
+try:
+    import tomllib
+except ImportError:
+    # Python 3.10 and below
+    import tomli as tomllib
 
 # Allow autodoc to import listparser.
 sys.path.append(os.path.abspath("../src"))
@@ -29,7 +33,8 @@ copyright = "2009-2022 Kurt McKee"
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-info = toml.load(pathlib.Path(__file__).parent.parent / "pyproject.toml")
+pyproject = pathlib.Path(__file__).parent.parent / "pyproject.toml"
+info = tomllib.loads(pyproject.read_text())
 version = release = info["tool"]["poetry"]["version"]
 
 # List of directories, relative to source directory, that shouldn't be searched
