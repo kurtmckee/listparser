@@ -28,13 +28,13 @@ class LxmlHandler(foaf.FoafMixin, igoogle.IgoogleMixin, opml.OpmlMixin):
         # ========================= ===========================
         # <tag XMLNS="URI">         {"xmlns": "URI"}
         # <tag xmlns:Prefix="uri">  {"xmlns:prefix": "uri"}
-        # <tag xmlns>               {"xmlns": None}
+        # <tag xmlns>               {"xmlns": ""}
         # ========================= ===========================
         #
         attrs_without_xmlns = {}
         for key, value in attrs.items():
             if key.startswith("xmlns"):
-                if value is not None:
+                if value:
                     self.uris[key.partition(":")[2]] = value
             else:
                 attrs_without_xmlns[key] = value
@@ -137,7 +137,7 @@ class HTMLHandler(
         attrs_without_xmlns = {}
         for key, value in attrs:
             if key.startswith("xmlns"):
-                if value is not None:
+                if value:
                     self.uris[key.partition(":")[2]] = value
             else:
                 attrs_without_xmlns[key] = value
