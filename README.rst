@@ -45,7 +45,7 @@ Continuing the example:
     ('listparser blog', 'https://kurtmckee.org/tag/listparser')
 
 More extensive documentation is available in the ``docs/`` directory
-`and online <https://listparser.readthedocs.io/en/stable/>`_.
+`and online <https://listparser.readthedocs.io/en/latest/>`_.
 
 
 Bugs

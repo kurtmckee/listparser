@@ -6,7 +6,7 @@ authors = ["Kurt McKee <contactme@kurtmckee.org>"]
 license = "MIT"
 readme = "README.rst"
 repository = "https://github.com/kurtmckee/listparser/"
-documentation = "https://listparser.readthedocs.io/en/stable/"
+documentation = "https://listparser.readthedocs.io/en/latest/"
 keywords = ["opml", "foaf", "igoogle", "feed"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
