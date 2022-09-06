@@ -154,32 +154,12 @@ class LxmlHandler(foaf.FoafMixin, igoogle.IgoogleMixin, opml.OpmlMixin):
         super().close()
 
 
-class HTMLHandler(
-    foaf.FoafMixin,
-    igoogle.IgoogleMixin,
-    opml.OpmlMixin,
-    html.parser.HTMLParser,
-):
-    def __init__(self):
-        super().__init__()
-
-        # {prefix: uri}
-        self.uris: dict[str, str] = {}
-
+class HTMLHandler(LxmlHandler, html.parser.HTMLParser):
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        """Handle start tags.
+        """Handle the start of an XML element."""
 
-        The HTML parser doesn't understand or handle XML namespaces,
-        so namespaces are registered as they're encountered.
-
-        Note that XML namespaces are not strictly tracked;
-        after a namespace is encountered in a start tag,
-        it is never removed when the corresponding end tag is encountered.
-        """
-
-        # Extract XML namespaces from the attributes list.
-        #
-        # The HTML parser converts attribute keys to lowercase.
+        # The HTML parser converts attribute names to lowercase.
+        # However, attribute values may be `None`.
         #
         # ========================= ===========================
         # Deployed XML              Tuple in *attrs*
@@ -189,73 +169,10 @@ class HTMLHandler(
         # <tag xmlns>               ("xmlns", None)
         # ========================= ===========================
         #
-        attrs_excluding_xmlns = {}
-        for key, value in attrs:
-            if key.startswith("xmlns"):
-                if value:
-                    _, _, declared_prefix = key.partition(":")
-                    self.uris[declared_prefix] = value
-            else:
-                attrs_excluding_xmlns[key] = value
+        # *attrs* must be modified to match what the LXML parser expects.
+        return self.start(tag, {key: value or "" for key, value in attrs})
 
-        # The tag will be in the form "name" or "prefix:name".
-        deployed_prefix, _, name = tag.rpartition(":")
-
-        # The deployed prefix used in the XML document is arbitrary,
-        # but handler methods are named using standard prefix names.
-        # The code below tries to map from the deployed prefix
-        # to a declared URI (if any), and then to a standard prefix.
-        # However, if there's no URI associated with the prefix,
-        # the only identifier available is the deployed prefix itself
-        # (which might be an empty string).
-        identifier = self.uris.get(
-            deployed_prefix, common.uris.get(deployed_prefix, deployed_prefix)
-        )
-        standard_prefix = common.prefixes.get(identifier, deployed_prefix)
-
-        try:
-            # Use a cached start method, if possible.
-            method = self.start_methods[(standard_prefix, name)]
-        except KeyError:
-            if standard_prefix:
-                method_name = f"start_{standard_prefix}_{name}"
-            else:
-                method_name = f"start_opml_{name}"
-            method = getattr(self, method_name, None)
-            self.start_methods[(standard_prefix, name)] = method
-
-        if method:
-            method(attrs_excluding_xmlns)
-
-    def handle_endtag(self, tag: str) -> None:
-        """Handle end tags."""
-
-        deployed_prefix, _, name = tag.rpartition(":")
-        identifier = self.uris.get(
-            deployed_prefix, common.uris.get(deployed_prefix, deployed_prefix)
-        )
-        standard_prefix = common.prefixes.get(identifier, deployed_prefix)
-
-        try:
-            method = self.end_methods[(standard_prefix, name)]
-        except KeyError:
-            if standard_prefix:
-                method_name = f"end_{standard_prefix}_{name}"
-            else:
-                method_name = f"end_opml_{name}"
-            method = getattr(self, method_name, None)
-            self.end_methods[(standard_prefix, name)] = method
-
-        if method:
-            method()
-
-    def handle_data(self, data: str) -> None:
-        """Handle text content of an element."""
-
-        if self.flag_expect_text:
-            self.text.append(data)
-
-    def close(self) -> None:
-        """Reset the parser / handler."""
-
-        super().close()
+    # These HTML and LXML methods' signatures and code are identical,
+    # but the method names differ.
+    handle_endtag = LxmlHandler.end
+    handle_data = LxmlHandler.data
