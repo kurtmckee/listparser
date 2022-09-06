@@ -1,11 +1,13 @@
 <?xml version="1.0"?>
 <!--
-    Description: Test malformed XML
+    Description: Test an unexpected end element
     Eval: result["bozo"] is False
     Eval: result["feeds"][0]["title"] == "malformed"
     Eval: result["feeds"][0]["url"] == "https://domain/feed"
 -->
-<opml version="2.0">
+<opml version="2.0" xmlns="http://opml.org/spec2">
     <body>
         <outline text="malformed" type="rss" xmlUrl="https://domain/feed" />
-    </body>
+
+
+</unexpected>
