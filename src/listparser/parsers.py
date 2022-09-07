@@ -130,10 +130,7 @@ class LxmlHandler(foaf.FoafMixin, igoogle.IgoogleMixin, opml.OpmlMixin):
                 )
 
             for prefix in node.namespace_prefixes:
-                try:
-                    self.uris[prefix].pop()
-                except LookupError:
-                    pass
+                self.uris[prefix].pop()
 
             end_method = self.end_methods.get((node.standard_prefix, node.name))
             if end_method is not None:
