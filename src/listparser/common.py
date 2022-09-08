@@ -75,12 +75,9 @@ class CommonMixin:
         self.start_methods: Dict[Union[Tuple[str, str], str], Optional[Callable]] = {}
         self.end_methods: Dict[Union[Tuple[str, str], str], Optional[Callable]] = {}
 
-    def raise_bozo(self, error: Union[Exception, str]):
+    def raise_bozo(self, error: str):
         self.harvest["bozo"] = True
-        if isinstance(error, str):
-            self.harvest["bozo_exception"] = ListparserError(error)
-        else:
-            self.harvest["bozo_exception"] = error
+        self.harvest["bozo_exception"] = ListparserError(error)
 
     def expect_text(self, _):
         """Flag that text content is anticipated.

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!--
+    Description: An xmlns key with no attribute value must not cause any issue.
+    Eval: result["bozo"] is False
+    Eval: result["meta"]["title"] == "xmlns without attribute"
+-->
+<opml xmlns>
+    <head>
+        <title>xmlns without attribute</title>
+    </head>
+</opml>

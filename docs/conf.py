@@ -2,10 +2,9 @@ import os
 import pathlib
 import sys
 
-try:
+if sys.version_info[:2] >= (3, 11):
     import tomllib
-except ImportError:
-    # Python 3.10 and below
+else:
     import tomli as tomllib
 
 # Allow autodoc to import listparser.
