@@ -12,7 +12,33 @@ RDF_ABOUT = "rdf:about"
 RDF_RESOURCE = "rdf:resource"
 
 
-class FoafMixin(common.CommonMixin):
+class FoafMixin(common.Common):
+    def __init__(self):
+        super().__init__()
+
+        self.flag_agent = False
+        self.flag_group = False
+        self.flag_new_title = False
+        self.flag_opportunity = False
+        # group_objs = [(append_to_key, obj)]
+        self.group_objs: list[tuple[str, common.SuperDict]] = []
+        self.agent_feeds = []
+        self.agent_lists = []
+        self.agent_opps = []
+        self.foaf_name = []
+
+    def close(self):
+        super().close()
+        self.flag_agent = False
+        self.flag_group = False
+        self.flag_new_title = False
+        self.flag_opportunity = False
+        self.group_objs = []
+        self.agent_feeds = []
+        self.agent_lists = []
+        self.agent_opps = []
+        self.foaf_name = []
+
     def start_rdf_rdf(self, _):
         self.harvest["version"] = "rdf"
 
@@ -103,7 +129,7 @@ class FoafMixin(common.CommonMixin):
 
     end_rdf_rdf = end_foaf_group
 
-    start_foaf_name = common.CommonMixin.expect_text
+    start_foaf_name = common.Common.expect_text
 
     def end_foaf_name(self):
         value = self.get_text()
@@ -114,7 +140,7 @@ class FoafMixin(common.CommonMixin):
             self.hierarchy.append(value)
             self.flag_group = False
 
-    start_foaf_member_name = common.CommonMixin.expect_text
+    start_foaf_member_name = common.Common.expect_text
     end_foaf_member_name = end_foaf_name
 
     def start_foaf_document(self, attrs):

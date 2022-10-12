@@ -19,12 +19,24 @@ try:
 except ImportError:
     lxml = None  # type: ignore
 
-from . import common, parsers
+from . import common, foaf, igoogle, opml, xml_handler
 from .exceptions import ListparserError
 
 __author__ = "Kurt McKee <contactme@kurtmckee.org>"
 __url__ = "https://github.com/kurtmckee/listparser"
 __version__ = "0.19"
+
+
+Handler = type(
+    "Handler",
+    (
+        opml.OpmlMixin,
+        foaf.FoafMixin,
+        igoogle.IgoogleMixin,
+        xml_handler.XMLHandler,
+    ),
+    {},
+)
 
 
 def parse(parse_obj: Union[str, bytes]) -> common.SuperDict:
@@ -53,16 +65,14 @@ def parse(parse_obj: Union[str, bytes]) -> common.SuperDict:
     if not content:
         return common.SuperDict(guarantees)
 
-    handler: Union[parsers.LxmlHandler, parsers.HTMLHandler]
+    handler = Handler()
+    handler.harvest.update(guarantees)
+
     if lxml is not None:
-        handler = parsers.LxmlHandler()
-        handler.harvest.update(guarantees)
         content_file = io.BytesIO(content)
         parser = lxml.etree.HTMLParser(target=handler, recover=True)
         lxml.etree.parse(content_file, parser)
     else:
-        handler = parsers.HTMLHandler()
-        handler.harvest.update(guarantees)
         handler.feed(content.decode())
 
     harvest = common.SuperDict(handler.harvest)

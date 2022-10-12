@@ -8,8 +8,21 @@ from __future__ import annotations
 import collections
 import dataclasses
 import html.parser
+import typing
 
-from . import common, foaf, igoogle, opml
+prefixes = {
+    "http://opml.org/spec2": "opml",
+    "http://www.google.com/ig": "igoogle",
+    "http://schemas.google.com/GadgetTabML/2008": "gtml",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#": "rdf",
+    "http://www.w3.org/2000/01/rdf-schema#": "rdfs",
+    "http://xmlns.com/foaf/0.1/": "foaf",
+    "http://purl.org/dc/elements/1.1/": "dc",
+    "http://purl.org/rss/1.0/": "rss",
+    "http://blogs.yandex.ru/schema/foaf/": "ya",
+}
+
+uris = {v: k for k, v in prefixes.items()}
 
 
 @dataclasses.dataclass
@@ -26,13 +39,32 @@ class Node:
     namespace_prefixes: set[str]
 
 
-class LxmlHandler(foaf.FoafMixin, igoogle.IgoogleMixin, opml.OpmlMixin):
+class XMLHandler(html.parser.HTMLParser):
+    """
+    Handle parsing events emitted by an HTML parser.
+
+    Although this class inherits from the Python's built-in HTMLParser,
+    it deliberately favors the lxml API for the sake of speed.
+    The HTMLParser API is supported using methods that alias the lxml API methods,
+    or transform the input parameters and then call the lxml API methods.
+    """
+
     def __init__(self):
         super().__init__()
 
         # {prefix: [uri1, ...]}
         self.uris: dict[str, list[str]] = {}
         self.node_stack: collections.deque[Node] = collections.deque()
+
+        # Cache element-to-method name lookups.
+        self.start_methods: dict[tuple[str, str], typing.Callable | None] = {}
+        self.end_methods: dict[tuple[str, str], typing.Callable | None] = {}
+
+        # *flag_expect_text* is set by `start_*()` methods that want to capture text.
+        # While set, text is captured in chunks in the *text* attribute.
+        # It is unset by `end_*()` methods.
+        self.flag_expect_text: bool = False
+        self.text: list[str] = []
 
     def start(self, tag: str, attrs: dict[str, str]):
         """Handle the start of an XML element."""
@@ -71,13 +103,13 @@ class LxmlHandler(foaf.FoafMixin, igoogle.IgoogleMixin, opml.OpmlMixin):
         # the only identifier available is the deployed prefix itself
         # (which might be an empty string).
         identifier_list = self.uris.get(
-            deployed_prefix, [common.uris.get(deployed_prefix, deployed_prefix)]
+            deployed_prefix, [uris.get(deployed_prefix, deployed_prefix)]
         )
         if identifier_list:
             identifier = identifier_list[-1]
         else:
             identifier = "= sentinel: no identifier ="
-        standard_prefix = common.prefixes.get(identifier, deployed_prefix)
+        standard_prefix = prefixes.get(identifier, deployed_prefix)
 
         # Namespaces must be associated with the tags that introduce them
         # so the corresponding end tag can remove them from the list.
@@ -115,13 +147,13 @@ class LxmlHandler(foaf.FoafMixin, igoogle.IgoogleMixin, opml.OpmlMixin):
             except IndexError:
                 deployed_prefix, _, name = tag.rpartition(":")
                 identifier_list = self.uris.get(
-                    deployed_prefix, [common.uris.get(deployed_prefix, deployed_prefix)]
+                    deployed_prefix, [uris.get(deployed_prefix, deployed_prefix)]
                 )
                 if identifier_list:
                     identifier = identifier_list[-1]
                 else:
                     identifier = "= sentinel: no identifier ="
-                standard_prefix = common.prefixes.get(identifier, deployed_prefix)
+                standard_prefix = prefixes.get(identifier, deployed_prefix)
                 node = Node(
                     tag=tag,
                     standard_prefix=standard_prefix,
@@ -149,9 +181,16 @@ class LxmlHandler(foaf.FoafMixin, igoogle.IgoogleMixin, opml.OpmlMixin):
         """Reset the handler."""
 
         super().close()
+        self.start_methods = {}
+        self.end_methods = {}
+        self.flag_expect_text = False
+        self.text = []
 
+    #
+    # Everything below this comment is a compatibility shim
+    # to support the HTMLParser API in Python's standard library.
+    #
 
-class HTMLHandler(LxmlHandler, html.parser.HTMLParser):
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         """Handle the start of an XML element."""
 
@@ -171,5 +210,5 @@ class HTMLHandler(LxmlHandler, html.parser.HTMLParser):
 
     # These HTML and LXML methods' signatures and code are identical,
     # but the method names differ.
-    handle_endtag = LxmlHandler.end
-    handle_data = LxmlHandler.data
+    handle_endtag = end
+    handle_data = data
