@@ -8,7 +8,7 @@ import copy
 from . import common
 
 
-class IgoogleMixin(common.CommonMixin):
+class IgoogleMixin(common.Common):
     def start_gtml_gadgettabml(self, _):
         self.harvest["version"] = "igoogle"
 

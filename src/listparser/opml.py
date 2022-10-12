@@ -8,7 +8,7 @@ import copy
 from . import common, dates
 
 
-class OpmlMixin(common.CommonMixin):
+class OpmlMixin(common.Common):
     def start_opml_opml(self, attrs):
         self.harvest["version"] = "opml"
         if attrs.get("version") in ("1.0", "1.1"):
@@ -76,14 +76,14 @@ class OpmlMixin(common.CommonMixin):
     def end_opml_outline(self):
         self.hierarchy.pop()
 
-    start_opml_title = common.CommonMixin.expect_text
+    start_opml_title = common.Common.expect_text
 
     def end_opml_title(self):
         value = self.get_text()
         if value:
             self.harvest["meta"]["title"] = value
 
-    start_opml_ownerid = common.CommonMixin.expect_text
+    start_opml_ownerid = common.Common.expect_text
 
     def end_opml_ownerid(self):
         value = self.get_text()
@@ -91,7 +91,7 @@ class OpmlMixin(common.CommonMixin):
             self.harvest["meta"].setdefault("author", common.SuperDict())
             self.harvest["meta"]["author"]["url"] = value
 
-    start_opml_owneremail = common.CommonMixin.expect_text
+    start_opml_owneremail = common.Common.expect_text
 
     def end_opml_owneremail(self):
         value = self.get_text()
@@ -99,7 +99,7 @@ class OpmlMixin(common.CommonMixin):
             self.harvest["meta"].setdefault("author", common.SuperDict())
             self.harvest["meta"]["author"]["email"] = value
 
-    start_opml_ownername = common.CommonMixin.expect_text
+    start_opml_ownername = common.Common.expect_text
 
     def end_opml_ownername(self):
         value = self.get_text()
@@ -107,7 +107,7 @@ class OpmlMixin(common.CommonMixin):
             self.harvest["meta"].setdefault("author", common.SuperDict())
             self.harvest["meta"]["author"]["name"] = value
 
-    start_opml_datecreated = common.CommonMixin.expect_text
+    start_opml_datecreated = common.Common.expect_text
 
     def end_opml_datecreated(self):
         value = self.get_text()
@@ -119,7 +119,7 @@ class OpmlMixin(common.CommonMixin):
             else:
                 self.raise_bozo("dateCreated is not an RFC 822 datetime")
 
-    start_opml_datemodified = common.CommonMixin.expect_text
+    start_opml_datemodified = common.Common.expect_text
 
     def end_opml_datemodified(self):
         value = self.get_text()
