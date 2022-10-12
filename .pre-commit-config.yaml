@@ -1,7 +1,7 @@
 # Run `pre-commit autoupdate` to update tool versions.
 repos:
   - repo: https://github.com/psf/black
-    rev: 22.8.0
+    rev: 22.10.0
     hooks:
       - id: black
 
@@ -17,7 +17,7 @@ repos:
         name: isort (python)
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.37.3
+    rev: v3.1.0
     hooks:
       - id: pyupgrade
         name: "Enforce Python 3.7 idioms"
