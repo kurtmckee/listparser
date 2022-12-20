@@ -1,8 +1,8 @@
 objects[i].tags
 ===============
 
-A list of all of the tags associated with the feed, subscription list, 
-or opportunity object. They are copied from the ``categories`` key if 
+A list of all of the tags associated with the feed, subscription list,
+or opportunity object. They are copied from the ``categories`` key if
 the category is one level deep. As an example:
 
 ..  code-block:: xml

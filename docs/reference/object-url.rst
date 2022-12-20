@@ -26,4 +26,3 @@ to indicate what format the target feed is presented in.
 
 *   ``/opml/body//outline/@htmlUrl``
 *   ``/rdf:RDF//foaf:Agent//foaf:Document/@rdf:about``
-
