@@ -1,20 +1,48 @@
 # Run `pre-commit autoupdate` to update tool versions.
+# Note that pre-commit.ci updates dependencies automatically.
+
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks.git
+    rev: v4.4.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: trailing-whitespace
+
   - repo: https://github.com/psf/black
     rev: 22.12.0
     hooks:
       - id: black
 
+      # Allow tox to run black as a test.
+      - id: black
+        alias: black-check
+        name: black (check)
+        stages: [manual]
+        args: [--check]
+
   - repo: https://github.com/pycqa/flake8
     rev: 6.0.0
     hooks:
       - id: flake8
+        additional_dependencies:
+          - "flake8-bugbear==22.10.27"
 
   - repo: https://github.com/pycqa/isort
     rev: v5.11.3
     hooks:
       - id: isort
-        name: isort (python)
+
+      # Allow tox to run isort as a test.
+      - id: isort
+        alias: isort-check
+        name: isort (check)
+        stages: [manual]
+        args: [--check]
 
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.3.1
