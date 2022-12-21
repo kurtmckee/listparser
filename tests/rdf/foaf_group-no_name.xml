@@ -16,17 +16,17 @@
 <foaf:Group>
     <foaf:name> </foaf:name>
     <foaf:member>
-        <foaf:Agent> 
+        <foaf:Agent>
             <foaf:name>User</foaf:name>
-            <foaf:weblog> 
-                <foaf:Document rdf:about="http://domain/"> 
-                    <rdfs:seeAlso> 
-                        <rss:channel rdf:about="http://domain/feed" /> 
-                    </rdfs:seeAlso> 
-                </foaf:Document> 
-            </foaf:weblog> 
-        </foaf:Agent> 
+            <foaf:weblog>
+                <foaf:Document rdf:about="http://domain/">
+                    <rdfs:seeAlso>
+                        <rss:channel rdf:about="http://domain/feed" />
+                    </rdfs:seeAlso>
+                </foaf:Document>
+            </foaf:weblog>
+        </foaf:Agent>
     </foaf:member>
 </foaf:Group>
 
-</rdf:RDF> 
+</rdf:RDF>
