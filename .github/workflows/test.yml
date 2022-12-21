@@ -1,0 +1,100 @@
+name: "Test"
+
+on:
+  - "push"
+  - "pull_request"
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os:
+          - name: "Ubuntu"
+            id: "ubuntu-latest"
+        python:
+          - setup-id: "3.11"
+            tox-id: "py311"
+          - setup-id: "3.10"
+            tox-id: "py310"
+          - setup-id: "3.9"
+            tox-id: "py39"
+          - setup-id: "3.8"
+            tox-id: "py38"
+          - setup-id: "3.7"
+            tox-id: "py37"
+        extras:
+          - "-http-lxml"
+
+        include:
+          # Test without extras on Ubuntu.
+          - os:
+              name: "Ubuntu"
+              id: "ubuntu-latest"
+            python:
+              setup-id: "3.7"
+              tox-id: "py37"
+            extras: ""
+
+          # Test minimum dependencies on Ubuntu.
+          - os:
+              name: "Ubuntu"
+              id: "ubuntu-latest"
+            python:
+              setup-id: "3.7"
+              tox-id: "py37"
+            extras: "-minimum_dependencies"
+
+          # Test pypy, without extras, on Ubuntu.
+          - os:
+              name: "Ubuntu"
+              id: "ubuntu-latest"
+            python:
+              setup-id: "pypy3.9"
+              tox-id: "pypy39"
+            extras: ""
+
+          # Test lowest and highest versions on Windows.
+          - os:
+              name: "Windows"
+              id: "windows-latest"
+            python:
+              setup-id: "3.7"
+              tox-id: "py37"
+          - os:
+              name: "Windows"
+              id: "windows-latest"
+            python:
+              setup-id: "3.11"
+              tox-id: "py311"
+
+          # Test lowest and highest versions on Mac.
+          - os:
+              name: "MacOS"
+              id: "macos-latest"
+            python:
+              setup-id: "3.7"
+              tox-id: "py37"
+          - os:
+              name: "MacOS"
+              id: "macos-latest"
+            python:
+              setup-id: "3.11"
+              tox-id: "py311"
+
+    name: "Test ${{ matrix.python.tox-id }}${{ matrix.extras }} on ${{ matrix.os.name }}"
+    runs-on: "${{ matrix.os.id }}"
+    steps:
+      - name: "Checkout branch"
+        uses: "actions/checkout@v3"
+
+      - name: "Setup Python (${{ matrix.python.setup-id }})"
+        uses: "actions/setup-python@v4"
+        with:
+          python-version: "${{ matrix.python.setup-id }}"
+
+      - name: "Install Tox"
+        run: "python -m pip install tox"
+
+      - name: "Test (${{ matrix.python.tox-id }}${{ matrix.extras }})"
+        # NOTE: The trailing "-ci" marker disables coverage.
+        run: "tox -e ${{ matrix.python.tox-id }}${{ matrix.extras }}-ci"
