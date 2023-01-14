@@ -88,13 +88,49 @@ jobs:
         uses: "actions/checkout@v3"
 
       - name: "Setup Python (${{ matrix.python.setup-id }})"
+        id: "setup-python"
         uses: "actions/setup-python@v4"
         with:
           python-version: "${{ matrix.python.setup-id }}"
+          # Cache packages that pip downloads.
+          # This does not cache the installed files.
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            tox.ini
+            .github/workflows/test.yml
 
-      - name: "Install Tox"
-        run: "python -m pip install tox"
+      - name: "Restore cache"
+        id: "restore-cache"
+        uses: "actions/cache@v3"
+        with:
+          path: |
+            .venv
+            .tox/${{ matrix.python.tox-id }}${{ matrix.extras }}-ci
+          key: >
+            cache
+            os=${{ matrix.os.id }}
+            python=${{ steps.setup-python.outputs.python-version }}
+            hash=${{ hashFiles('pyproject.toml', 'tox.ini', '.github/workflows/test.yaml') }}
+            tox=${{ matrix.python.tox-id }}${{ matrix.extras }}
+
+      # Possibility 1: Windows
+      - name: "Create a virtual environment (Windows)"
+        if: "${{ steps.restore-cache.outputs.cache-hit != 'true' && runner.os == 'Windows' }}"
+        run: |
+          python -m venv .venv
+          .venv\Scripts\pip.exe install tox
+
+      # Possibility 2: Linux or macOS
+      - name: "Create a virtual environment (non-Windows)"
+        if: "${{ steps.restore-cache.outputs.cache-hit != 'true' && runner.os != 'Windows' }}"
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install tox
 
       - name: "Test (${{ matrix.python.tox-id }}${{ matrix.extras }})"
         # NOTE: The trailing "-ci" marker disables coverage.
-        run: "tox -e ${{ matrix.python.tox-id }}${{ matrix.extras }}-ci"
+        # If the trailing marker ever changes, then update the caching above.
+        run: >
+          ${{ runner.os == 'Windows' && '.venv\Scripts\tox.exe' || '.venv/bin/tox' }}
+          -e ${{ matrix.python.tox-id }}${{ matrix.extras }}-ci
