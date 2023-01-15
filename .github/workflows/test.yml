@@ -5,7 +5,43 @@ on:
   - "pull_request"
 
 jobs:
+  build:
+    name: "Build wheel"
+    runs-on: "ubuntu-latest"
+    outputs:
+      wheel-filename: "${{ steps.get-filename.outputs.wheel-filename }}"
+    steps:
+      - name: "Checkout branch"
+        uses: "actions/checkout@v3"
+
+      - name: "Setup Python"
+        id: "setup-python"
+        uses: "actions/setup-python@v4"
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            tox.ini
+            .github/workflows/test.yml
+
+      - name: "Build the project"
+        run: "pip wheel ."
+
+      - name: "Identify the wheel filename"
+        id: "get-filename"
+        run: 'echo "wheel-filename=$(ls -1 *.whl | head -n 1)" >> $GITHUB_OUTPUT'
+
+      - name: "Upload the build artifact"
+        uses: "actions/upload-artifact@v3"
+        with:
+          name: "listparser-${{ github.sha }}.whl"
+          path: "${{ steps.get-filename.outputs.wheel-filename }}"
+          retention-days: 1
+
   test:
+    needs: "build"
+
     strategy:
       matrix:
         os:
@@ -128,9 +164,16 @@ jobs:
           python -m venv .venv
           .venv/bin/pip install tox
 
+
+      - name: "Download the build artifact"
+        uses: "actions/download-artifact@v3"
+        with:
+          name: "listparser-${{ github.sha }}.whl"
+
       - name: "Test (${{ matrix.python.tox-id }}${{ matrix.extras }})"
         # NOTE: The trailing "-ci" marker disables coverage.
         # If the trailing marker ever changes, then update the caching above.
         run: >
           ${{ runner.os == 'Windows' && '.venv\Scripts\tox.exe' || '.venv/bin/tox' }}
+          --installpkg "${{ needs.build.outputs.wheel-filename }}"
           -e ${{ matrix.python.tox-id }}${{ matrix.extras }}-ci
