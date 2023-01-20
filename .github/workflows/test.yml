@@ -150,20 +150,16 @@ jobs:
             hash=${{ hashFiles('pyproject.toml', 'tox.ini', '.github/workflows/test.yaml') }}
             tox=${{ matrix.python.tox-id }}${{ matrix.extras }}
 
-      # Possibility 1: Windows
-      - name: "Create a virtual environment (Windows)"
-        if: "${{ steps.restore-cache.outputs.cache-hit != 'true' && runner.os == 'Windows' }}"
+      - name: "Identify venv path"
+        shell: "bash"
+        run: "echo 'venv-path=${{ runner.os == 'Windows' && '.venv/Scripts' || '.venv/bin' }}' >> $GITHUB_ENV"
+
+      - name: "Create a virtual environment"
+        if: "steps.restore-cache.outputs.cache-hit == false"
         run: |
           python -m venv .venv
-          .venv\Scripts\pip.exe install tox
-
-      # Possibility 2: Linux or macOS
-      - name: "Create a virtual environment (non-Windows)"
-        if: "${{ steps.restore-cache.outputs.cache-hit != 'true' && runner.os != 'Windows' }}"
-        run: |
-          python -m venv .venv
-          .venv/bin/pip install tox
-
+          ${{ env.venv-path }}/pip install --upgrade pip setuptools wheel
+          ${{ env.venv-path }}/pip install tox
 
       - name: "Download the build artifact"
         uses: "actions/download-artifact@v3"
@@ -174,6 +170,6 @@ jobs:
         # NOTE: The trailing "-ci" marker disables coverage.
         # If the trailing marker ever changes, then update the caching above.
         run: >
-          ${{ runner.os == 'Windows' && '.venv\Scripts\tox.exe' || '.venv/bin/tox' }}
+          ${{ env.venv-path }}/tox run
           --installpkg "${{ needs.build.outputs.wheel-filename }}"
           -e ${{ matrix.python.tox-id }}${{ matrix.extras }}-ci
