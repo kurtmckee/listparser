@@ -23,7 +23,7 @@ jobs:
           cache-dependency-path: |
             pyproject.toml
             tox.ini
-            .github/workflows/test.yml
+            .github/workflows/test.yaml
 
       - name: "Build the project"
         run: "pip wheel ."
@@ -134,7 +134,7 @@ jobs:
           cache-dependency-path: |
             pyproject.toml
             tox.ini
-            .github/workflows/test.yml
+            .github/workflows/test.yaml
 
       - name: "Restore cache"
         id: "restore-cache"
