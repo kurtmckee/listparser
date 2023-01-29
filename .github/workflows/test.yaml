@@ -44,111 +44,82 @@ jobs:
 
     strategy:
       matrix:
-        os:
-          - name: "Ubuntu"
-            id: "ubuntu-latest"
-        python:
-          - setup-id: "3.11"
-            tox-id: "py311"
-          - setup-id: "3.10"
-            tox-id: "py310"
-          - setup-id: "3.9"
-            tox-id: "py39"
-          - setup-id: "3.8"
-            tox-id: "py38"
-          - setup-id: "3.7"
-            tox-id: "py37"
-        extras:
-          - "-http-lxml"
-
-        include:
-          # Test without extras on Ubuntu.
+        run:
           - os:
-              name: "Ubuntu"
               id: "ubuntu-latest"
-            python:
-              setup-id: "3.7"
-              tox-id: "py37"
-            extras: ""
-
-          # Test minimum dependencies on Ubuntu.
-          - os:
               name: "Ubuntu"
-              id: "ubuntu-latest"
-            python:
-              setup-id: "3.7"
-              tox-id: "py37"
-            extras: "-minimum_dependencies"
-
-          # Test pypy, without extras, on Ubuntu.
-          - os:
-              name: "Ubuntu"
-              id: "ubuntu-latest"
-            python:
-              setup-id: "pypy3.9"
-              tox-id: "pypy39"
-            extras: ""
+            pythons: |
+              pypy3.9
+              3.7
+              3.8
+              3.9
+              3.10
+              3.11
+            tox-environments:
+              - "py311-http-lxml"
+              - "py310-http-lxml"
+              - "py39-http-lxml"
+              - "py38-http-lxml"
+              - "py37-http-lxml"
+              - "py37"
+              - "py37-minimum-dependencies"
+              - "pypy39"
 
           # Test lowest and highest versions on Windows.
           - os:
-              name: "Windows"
               id: "windows-latest"
-            python:
-              setup-id: "3.7"
-              tox-id: "py37"
-          - os:
               name: "Windows"
-              id: "windows-latest"
-            python:
-              setup-id: "3.11"
-              tox-id: "py311"
+            pythons: |
+              3.7
+              3.11
+            tox-environments:
+              - "py37"
+              - "py311"
 
           # Test lowest and highest versions on Mac.
           - os:
               name: "MacOS"
               id: "macos-latest"
-            python:
-              setup-id: "3.7"
-              tox-id: "py37"
-          - os:
-              name: "MacOS"
-              id: "macos-latest"
-            python:
-              setup-id: "3.11"
-              tox-id: "py311"
+            pythons: |
+              3.7
+              3.11
+            tox-environments:
+              - "py37"
+              - "py311"
 
-    name: "Test ${{ matrix.python.tox-id }}${{ matrix.extras }} on ${{ matrix.os.name }}"
-    runs-on: "${{ matrix.os.id }}"
+    name: "Test on ${{ matrix.run.os.name }}"
+    runs-on: "${{ matrix.run.os.id }}"
     steps:
+      # The week number is used for cache-busting.
+      - name: "Identify week number"
+        shell: "bash"
+        run: "date +'%V' > week-number.txt"
+
       - name: "Checkout branch"
         uses: "actions/checkout@v3"
 
-      - name: "Setup Python (${{ matrix.python.setup-id }})"
+      - name: "Setup Pythons"
         id: "setup-python"
         uses: "actions/setup-python@v4"
         with:
-          python-version: "${{ matrix.python.setup-id }}"
+          python-version: "${{ matrix.run.pythons }}"
           # Cache packages that pip downloads.
           # This does not cache the installed files.
           cache: "pip"
           cache-dependency-path: |
+            .github/workflows/test.yaml
             pyproject.toml
             tox.ini
-            .github/workflows/test.yaml
+            week-number.txt
 
       - name: "Restore cache"
         id: "restore-cache"
         uses: "actions/cache@v3"
         with:
           path: |
-            .venv
-            .tox/${{ matrix.python.tox-id }}${{ matrix.extras }}-ci
-          key: >
-            cache
-            os=${{ matrix.os.id }}
-            python=${{ steps.setup-python.outputs.python-version }}
-            hash=${{ hashFiles('pyproject.toml', 'tox.ini', '.github/workflows/test.yaml') }}
-            tox=${{ matrix.python.tox-id }}${{ matrix.extras }}
+            .venv/
+            .tox/
+          key: "cache-os=${{ matrix.run.os.id }}-hash=${{ hashFiles('.github/workflows/test.yaml', 'pyproject.toml', 'tox.ini', 'week-number.txt') }}"
 
       - name: "Identify venv path"
         shell: "bash"
@@ -166,10 +137,8 @@ jobs:
         with:
           name: "listparser-${{ github.sha }}.whl"
 
-      - name: "Test (${{ matrix.python.tox-id }}${{ matrix.extras }})"
-        # NOTE: The trailing "-ci" marker disables coverage.
-        # If the trailing marker ever changes, then update the caching above.
+      - name: "Test"
         run: >
           ${{ env.venv-path }}/tox run
           --installpkg "${{ needs.build.outputs.wheel-filename }}"
-          -e ${{ matrix.python.tox-id }}${{ matrix.extras }}-ci
+          -e ${{ join(matrix.run.tox-environments, ',') }}
