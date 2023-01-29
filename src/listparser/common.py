@@ -3,13 +3,15 @@
 # SPDX-License-Identifier: MIT
 #
 
-from typing import Dict, Tuple
+from __future__ import annotations
+
+import typing as t
 
 from .exceptions import ListparserError
 from .xml_handler import XMLHandler
 
 
-class SuperDict(dict):
+class SuperDict(t.Dict[str, t.Any]):
     """
     SuperDict is a dictionary object with keys posing as instance attributes.
 
@@ -22,7 +24,7 @@ class SuperDict(dict):
 
     """
 
-    def __getattribute__(self, name):
+    def __getattribute__(self, name: str) -> t.Any:
         if name in self:
             return self[name]
         else:
@@ -30,20 +32,20 @@ class SuperDict(dict):
 
 
 class Common(XMLHandler):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.harvest = {}
-        self.hierarchy = []
+        self.harvest: dict[str, t.Any] = {}
+        self.hierarchy: list[str] = []
         self.flag_feed = False
 
         # found_urls = {url: (append_to_key, obj)}
-        self.found_urls: Dict[str, Tuple[str, SuperDict]] = {}
+        self.found_urls: dict[str, tuple[str, SuperDict]] = {}
 
-    def raise_bozo(self, error: str):
+    def raise_bozo(self, error: str) -> None:
         self.harvest["bozo"] = True
         self.harvest["bozo_exception"] = ListparserError(error)
 
-    def expect_text(self, _):
+    def expect_text(self, _: t.Any) -> None:
         """Flag that text content is anticipated.
 
         Many start_* methods only need to prepare for text content.
@@ -61,7 +63,7 @@ class Common(XMLHandler):
         self.text = []
         return text
 
-    def close(self):
+    def close(self) -> None:
         super().close()
         self.hierarchy = []
         self.flag_feed = False

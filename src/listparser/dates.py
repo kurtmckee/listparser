@@ -3,10 +3,11 @@
 # SPDX-License-Identifier: MIT
 #
 
-import datetime
-from typing import Dict, Optional
+from __future__ import annotations
 
-months: Dict[str, int] = {
+import datetime
+
+months: dict[str, int] = {
     "jan": 1,
     "feb": 2,
     "mar": 3,
@@ -21,7 +22,7 @@ months: Dict[str, int] = {
     "dec": 12,
 }
 
-timezones: Dict[str, int] = {
+timezones: dict[str, int] = {
     # Universal Time
     "ut": 0,
     "utc": 0,
@@ -44,7 +45,7 @@ timezones: Dict[str, int] = {
 }
 
 
-def parse_rfc822(date: str) -> Optional[datetime.datetime]:
+def parse_rfc822(date: str) -> datetime.datetime | None:
     """Parse RFC 822 dates and times.
 
     https://tools.ietf.org/html/rfc822#section-5
