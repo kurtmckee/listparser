@@ -192,8 +192,11 @@ jobs:
         with:
           name: "listparser-${{ github.sha }}.whl"
 
-      - name: "mypy"
+      - name: "Lint type annotations"
         run: >
           .venv/bin/tox run
           --installpkg "${{ needs.build.outputs.wheel-filename }}"
           -e mypy
+
+      - name: "Lint documentation"
+        run: ".venv/bin/tox run -e docs"
