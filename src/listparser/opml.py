@@ -3,20 +3,22 @@
 # SPDX-License-Identifier: MIT
 #
 
+from __future__ import annotations
+
 import copy
 
 from . import common, dates
 
 
 class OpmlMixin(common.Common):
-    def start_opml_opml(self, attrs):
+    def start_opml_opml(self, attrs: dict[str, str]) -> None:
         self.harvest["version"] = "opml"
         if attrs.get("version") in ("1.0", "1.1"):
             self.harvest["version"] = "opml1"
         elif attrs.get("version") == "2.0":
             self.harvest["version"] = "opml2"
 
-    def start_opml_outline(self, attrs):
+    def start_opml_outline(self, attrs: dict[str, str]) -> None:
         # Find an appropriate title in @text or @title (else empty)
         if attrs.get("text", "").strip():
             title = attrs["text"].strip()
@@ -73,19 +75,19 @@ class OpmlMixin(common.Common):
 
         self.hierarchy.append("")
 
-    def end_opml_outline(self):
+    def end_opml_outline(self) -> None:
         self.hierarchy.pop()
 
     start_opml_title = common.Common.expect_text
 
-    def end_opml_title(self):
+    def end_opml_title(self) -> None:
         value = self.get_text()
         if value:
             self.harvest["meta"]["title"] = value
 
     start_opml_ownerid = common.Common.expect_text
 
-    def end_opml_ownerid(self):
+    def end_opml_ownerid(self) -> None:
         value = self.get_text()
         if value:
             self.harvest["meta"].setdefault("author", common.SuperDict())
@@ -93,7 +95,7 @@ class OpmlMixin(common.Common):
 
     start_opml_owneremail = common.Common.expect_text
 
-    def end_opml_owneremail(self):
+    def end_opml_owneremail(self) -> None:
         value = self.get_text()
         if value:
             self.harvest["meta"].setdefault("author", common.SuperDict())
@@ -101,7 +103,7 @@ class OpmlMixin(common.Common):
 
     start_opml_ownername = common.Common.expect_text
 
-    def end_opml_ownername(self):
+    def end_opml_ownername(self) -> None:
         value = self.get_text()
         if value:
             self.harvest["meta"].setdefault("author", common.SuperDict())
@@ -109,7 +111,7 @@ class OpmlMixin(common.Common):
 
     start_opml_datecreated = common.Common.expect_text
 
-    def end_opml_datecreated(self):
+    def end_opml_datecreated(self) -> None:
         value = self.get_text()
         if value:
             self.harvest["meta"]["created"] = value
@@ -121,7 +123,7 @@ class OpmlMixin(common.Common):
 
     start_opml_datemodified = common.Common.expect_text
 
-    def end_opml_datemodified(self):
+    def end_opml_datemodified(self) -> None:
         value = self.get_text()
         if value:
             self.harvest["meta"]["modified"] = value

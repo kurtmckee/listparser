@@ -3,8 +3,10 @@
 # SPDX-License-Identifier: MIT
 #
 
+from __future__ import annotations
+
 import io
-from typing import Any, Dict, Optional, Tuple, Union
+import typing as t
 
 try:
     import requests
@@ -17,7 +19,7 @@ try:
     # lxml lacks mypy stubs at the time of writing.
     import lxml.etree  # type: ignore
 except ImportError:
-    lxml = None  # type: ignore
+    lxml = None
 
 from . import common, foaf, igoogle, opml, xml_handler
 from .exceptions import ListparserError
@@ -39,7 +41,7 @@ Handler = type(
 )
 
 
-def parse(parse_obj: Union[str, bytes]) -> common.SuperDict:
+def parse(parse_obj: str | bytes) -> common.SuperDict:
     """Parse a subscription list and return a dict containing the results.
 
     *parse_obj* must be one of the following:
@@ -51,7 +53,7 @@ def parse(parse_obj: Union[str, bytes]) -> common.SuperDict:
     HTTP response headers (if applicable), and any exception encountered.
     """
 
-    guarantees: Dict[str, Any] = {
+    guarantees: dict[str, t.Any] = {
         "bozo": False,
         "bozo_exception": None,
         "feeds": [],
@@ -82,7 +84,7 @@ def parse(parse_obj: Union[str, bytes]) -> common.SuperDict:
     return harvest
 
 
-def get_content(obj) -> Tuple[Optional[bytes], Dict]:
+def get_content(obj: bytes | str) -> tuple[bytes | None, dict[str, t.Any]]:
     if isinstance(obj, bytes):
         return obj, {"bozo": False, "bozo_exception": None}
     elif not isinstance(obj, str):

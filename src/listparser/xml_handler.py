@@ -49,7 +49,7 @@ class XMLHandler(html.parser.HTMLParser):
     or transform the input parameters and then call the lxml API methods.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         # {prefix: [uri1, ...]}
@@ -57,8 +57,10 @@ class XMLHandler(html.parser.HTMLParser):
         self.node_stack: collections.deque[Node] = collections.deque()
 
         # Cache element-to-method name lookups.
-        self.start_methods: dict[tuple[str, str], typing.Callable | None] = {}
-        self.end_methods: dict[tuple[str, str], typing.Callable | None] = {}
+        self.start_methods: dict[
+            tuple[str, str], typing.Callable[[dict[str, str]], None] | None
+        ] = {}
+        self.end_methods: dict[tuple[str, str], typing.Callable[[], None] | None] = {}
 
         # *flag_expect_text* is set by `start_*()` methods that want to capture text.
         # While set, text is captured in chunks in the *text* attribute.
@@ -66,7 +68,7 @@ class XMLHandler(html.parser.HTMLParser):
         self.flag_expect_text: bool = False
         self.text: list[str] = []
 
-    def start(self, tag: str, attrs: dict[str, str]):
+    def start(self, tag: str, attrs: dict[str, str]) -> None:
         """Handle the start of an XML element."""
 
         # Extract XML namespaces from the attributes dictionary.
@@ -138,7 +140,7 @@ class XMLHandler(html.parser.HTMLParser):
         if start_method is not None:
             start_method(attrs_excluding_xmlns)
 
-    def end(self, tag: str):
+    def end(self, tag: str) -> None:
         """Handle the end of an XML element."""
 
         while True:
@@ -171,13 +173,13 @@ class XMLHandler(html.parser.HTMLParser):
             if node.tag == tag:
                 break
 
-    def data(self, data: str):
+    def data(self, data: str) -> None:
         """Handle text content of an element."""
 
         if self.flag_expect_text:
             self.text.append(data)
 
-    def close(self):
+    def close(self) -> None:
         """Reset the handler."""
 
         super().close()

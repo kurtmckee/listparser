@@ -86,3 +86,9 @@ new_fragment_template = "file: fragment-template.rst.txt"
 
 [tool.isort]
 profile = "black"
+
+
+[tool.mypy]
+packages = "listparser"
+strict = true
+sqlite_cache = true
