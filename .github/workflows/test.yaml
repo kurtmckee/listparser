@@ -56,14 +56,14 @@ jobs:
               3.10
               3.11
             tox-environments:
-              - "py311-http-lxml-ci"
-              - "py310-http-lxml-ci"
-              - "py39-http-lxml-ci"
-              - "py38-http-lxml-ci"
-              - "py37-http-lxml-ci"
-              - "py37-ci"
-              - "py37-minimum-dependencies-ci"
-              - "pypy39-ci"
+              - "py311-http-lxml"
+              - "py310-http-lxml"
+              - "py39-http-lxml"
+              - "py38-http-lxml"
+              - "py37-http-lxml"
+              - "py37"
+              - "py37-minimum-dependencies"
+              - "pypy39"
 
           # Test lowest and highest versions on Windows.
           - os:
@@ -73,8 +73,8 @@ jobs:
               3.7
               3.11
             tox-environments:
-              - "py311-ci"
-              - "py37-ci"
+              - "py37"
+              - "py311"
 
           # Test lowest and highest versions on Mac.
           - os:
@@ -84,8 +84,8 @@ jobs:
               3.7
               3.11
             tox-environments:
-              - "py37-ci"
-              - "py311-ci"
+              - "py37"
+              - "py311"
 
     name: "Test on ${{ matrix.run.os.name }}"
     runs-on: "${{ matrix.run.os.id }}"
