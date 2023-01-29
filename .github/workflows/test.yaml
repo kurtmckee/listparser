@@ -90,6 +90,11 @@ jobs:
     name: "Test on ${{ matrix.run.os.name }}"
     runs-on: "${{ matrix.run.os.id }}"
     steps:
+      # The week number is used for cache-busting.
+      - name: "Identify week number"
+        shell: "bash"
+        run: "date +'%V' > week-number.txt"
+
       - name: "Checkout branch"
         uses: "actions/checkout@v3"
 
@@ -102,9 +107,10 @@ jobs:
           # This does not cache the installed files.
           cache: "pip"
           cache-dependency-path: |
+            .github/workflows/test.yaml
             pyproject.toml
             tox.ini
-            .github/workflows/test.yaml
+            week-number.txt
 
       - name: "Restore cache"
         id: "restore-cache"
@@ -113,11 +119,7 @@ jobs:
           path: |
             .venv/
             .tox/
-          key: >
-            cache
-            os=${{ matrix.run.os.id }}
-            python=${{ steps.setup-python.outputs.python-version }}
-            hash=${{ hashFiles('pyproject.toml', 'tox.ini', '.github/workflows/test.yaml') }}
+          key: "cache-os=${{ matrix.run.os.id }}-hash=${{ hashFiles('.github/workflows/test.yaml', 'pyproject.toml', 'tox.ini', 'week-number.txt') }}"
 
       - name: "Identify venv path"
         shell: "bash"
