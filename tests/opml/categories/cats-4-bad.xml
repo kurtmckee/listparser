@@ -13,6 +13,7 @@
     <head></head>
     <body>
         <outline text="feedname" type="rss" xmlUrl="http://domain/feed"
-         category=" / , root1 / , root2// /node2 , / / root3 // node 3 " />
+            category=" / , root1 / , root2// /node2 , / / root3 // node 3 "
+        />
     </body>
 </opml>
