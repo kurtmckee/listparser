@@ -1,5 +1,5 @@
-# Run `pre-commit autoupdate` to update tool versions.
-# Note that pre-commit.ci updates dependencies automatically.
+# Run `pre-commit autoupdate` and `upadup` to update tool versions.
+# Note that pre-commit.ci updates hook versions automatically.
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks.git
@@ -50,3 +50,8 @@ repos:
       - id: pyupgrade
         name: "Enforce Python 3.7 idioms"
         args: [--py37-plus]
+
+  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: 2.7.1
+    hooks:
+      - id: editorconfig-checker
