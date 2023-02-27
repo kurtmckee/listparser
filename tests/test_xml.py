@@ -21,7 +21,7 @@ def use_dict():
 
 
 def test_return_guarantees(use_dict):
-    result = listparser.parse(0)  # type: ignore
+    result = listparser.parse(0)
     assert result["bozo"]
 
 
