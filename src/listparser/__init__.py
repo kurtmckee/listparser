@@ -12,12 +12,12 @@ try:
     import requests
     import urllib3.exceptions
 except ImportError:
-    requests = None  # type: ignore
-    urllib3 = None  # type: ignore
+    requests = None  # type: ignore[assignment]
+    urllib3 = None  # type: ignore[assignment]
 
 try:
     # lxml lacks mypy stubs at the time of writing.
-    import lxml.etree  # type: ignore
+    import lxml.etree  # type: ignore[import]
 except ImportError:
     lxml = None
 

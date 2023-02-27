@@ -12,7 +12,7 @@ import listparser
 try:
     import requests
 except ImportError:
-    requests = None  # type: ignore
+    requests = None
 
 
 empty_doc = '<?xml version="1.0"?><opml />'
