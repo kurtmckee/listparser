@@ -52,7 +52,6 @@ jobs:
               name: "Ubuntu"
             pythons: |
               pypy3.9
-              3.7
               3.8
               3.9
               3.10
@@ -62,9 +61,6 @@ jobs:
               - "py310-http-lxml"
               - "py39-http-lxml"
               - "py38-http-lxml"
-              - "py37-http-lxml"
-              - "py37"
-              - "py37-minimum-dependencies"
               - "pypy39"
 
           # Test lowest and highest versions on Windows.
@@ -72,10 +68,10 @@ jobs:
               id: "windows-latest"
               name: "Windows"
             pythons: |
-              3.7
+              3.8
               3.11
             tox-environments:
-              - "py37"
+              - "py38"
               - "py311"
 
           # Test lowest and highest versions on Mac.
@@ -83,10 +79,10 @@ jobs:
               name: "MacOS"
               id: "macos-latest"
             pythons: |
-              3.7
+              3.8
               3.11
             tox-environments:
-              - "py37"
+              - "py38"
               - "py311"
 
     steps:
