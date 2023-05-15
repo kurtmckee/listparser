@@ -48,8 +48,8 @@ repos:
     rev: v3.4.0
     hooks:
       - id: pyupgrade
-        name: "Enforce Python 3.7 idioms"
-        args: [--py37-plus]
+        name: "Enforce Python 3.8 idioms"
+        args: [--py38-plus]
 
   - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
     rev: 2.7.1
