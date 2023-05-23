@@ -291,8 +291,8 @@ This document and the information contained herein is provided on an "AS IS" bas
 
 
 ..  _1.1: https://web.archive.org/web/20070221092352/http://www.opml.org:80/stories/storyReader$11
-..  _outliner: http://support.opml.org/basicOutlining
+..  _outliner: https://web.archive.org/web/20071017025441/http://support.opml.org/basicOutlining
 ..  _RSS 2.0 category: https://cyber.harvard.edu/rss/rss.html#ltcategorygtSubelementOfLtitemgt
 ..  _specified: https://www.w3.org/TR/REC-xml-names/
 ..  _RFC 822: https://datatracker.ietf.org/doc/html/rfc822#section-5
-..  _example: http://www.scripting.com/stories/2007/08/28/rssexample1.xml
+..  _example: http://scripting.com/stories/2007/08/28/rssexample1.xml
