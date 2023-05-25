@@ -18,13 +18,6 @@ repos:
     hooks:
       - id: black
 
-      # Allow tox to run black as a test.
-      - id: black
-        alias: black-check
-        name: black (check)
-        stages: [manual]
-        args: [--check]
-
   - repo: https://github.com/pycqa/flake8
     rev: 6.0.0
     hooks:
@@ -36,13 +29,6 @@ repos:
     rev: 5.12.0
     hooks:
       - id: isort
-
-      # Allow tox to run isort as a test.
-      - id: isort
-        alias: isort-check
-        name: isort (check)
-        stages: [manual]
-        args: [--check]
 
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.4.0
