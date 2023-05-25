@@ -143,8 +143,8 @@ jobs:
           -e ${{ join(matrix.run.tox-environments, ',') }}
 
 
-  lint:
-    name: "Lint"
+  quality:
+    name: "Quality"
     runs-on: "ubuntu-latest"
     needs: "build"
     steps:
