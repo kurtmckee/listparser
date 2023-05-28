@@ -142,6 +142,57 @@ jobs:
           --installpkg "${{ needs.build.outputs.wheel-filename }}"
           -e ${{ join(matrix.run.tox-environments, ',') }}
 
+      - name: "Upload coverage data files"
+        uses: "actions/upload-artifact@v3"
+        with:
+          name: "coverage-data-files"
+          path: ".coverage.*"
+          retention-days: 1
+
+  coverage:
+    name: "Calculate code coverage"
+    needs: "test"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout branch"
+        uses: "actions/checkout@v3"
+
+      - name: "Setup Pythons"
+        id: "setup-python"
+        uses: "actions/setup-python@v4"
+        with:
+          python-version: "3.11"
+          # Cache packages that pip downloads.
+          # This does not cache the installed files.
+          cache: "pip"
+          cache-dependency-path: |
+            .github/workflows/test.yaml
+            pyproject.toml
+            week-number.txt
+
+      - name: "Restore cache"
+        id: "restore-cache"
+        uses: "actions/cache@v3"
+        with:
+          path: ".venv/"
+          key: "coverage-hash=${{ hashFiles('.github/workflows/test.yaml', 'pyproject.toml', 'week-number.txt') }}"
+
+      - name: "Create a virtual environment"
+        if: "steps.restore-cache.outputs.cache-hit == false"
+        run: |
+          python -m venv .venv
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install coverage[toml]
+
+      - name: "Download coverage data files"
+        uses: "actions/download-artifact@v3"
+        with:
+          name: "coverage-data-files"
+
+      - name: "Calculate coverage"
+        run: |
+          coverage combine
+          coverage report
 
   quality:
     name: "Quality"
