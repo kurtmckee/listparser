@@ -40,6 +40,7 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.coverage.run]
+relative_files = true
 parallel = true
 branch = true
 source = [
@@ -92,3 +93,7 @@ profile = "black"
 packages = "listparser"
 strict = true
 sqlite_cache = true
+
+
+[tool.pytest.ini_options]
+addopts = "--color=yes"
