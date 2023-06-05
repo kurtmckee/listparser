@@ -41,3 +41,10 @@ repos:
     rev: 2.7.1
     hooks:
       - id: editorconfig-checker
+
+  - repo: "https://github.com/python-jsonschema/check-jsonschema"
+    rev: "0.23.1"
+    hooks:
+      - id: "check-dependabot"
+      - id: "check-github-workflows"
+      - id: "check-readthedocs"
