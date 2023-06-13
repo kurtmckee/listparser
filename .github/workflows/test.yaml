@@ -181,8 +181,8 @@ jobs:
         if: "steps.restore-cache.outputs.cache-hit == false"
         run: |
           python -m venv .venv
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install coverage[toml]
+          .venv/bin/python -m pip install --upgrade pip setuptools wheel
+          .venv/bin/python -m pip install coverage[toml]
 
       - name: "Download coverage data files"
         uses: "actions/download-artifact@v3"
@@ -191,8 +191,8 @@ jobs:
 
       - name: "Calculate coverage"
         run: |
-          coverage combine
-          coverage report
+          .venv/bin/coverage combine
+          .venv/bin/coverage report
 
   quality:
     name: "Quality"
