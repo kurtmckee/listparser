@@ -1,0 +1,33 @@
+name: "Dependency updates"
+
+on:
+  workflow_dispatch: null
+
+jobs:
+  update:
+    name: "Dependency updates"
+    runs-on: "windows-latest"
+    defaults:
+      run:
+        shell: "bash"
+    steps:
+      - name: "Checkout branch"
+        uses: "actions/checkout@v3"
+
+      - name: "Setup Python"
+        uses: "actions/setup-python@v4"
+        with:
+          python-version: "3.11"
+
+      - name: "Install dependencies"
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install upadup
+
+      - name: "Update pre-commit hook dependency versions"
+        run: "upadup"
+
+      - name: "Create pull request"
+        uses: "peter-evans/create-pull-request@v5"
+        with:
+          author: "kurtmckee-bot <142126390+kurtmckee-bot@users.noreply.github.com>"
