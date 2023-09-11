@@ -97,3 +97,6 @@ sqlite_cache = true
 
 [tool.pytest.ini_options]
 addopts = "--color=yes"
+filterwarnings = [
+    "error",
+]
