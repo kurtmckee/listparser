@@ -19,7 +19,7 @@ jobs:
 
       - name: "Setup Python"
         id: "setup-python"
-        uses: "actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236" # v4.7.1
+        uses: "actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c" # v5.0.0
         with:
           python-version: "3.11"
           cache: "pip"
@@ -36,7 +36,7 @@ jobs:
         run: 'echo "wheel-filename=$(ls -1 *.whl | head -n 1)" >> $GITHUB_OUTPUT'
 
       - name: "Upload the build artifact"
-        uses: "actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32" # v3.1.3
+        uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
         with:
           name: "listparser-${{ github.sha }}.whl"
           path: "${{ steps.get-filename.outputs.wheel-filename }}"
@@ -101,7 +101,7 @@ jobs:
 
       - name: "Setup Pythons"
         id: "setup-python"
-        uses: "actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236" # v4.7.1
+        uses: "actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c" # v5.0.0
         with:
           python-version: "${{ matrix.run.pythons }}"
           allow-prereleases: true
@@ -116,7 +116,7 @@ jobs:
 
       - name: "Restore cache"
         id: "restore-cache"
-        uses: "actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84" # v3.3.2
+        uses: "actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319" # v4.0.1
         with:
           path: |
             .tox/
@@ -135,7 +135,7 @@ jobs:
           ${{ env.venv-path }}/pip install tox
 
       - name: "Download the build artifact"
-        uses: "actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a" # v3.0.2
+        uses: "actions/download-artifact@87c55149d96e628cc2ef7e6fc2aab372015aec85" # v4.1.3
         with:
           name: "listparser-${{ github.sha }}.whl"
 
@@ -146,7 +146,7 @@ jobs:
           -e ${{ join(matrix.run.tox-environments, ',') }}
 
       - name: "Upload coverage data files"
-        uses: "actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32" # v3.1.3
+        uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
         with:
           name: "coverage-data-files"
           path: ".coverage.*"
@@ -162,7 +162,7 @@ jobs:
 
       - name: "Setup Pythons"
         id: "setup-python"
-        uses: "actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236" # v4.7.1
+        uses: "actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c" # v5.0.0
         with:
           python-version: "3.11"
           # Cache packages that pip downloads.
@@ -175,7 +175,7 @@ jobs:
 
       - name: "Restore cache"
         id: "restore-cache"
-        uses: "actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84" # v3.3.2
+        uses: "actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319" # v4.0.1
         with:
           path: ".venv/"
           key: "coverage-hash=${{ hashFiles('.github/workflows/test.yaml', 'pyproject.toml', 'week-number.txt') }}"
@@ -188,7 +188,7 @@ jobs:
           .venv/bin/python -m pip install coverage[toml]
 
       - name: "Download coverage data files"
-        uses: "actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a" # v3.0.2
+        uses: "actions/download-artifact@87c55149d96e628cc2ef7e6fc2aab372015aec85" # v4.1.3
         with:
           name: "coverage-data-files"
 
@@ -211,7 +211,7 @@ jobs:
 
       - name: "Setup Pythons"
         id: "setup-python"
-        uses: "actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236" # v4.7.1
+        uses: "actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c" # v5.0.0
         with:
           python-version: "3.11"
           # Cache packages that pip downloads.
@@ -225,7 +225,7 @@ jobs:
 
       - name: "Restore cache"
         id: "restore-cache"
-        uses: "actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84" # v3.3.2
+        uses: "actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319" # v4.0.1
         with:
           path: |
             .mypy_cache/
@@ -241,7 +241,7 @@ jobs:
           .venv/bin/pip install tox
 
       - name: "Download the build artifact"
-        uses: "actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a" # v3.0.2
+        uses: "actions/download-artifact@87c55149d96e628cc2ef7e6fc2aab372015aec85" # v4.1.3
         with:
           name: "listparser-${{ github.sha }}.whl"
 
