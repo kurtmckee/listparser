@@ -28,7 +28,8 @@ jobs:
 
       - name: "Identify the wheel filename"
         id: "get-filename"
-        run: 'echo "wheel-filename=$(ls -1 *.whl | head -n 1)" >> $GITHUB_OUTPUT'
+        run: |
+          echo "wheel-filename=$(find listparser-*.whl | head -n 1)" >> "$GITHUB_OUTPUT"
 
       - name: "Upload the build artifact"
         uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
@@ -112,7 +113,8 @@ jobs:
 
       - name: "Identify venv path"
         shell: "bash"
-        run: "echo 'venv-path=${{ runner.os == 'Windows' && '.venv/Scripts' || '.venv/bin' }}' >> $GITHUB_ENV"
+        run: |
+          echo 'venv-path=${{ runner.os == 'Windows' && '.venv/Scripts' || '.venv/bin' }}' >> "$GITHUB_ENV"
 
       - name: "Create a virtual environment"
         if: "steps.restore-cache.outputs.cache-hit == false"
