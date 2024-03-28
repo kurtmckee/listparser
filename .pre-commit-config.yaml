@@ -1,5 +1,8 @@
 ci:
-  autoupdate_schedule: "monthly"
+  autoupdate_schedule: "quarterly"
+
+default_language_version:
+  python: "python3.12"
 
 repos:
   - repo: "meta"
@@ -56,3 +59,13 @@ repos:
       - id: "check-dependabot"
       - id: "check-github-workflows"
       - id: "check-readthedocs"
+
+  - repo: "https://github.com/rhysd/actionlint"
+    rev: "v1.6.27"
+    hooks:
+      - id: "actionlint"
+
+  - repo: "https://github.com/kurtmckee/pre-commit-hooks"
+    rev: "v0.1.1"
+    hooks:
+      - id: "verify-consistent-pyproject-toml-python-requirements"
