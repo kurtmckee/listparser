@@ -21,7 +21,7 @@ listparser has a single public function, :py:func:`~listparser.parse`.
 ..  code-block:: pycon
 
     >>> import listparser
-    >>> result = listparser.parse('https://github.com/kurtmckee/listparser/raw/develop/feeds.opml')
+    >>> result = listparser.parse("https://raw.githubusercontent.com/kurtmckee/listparser/main/feeds.opml")
 
 :py:func:`~listparser.parse` can be given a URL, an open file handle,
 or even an in-memory string.
@@ -54,10 +54,10 @@ The title and the URL are stored in keys of the same names.
 ..  code-block:: pycon
 
     >>> for i in result.feeds:
-    ...     print('{title} <{url}>'.format(**i))
+    ...     print(f"{i.title} <{i.url}>")
     ...
-    listparser blog <https://kurtmckee.org/tag/listparser>
-    listparser changelog <https://github.com/kurtmckee/listparser/commits/develop.atom>
+    listparser blog <https://kurtmckee.org/tag/listparser/feed>
+    listparser changelog <https://github.com/kurtmckee/listparser/commits/main.atom>
 
 
 

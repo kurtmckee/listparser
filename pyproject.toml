@@ -75,7 +75,7 @@ entry_title_template = "{{ version }} - {{ date.strftime('%Y-%m-%d') }}"
 format = "rst"
 fragment_directory = "changelog.d"
 insert_marker = "scriv-insert-here"
-main_branches = ["develop", "master"]
+main_branches = ["main", "releases"]
 new_fragment_template = "file: fragment-template.rst.txt"
 
 
