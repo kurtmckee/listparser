@@ -1,6 +1,7 @@
 [tool.poetry.dependencies]
 python = ">=3.8"
 mypy = "*"
+lxml-stubs = "*"
 types-requests = "*"
 types-toml = "*"
 
