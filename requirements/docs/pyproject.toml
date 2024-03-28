@@ -1,0 +1,10 @@
+[tool.poetry.dependencies]
+python = ">=3.8"
+sphinx = "*"
+
+
+[tool.poetry]
+name = ""
+version = "0"
+description = ""
+authors = []

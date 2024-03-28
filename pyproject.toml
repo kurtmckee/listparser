@@ -27,12 +27,6 @@ http = ["requests"]
 lxml = ["lxml"]
 
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.2.0"
-scriv = {extras = ["toml"], version = "^1.0.0"}
-tox = "^4.3.5"
-
-
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
