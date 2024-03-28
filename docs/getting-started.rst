@@ -53,8 +53,8 @@ The title and the URL are stored in keys of the same names.
 
 ..  code-block:: pycon
 
-    >>> for i in result.feeds:
-    ...     print(f"{i.title} <{i.url}>")
+    >>> for feed in result.feeds:
+    ...     print(f"{feed.title} <{feed.url}>")
     ...
     listparser blog <https://kurtmckee.org/tag/listparser/feed>
     listparser changelog <https://github.com/kurtmckee/listparser/commits/main.atom>
