@@ -1,0 +1,12 @@
+[tool.poetry.dependencies]
+python = ">=3.8"
+coverage = {extras = ["toml"], version = "*"}
+pytest = "*"
+pytest-randomly = "*"
+
+
+[tool.poetry]
+name = ""
+version = "0"
+description = ""
+authors = []

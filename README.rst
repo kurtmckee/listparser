@@ -96,7 +96,7 @@ To set up a development environment, follow these steps at a command line:
 
     # Install dependencies.
     python -m pip install -U pip setuptools wheel
-    python -m pip install poetry pre-commit
+    python -m pip install poetry pre-commit tox scriv
     poetry install --all-extras
 
     # Enable pre-commit.

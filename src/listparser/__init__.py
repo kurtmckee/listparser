@@ -17,7 +17,7 @@ except ImportError:
 
 try:
     # lxml lacks mypy stubs at the time of writing.
-    import lxml.etree  # type: ignore[import]
+    import lxml.etree  # type: ignore[import-untyped]
 except ImportError:
     lxml = None
 
