@@ -16,10 +16,9 @@ except ImportError:
     urllib3 = None  # type: ignore[assignment]
 
 try:
-    # lxml lacks mypy stubs at the time of writing.
-    import lxml.etree  # type: ignore[import-untyped]
+    import lxml.etree
 except ImportError:
-    lxml = None
+    lxml = None  # type: ignore[assignment]
 
 from . import common, foaf, igoogle, opml, xml_handler
 from .exceptions import ListparserError
