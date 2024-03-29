@@ -20,6 +20,50 @@ Please see the fragment files in the `changelog.d directory`_.
 
 ..  scriv-insert-here
 
+.. _changelog-0.20:
+
+0.20 - 2024-03-29
+=================
+
+Python support
+--------------
+
+*   Support Python 3.11 and 3.12.
+*   Drop support for Python 3.7.
+
+Added
+-----
+
+*   Add a ``py.typed`` file so mypy can lint listparser use in dependent applications.
+*   Support lxml v5.0.0 while maintaining support for v4.6.2.
+
+Changed
+-------
+
+*   Support malformed XML documents by using lxml's HTML parsers.
+
+Fixed
+-----
+
+*   Fix the feed URL to the blog entries about listparser.
+
+Documentation
+-------------
+
+*   Add the OPML 1.0 and OPML 2.0 specifications to the listparser documentation for posterity.
+
+Development
+-----------
+
+*   Randomize the order of listparser's unit tests on each run
+    to help ensure there are no testing interdependencies.
+*   Add black, flake8, and isort as pre-commit hooks.
+*   Add mypy as a tox test environment.
+*   Add pyupgrade as a pre-commit hook and enforce Python 3.8+ syntax.
+*   Python warnings encountered during testing are now escalated to errors.
+*   Move tool dependencies into separate ``requirements.txt`` files.
+*   Add a tox label, ``update``, so it's easy to update tool dependencies.
+
 .. _changelog-0.19:
 
 0.19 - 2022-06-04
