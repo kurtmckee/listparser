@@ -20,7 +20,7 @@ Usage
 ..  code-block:: pycon
 
     >>> import listparser
-    >>> result = listparser.parse(open('feeds.opml').read())
+    >>> result = listparser.parse(open("feeds.opml").read())
 
 A dictionary will be returned with several keys:
 

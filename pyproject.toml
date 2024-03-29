@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "listparser"
-version = "0.19"
+version = "0.20"
 description = "Parse OPML subscription lists"
 authors = ["Kurt McKee <contactme@kurtmckee.org>"]
 license = "MIT"
