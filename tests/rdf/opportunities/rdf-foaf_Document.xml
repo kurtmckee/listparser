@@ -13,15 +13,15 @@
     xmlns:rss="http://purl.org/rss/1.0/"
 >
 
-<foaf:Agent> 
+<foaf:Agent>
     <foaf:name>opportunity</foaf:name>
-    <foaf:weblog> 
-        <foaf:Document rdf:about="http://domain/"> 
-            <rdfs:seeAlso> 
-                <rss:channel rdf:about="" /> 
-            </rdfs:seeAlso> 
-        </foaf:Document> 
-    </foaf:weblog> 
-</foaf:Agent> 
+    <foaf:weblog>
+        <foaf:Document rdf:about="http://domain/">
+            <rdfs:seeAlso>
+                <rss:channel rdf:about="" />
+            </rdfs:seeAlso>
+        </foaf:Document>
+    </foaf:weblog>
+</foaf:Agent>
 
-</rdf:RDF> 
+</rdf:RDF>

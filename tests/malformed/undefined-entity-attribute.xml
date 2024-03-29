@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!--
+    Description: Undefined entity reference (attribute node)
+    Eval: result['bozo'] is False
+-->
+<opml version="2.0">
+    <head>
+    </head>
+    <body>
+        <outline type="rss" text="arch&egregiouslyundefined;ology" xmlUrl="http://domain1/feed" />
+    </body>
+</opml>

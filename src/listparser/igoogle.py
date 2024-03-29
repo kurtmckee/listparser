@@ -1,38 +1,41 @@
 # This file is part of listparser.
-# Copyright 2009-2022 Kurt McKee <contactme@kurtmckee.org>
+# Copyright 2009-2024 Kurt McKee <contactme@kurtmckee.org>
 # SPDX-License-Identifier: MIT
 #
 
+from __future__ import annotations
+
 import copy
+import typing as t
 
 from . import common
 
 
-class IgoogleMixin(common.CommonMixin):
-    def start_gtml_GadgetTabML(self, _):
-        self.harvest['version'] = 'igoogle'
+class IgoogleMixin(common.Common):
+    def start_gtml_gadgettabml(self, _: t.Any) -> None:
+        self.harvest["version"] = "igoogle"
 
-    def start_gtml_Tab(self, attrs):
-        if attrs.get('title', '').strip():
-            self.hierarchy.append(attrs['title'].strip())
+    def start_gtml_tab(self, attrs: dict[str, str]) -> None:
+        if attrs.get("title", "").strip():
+            self.hierarchy.append(attrs["title"].strip())
 
-    def end_gtml_Tab(self):
+    def end_gtml_tab(self) -> None:
         if self.hierarchy:
             self.hierarchy.pop()
 
-    def start_iGoogle_Module(self, attrs):
-        if attrs.get('type', '').strip().lower() == 'rss':
+    def start_igoogle_module(self, attrs: dict[str, str]) -> None:
+        if attrs.get("type", "").strip().lower() == "rss":
             self.flag_feed = True
 
-    def end_iGoogle_Module(self):
+    def end_igoogle_module(self) -> None:
         self.flag_feed = False
 
-    def start_iGoogle_ModulePrefs(self, attrs):
-        if self.flag_feed and attrs.get('xmlUrl', '').strip():
-            obj = common.SuperDict({'url': attrs['xmlUrl'].strip()})
-            obj['title'] = ''
+    def start_igoogle_moduleprefs(self, attrs: dict[str, str]) -> None:
+        if self.flag_feed and attrs.get("xmlurl", "").strip():
+            obj = common.SuperDict({"url": attrs["xmlurl"].strip()})
+            obj["title"] = ""
             if self.hierarchy:
-                obj['categories'] = [copy.copy(self.hierarchy)]
+                obj["categories"] = [copy.copy(self.hierarchy)]
             if len(self.hierarchy) == 1:
-                obj['tags'] = copy.copy(self.hierarchy)
-            self.harvest['feeds'].append(obj)
+                obj["tags"] = copy.copy(self.hierarchy)
+            self.harvest["feeds"].append(obj)

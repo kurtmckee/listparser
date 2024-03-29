@@ -8,8 +8,8 @@
     </head>
     <body>
         <outline type="rss" text="listparser blog"
-            xmlUrl="https://kurtmckee.org/tag/listparser" />
+            xmlUrl="https://kurtmckee.org/tag/listparser/feed" />
         <outline type="rss" text="listparser changelog"
-            xmlUrl="https://github.com/kurtmckee/listparser/commits/develop.atom" />
+            xmlUrl="https://github.com/kurtmckee/listparser/commits/main.atom" />
     </body>
 </opml>

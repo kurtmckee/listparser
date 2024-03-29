@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+    Description: Test concatenated documents
+    Eval: result['bozo'] == 0
+    Eval: result['feeds'][0]['title'] == result['feeds'][1]['title']
+-->
+<!-- The xmlns attribute is necessary here -->
+<opml version="2.0" xmlns="http://opml.org/spec2">
+    <head></head>
+    <body>
+        <outline text="feedname" type="rss" xmlUrl="http://domain/feed1" />
+    </body>
+</opml>
+
+<!--
+    Re-opening the opml element without a namespace
+    triggers a specific condition in listparser's URI-and-prefix code.
+-->
+<opml version="2.0">
+    <head></head>
+    <body>
+        <outline text="feedname" type="rss" xmlUrl="http://domain/feed2" />
+    </body>
+</opml>

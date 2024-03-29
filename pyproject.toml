@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "listparser"
-version = "0.19"
+version = "0.20"
 description = "Parse OPML subscription lists"
 authors = ["Kurt McKee <contactme@kurtmckee.org>"]
 license = "MIT"
 readme = "README.rst"
 repository = "https://github.com/kurtmckee/listparser/"
-documentation = "https://listparser.readthedocs.io/en/stable/"
+documentation = "https://listparser.readthedocs.io/en/latest/"
 keywords = ["opml", "foaf", "igoogle", "feed"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -14,21 +14,17 @@ classifiers = [
     "Topic :: Text Processing :: Markup :: XML",
 ]
 
+
 [tool.poetry.dependencies]
-python = "^3.7"
+python = ">=3.8"
+# The dependencies here must match the minimums tested in `tox.ini`.
 requests = {version = "^2.25.1", optional = true}
-lxml = {version = "^4.6.2", optional = true}
+lxml = {version = ">=4.6.2,<6.0.0", optional = true}
 
 
 [tool.poetry.extras]
-http = ['requests']
-lxml = ['lxml']
-
-
-[tool.poetry.dev-dependencies]
-tox = "^3.25.0"
-Sphinx = "^5.0.0"
-scriv = "^0.15.0"
+http = ["requests"]
+lxml = ["lxml"]
 
 
 [build-system]
@@ -36,82 +32,65 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 
-[tool.tox]
-legacy_tox_ini = """
-
-[tox]
-envlist =
-    coverage_erase
-    py{310, 39, 38, 37}{-requests,}{-lxml,}, pypy3{-requests,}
-    coverage_report
-    flake8
-    docs
-
-skip_missing_interpreters = True
-isolated_build = True
-
-[testenv]
-deps =
-    lxml: lxml
-    requests: requests
-    pytest
-    pytest-cov
-
-commands =
-    {envpython} -m pytest --cov=listparser --cov=tests --cov-append
-
-[testenv:flake8]
-skipsdist = true
-skip_install = true
-deps =
-    flake8
-
-commands =
-    {envpython} -m flake8 src tests docs
-
-[testenv:docs]
-skipsdist = true
-skip_install = true
-deps =
-    lxml
-    sphinx
-    toml
-
-commands =
-    {envpython} -m sphinx -aWEqb html docs/ build/trash
-
-[testenv:coverage_erase]
-skipsdist = true
-skip_install = true
-deps = coverage[toml]
-commands = coverage erase
-
-[testenv:coverage_report]
-skipsdist = true
-skip_install = true
-deps = coverage[toml]
-commands = coverage html -d htmlcov
-
-"""
-
 
 [tool.coverage.run]
+relative_files = true
+parallel = true
 branch = true
+source = [
+    "listparser",
+    "tests",
+]
 
 
 [tool.coverage.paths]
 source = [
     "src",
-    ".tox/*/site-packages",
+    "*/site-packages",
 ]
+
+
+[tool.coverage.report]
+skip_covered = true
+fail_under = 100
+
+
+[tool.coverage.html]
+directory = "htmlcov/"
+skip_covered = false
 
 
 [tool.scriv]
 version = "literal: pyproject.toml: tool.poetry.version"
-categories = ["Added", "Fixed", "Removed", "Changed", "Deprecated", "Security"]
+categories = [
+    "Python support",
+    "Added",
+    "Fixed",
+    "Removed",
+    "Changed",
+    "Deprecated",
+    "Security",
+]
 entry_title_template = "{{ version }} - {{ date.strftime('%Y-%m-%d') }}"
 format = "rst"
 fragment_directory = "changelog.d"
 insert_marker = "scriv-insert-here"
-main_branches = ["develop", "master"]
+main_branches = ["main", "releases"]
 new_fragment_template = "file: fragment-template.rst.txt"
+
+
+[tool.isort]
+profile = "black"
+
+
+[tool.mypy]
+packages = "listparser"
+strict = true
+sqlite_cache = true
+
+
+[tool.pytest.ini_options]
+addopts = "--color=yes"
+filterwarnings = [
+    "error",
+]

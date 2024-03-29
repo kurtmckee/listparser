@@ -1,0 +1,230 @@
+name: "Test"
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "main"
+      - "releases"
+
+jobs:
+  build:
+    name: "Build wheel"
+    runs-on: "ubuntu-latest"
+    outputs:
+      wheel-filename: "${{ steps.get-filename.outputs.wheel-filename }}"
+    steps:
+      - name: "Checkout branch"
+        uses: "actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11" # v4.1.1
+
+      - name: "Setup Python"
+        id: "setup-python"
+        uses: "actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c" # v5.0.0
+        with:
+          python-version: "3.12"
+
+      - name: "Build the project"
+        run: "pip wheel ."
+
+      - name: "Identify the wheel filename"
+        id: "get-filename"
+        run: |
+          echo "wheel-filename=$(find listparser-*.whl | head -n 1)" >> "$GITHUB_OUTPUT"
+
+      - name: "Upload the build artifact"
+        uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
+        with:
+          name: "listparser-${{ github.sha }}.whl"
+          path: "${{ steps.get-filename.outputs.wheel-filename }}"
+          retention-days: 1
+
+  test:
+    name: "Test on ${{ matrix.run.os.name }}"
+    runs-on: "${{ matrix.run.os.id }}"
+    needs: "build"
+
+    strategy:
+      matrix:
+        run:
+          - os:
+              id: "ubuntu-latest"
+              name: "Ubuntu"
+            pythons: |
+              pypy3.9
+              3.8
+              3.9
+              3.10
+              3.11
+              3.12
+            tox-environments:
+              - "py312-http-lxml"
+              - "py311-http-lxml"
+              - "py310-http-lxml"
+              - "py39-http-lxml"
+              - "py38-http-lxml"
+              - "pypy39"
+
+          # Test lowest and highest versions on Windows.
+          - os:
+              id: "windows-latest"
+              name: "Windows"
+            pythons: |
+              3.8
+              3.11
+            tox-environments:
+              - "py38"
+              - "py311"
+
+          # Test lowest and highest versions on Mac.
+          - os:
+              name: "MacOS"
+              id: "macos-latest"
+            pythons: |
+              3.8
+              3.11
+            tox-environments:
+              - "py38"
+              - "py311"
+
+    steps:
+      # The week number is used for cache-busting.
+      - name: "Identify week number"
+        shell: "bash"
+        run: "date +'%V' > week-number.txt"
+
+      - name: "Checkout branch"
+        uses: "actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11" # v4.1.1
+
+      - name: "Setup Pythons"
+        id: "setup-python"
+        uses: "actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c" # v5.0.0
+        with:
+          python-version: "${{ matrix.run.pythons }}"
+          allow-prereleases: true
+
+      - name: "Restore cache"
+        id: "restore-cache"
+        uses: "actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319" # v4.0.1
+        with:
+          path: |
+            .tox/
+            .venv/
+          key: "test-os=${{ matrix.run.os.id }}-hash=${{ hashFiles('.github/workflows/test.yaml', 'pyproject.toml', 'tox.ini', 'week-number.txt', 'requirements/*/*.txt') }}"
+
+      - name: "Identify venv path"
+        shell: "bash"
+        run: |
+          echo 'venv-path=${{ runner.os == 'Windows' && '.venv/Scripts' || '.venv/bin' }}' >> "$GITHUB_ENV"
+
+      - name: "Create a virtual environment"
+        if: "steps.restore-cache.outputs.cache-hit == false"
+        run: |
+          python -m venv .venv
+          ${{ env.venv-path }}/python -m pip install --upgrade pip setuptools wheel
+          ${{ env.venv-path }}/pip install tox
+
+      - name: "Download the build artifact"
+        uses: "actions/download-artifact@87c55149d96e628cc2ef7e6fc2aab372015aec85" # v4.1.3
+        with:
+          name: "listparser-${{ github.sha }}.whl"
+
+      - name: "Test"
+        run: >
+          ${{ env.venv-path }}/tox run
+          --installpkg "${{ needs.build.outputs.wheel-filename }}"
+          -e ${{ join(matrix.run.tox-environments, ',') }}
+
+      - name: "Upload coverage data files"
+        uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
+        with:
+          name: "coverage-data-files-${{ matrix.run.os.id }}"
+          path: ".coverage.*"
+          retention-days: 1
+
+  coverage:
+    name: "Calculate code coverage"
+    needs: "test"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout branch"
+        uses: "actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11" # v4.1.1
+
+      - name: "Setup Pythons"
+        id: "setup-python"
+        uses: "actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c" # v5.0.0
+        with:
+          python-version: "3.12"
+
+      - name: "Restore cache"
+        id: "restore-cache"
+        uses: "actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319" # v4.0.1
+        with:
+          path: ".venv/"
+          key: "coverage-hash=${{ hashFiles('.github/workflows/test.yaml', 'pyproject.toml', 'week-number.txt', 'requirements/*/*.txt') }}"
+
+      - name: "Create a virtual environment"
+        if: "steps.restore-cache.outputs.cache-hit == false"
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip setuptools wheel
+          .venv/bin/python -m pip install coverage[toml]
+
+      - name: "Download coverage data files"
+        uses: "actions/download-artifact@87c55149d96e628cc2ef7e6fc2aab372015aec85" # v4.1.3
+        with:
+          pattern: "coverage-data-files-*"
+          merge-multiple: true
+
+      - name: "Calculate coverage"
+        run: |
+          .venv/bin/coverage combine
+          .venv/bin/coverage report
+
+  quality:
+    name: "Quality"
+    runs-on: "ubuntu-latest"
+    needs: "build"
+    steps:
+      # The week number is used for cache-busting.
+      - name: "Identify week number"
+        run: "date +'%V' > week-number.txt"
+
+      - name: "Checkout branch"
+        uses: "actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11" # v4.1.1
+
+      - name: "Setup Pythons"
+        id: "setup-python"
+        uses: "actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c" # v5.0.0
+        with:
+          python-version: "3.12"
+
+      - name: "Restore cache"
+        id: "restore-cache"
+        uses: "actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319" # v4.0.1
+        with:
+          path: |
+            .mypy_cache/
+            .tox/
+            .venv/
+          key: "lint-hash=${{ hashFiles('.github/workflows/test.yaml', 'pyproject.toml', 'tox.ini', 'week-number.txt', 'requirements/*/*.txt') }}"
+
+      - name: "Create a virtual environment"
+        if: "steps.restore-cache.outputs.cache-hit == false"
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip setuptools wheel
+          .venv/bin/pip install tox
+
+      - name: "Download the build artifact"
+        uses: "actions/download-artifact@87c55149d96e628cc2ef7e6fc2aab372015aec85" # v4.1.3
+        with:
+          name: "listparser-${{ github.sha }}.whl"
+
+      - name: "Lint type annotations"
+        run: >
+          .venv/bin/tox run
+          --installpkg "${{ needs.build.outputs.wheel-filename }}"
+          -e mypy
+
+      - name: "Lint documentation"
+        run: ".venv/bin/tox run -e docs"

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!--
+    Description: Test a missing end element
+    Eval: result["bozo"] is False
+    Eval: result["feeds"][0]["title"] == "malformed"
+    Eval: result["feeds"][0]["url"] == "https://domain/feed"
+-->
+<opml version="2.0">
+    <body>
+        <outline text="malformed" type="rss" xmlUrl="https://domain/feed" />
+    </body>

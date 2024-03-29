@@ -1,53 +1,51 @@
 # This file is part of listparser.
-# Copyright 2009-2022 Kurt McKee <contactme@kurtmckee.org>
+# Copyright 2009-2024 Kurt McKee <contactme@kurtmckee.org>
 # SPDX-License-Identifier: MIT
 #
 
+from __future__ import annotations
+
 import datetime
-from typing import Dict, Optional
 
-
-months: Dict[str, int] = {
-    'jan': 1,
-    'feb': 2,
-    'mar': 3,
-    'apr': 4,
-    'may': 5,
-    'jun': 6,
-    'jul': 7,
-    'aug': 8,
-    'sep': 9,
-    'oct': 10,
-    'nov': 11,
-    'dec': 12,
+months: dict[str, int] = {
+    "jan": 1,
+    "feb": 2,
+    "mar": 3,
+    "apr": 4,
+    "may": 5,
+    "jun": 6,
+    "jul": 7,
+    "aug": 8,
+    "sep": 9,
+    "oct": 10,
+    "nov": 11,
+    "dec": 12,
 }
 
-timezones: Dict[str, int] = {
+timezones: dict[str, int] = {
     # Universal Time
-    'ut': 0,
-    'utc': 0,
-    'gmt': 0,
-
+    "ut": 0,
+    "utc": 0,
+    "gmt": 0,
     # North America
-    'est': -5,
-    'edt': -4,
-    'cst': -6,
-    'cdt': -5,
-    'mst': -7,
-    'mdt': -6,
-    'pst': -8,
-    'pdt': -7,
-
+    "est": -5,
+    "edt": -4,
+    "cst": -6,
+    "cdt": -5,
+    "mst": -7,
+    "mdt": -6,
+    "pst": -8,
+    "pdt": -7,
     # Military
-    'z': 0,
-    'a': -1,
-    'n': +1,
-    'm': -12,
-    'y': +12,
+    "z": 0,
+    "a": -1,
+    "n": +1,
+    "m": -12,
+    "y": +12,
 }
 
 
-def parse_rfc822(date: str) -> Optional[datetime.datetime]:
+def parse_rfc822(date: str) -> datetime.datetime | None:
     """Parse RFC 822 dates and times.
 
     https://tools.ietf.org/html/rfc822#section-5
@@ -74,13 +72,13 @@ def parse_rfc822(date: str) -> Optional[datetime.datetime]:
 
     """
 
-    parts = date.rpartition(',')[2].lower().split()
+    parts = date.rpartition(",")[2].lower().split()
     if len(parts) == 3:
         # Assume that the time is missing.
-        parts.append('00:00:00')
+        parts.append("00:00:00")
     if len(parts) == 4:
         # Assume that the timezone is missing.
-        parts.append('gmt')
+        parts.append("gmt")
     elif len(parts) != 5:
         # If there are not exactly five parts then this isn't an
         # RFC 822 date and time.
@@ -121,8 +119,8 @@ def parse_rfc822(date: str) -> Optional[datetime.datetime]:
             year += 2000
 
     # Parse the time.
-    time_parts = parts[3].split(':')
-    time_parts += ['0'] * (3 - len(time_parts))
+    time_parts = parts[3].split(":")
+    time_parts += ["0"] * (3 - len(time_parts))
     try:
         hour, minute, second = map(int, time_parts)
     except ValueError:
@@ -132,21 +130,21 @@ def parse_rfc822(date: str) -> Optional[datetime.datetime]:
     tz_min = 0
     # Strip 'Etc/' from the timezone name.
     timezone = parts[4]
-    if timezone.startswith('etc/'):
-        timezone = timezone[4:] or 'gmt'
+    if timezone.startswith("etc/"):
+        timezone = timezone[4:] or "gmt"
     # Normalize timezones that start with 'gmt':
     #
     # * gmt-05:00 => -05:00
     # * gmt => gmt
     #
-    if timezone.startswith('gmt'):
-        timezone = timezone[3:] or 'gmt'
+    if timezone.startswith("gmt"):
+        timezone = timezone[3:] or "gmt"
     tz_hour = timezones.get(timezone)
 
     # Parse numeric timezones like '-0500' and '+0500'.
     if tz_hour is None:
         try:
-            tz_left, tz_right = timezone.split(':')
+            tz_left, tz_right = timezone.split(":")
             tz_hour = int(tz_left)
             tz_min = int(tz_right)
         except ValueError:
@@ -162,8 +160,12 @@ def parse_rfc822(date: str) -> Optional[datetime.datetime]:
     # Create the datetime and timezone offset return values.
     try:
         return datetime.datetime(
-            year, month, day,
-            hour, minute, second,
+            year,
+            month,
+            day,
+            hour,
+            minute,
+            second,
             tzinfo=datetime.timezone(
                 datetime.timedelta(minutes=(tz_hour * 60) + tz_min)
             ),

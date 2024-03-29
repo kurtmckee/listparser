@@ -7,8 +7,7 @@ build
 listparser.egg-info/
 .cache
 htmlcov/
-.coverage
-venv/
+.coverage*
 .idea/
 .venv/
-poetry.lock
+/poetry.lock
