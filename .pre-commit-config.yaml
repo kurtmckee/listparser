@@ -23,7 +23,7 @@ repos:
       - id: "trailing-whitespace"
 
   - repo: "https://github.com/asottile/pyupgrade"
-    rev: "v3.15.2"
+    rev: "v3.16.0"
     hooks:
       - id: "pyupgrade"
         name: "Enforce Python 3.8+ idioms"
@@ -41,7 +41,7 @@ repos:
       - id: "isort"
 
   - repo: "https://github.com/pycqa/flake8"
-    rev: "7.0.0"
+    rev: "7.1.0"
     hooks:
       - id: "flake8"
         additional_dependencies:
@@ -53,14 +53,14 @@ repos:
       - id: "editorconfig-checker"
 
   - repo: "https://github.com/python-jsonschema/check-jsonschema"
-    rev: "0.28.3"
+    rev: "0.28.6"
     hooks:
       - id: "check-dependabot"
       - id: "check-github-workflows"
       - id: "check-readthedocs"
 
   - repo: "https://github.com/rhysd/actionlint"
-    rev: "v1.7.0"
+    rev: "v1.7.1"
     hooks:
       - id: "actionlint"
 
