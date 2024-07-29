@@ -23,7 +23,7 @@ repos:
       - id: "trailing-whitespace"
 
   - repo: "https://github.com/asottile/pyupgrade"
-    rev: "v3.16.0"
+    rev: "v3.17.0"
     hooks:
       - id: "pyupgrade"
         name: "Enforce Python 3.8+ idioms"
@@ -53,7 +53,7 @@ repos:
       - id: "editorconfig-checker"
 
   - repo: "https://github.com/python-jsonschema/check-jsonschema"
-    rev: "0.28.6"
+    rev: "0.29.1"
     hooks:
       - id: "check-dependabot"
       - id: "check-github-workflows"
