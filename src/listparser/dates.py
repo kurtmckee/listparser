@@ -94,8 +94,7 @@ def parse_rfc822(date: str) -> datetime.datetime | None:
                 day = int(parts[1])
             except ValueError:
                 return None
-            else:
-                parts[1] = parts[0]
+            parts[1] = parts[0]
         else:
             return None
     month = months.get(parts[1][:3])
