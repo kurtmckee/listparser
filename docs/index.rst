@@ -1,5 +1,11 @@
-listparser - Parse subscription lists in Python
-===============================================
+..  rst-class:: visually-hidden
+
+listparser - Parse OPML subscription lists in Python
+====================================================
+
+..  image:: _static/banner.png
+    :alt: The listparser logo
+
 
 If you're building a feed reader and you need to import OPML subscription lists,
 you've come to the right place!
@@ -54,3 +60,13 @@ Specifications
 
     specifications/opml-1.0
     specifications/opml-2.0
+
+
+License and Colophon
+--------------------
+
+..  toctree::
+    :maxdepth: 1
+
+    license
+    colophon

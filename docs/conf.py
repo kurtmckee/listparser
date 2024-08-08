@@ -48,3 +48,32 @@ pygments_style = "sphinx"
 # ------------------------
 
 html_theme = "alabaster"
+html_static_path = [
+    "_static",
+]
+html_theme_options = {
+    "logo": "logo.png",
+    "logo_name": True,
+    "description": "Parse OPML subscription lists in Python.",
+    # Link to GitHub
+    "github_user": "kurtmckee",
+    "github_repo": "listparser",
+    "github_button": True,
+    "github_type": "star",
+    "github_count": False,
+    # Don't show "Powered by" text.
+    "show_powered_by": False,
+}
+templates_path = ["_templates"]
+html_sidebars = {
+    "index": [
+        "about-no-logo.html",  # Don't show a logo on the front page.
+        "searchfield.html",
+        "navigation.html",
+        "relations.html",
+        "donate.html",
+    ]
+}
+
+# Don't copy source .rst files into the built documentation.
+html_copy_source = False

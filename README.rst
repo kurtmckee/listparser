@@ -1,7 +1,5 @@
-listparser
-==========
-
-*Parse OPML subscription lists in Python.*
+..  image:: docs/_static/banner.png
+    :alt: listparser: Parse OPML subscription lists in Python.
 
 -------------------------------------------------------------------------------
 
