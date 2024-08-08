@@ -8,7 +8,7 @@ you've come to the right place!
 
 listparser makes it easy to parse and use subscription lists in multiple formats.
 It supports OPML, RDF+FOAF, and the iGoogle exported settings format,
-and runs on Python 3.8+ and on PyPy 3.8.
+and runs on Python 3.9+ and on PyPy 3.9+.
 
 
 
