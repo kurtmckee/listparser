@@ -18,9 +18,6 @@ sys.path.append(os.path.abspath("../src"))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ["sphinx.ext.autodoc"]
 
-# The suffix of source filenames.
-source_suffix = ".rst"
-
 # The master toctree document.
 master_doc = "index"
 
