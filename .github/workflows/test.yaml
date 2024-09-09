@@ -1,4 +1,4 @@
-name: "🔬 Test"
+name: "🧪 Test"
 
 on:
   pull_request:
@@ -21,13 +21,11 @@ jobs:
           - "macOS"
           - "Windows"
           - "Quality"
-        cache:
-          - key:
-              hash-files:
-                - "pyproject.toml"
-                - "requirements/*/*.txt"
-            paths:
-              - ".mypy_cache/"
+        cache-key-hash-files:
+          - - "pyproject.toml"
+            - "requirements/*/*.txt"
+        cache-paths:
+          - - ".mypy_cache/"
 
         include:
           # Test extensively on Linux.
@@ -42,11 +40,10 @@ jobs:
             pypys:
               - "3.9"
               - "3.10"
-            tox:
-              post-environments:
-                - "py3.9-minimum_dependencies"
-                - "py3.9-http-lxml"
-                - "py3.12-http-lxml"
+            tox-post-environments:
+              - "py3.9-minimum_dependencies"
+              - "py3.9-http-lxml"
+              - "py3.12-http-lxml"
 
           # Test lowest and highest versions on Mac.
           - name: "macOS"
@@ -54,10 +51,9 @@ jobs:
             cpythons:
               - "3.9"
               - "3.12"
-            tox:
-              environments:
-                - "py3.9"
-                - "py3.12"
+            tox-environments:
+              - "py3.9"
+              - "py3.12"
 
           # Test lowest and highest versions on Windows.
           - name: "Windows"
@@ -65,21 +61,20 @@ jobs:
             cpythons:
               - "3.9"
               - "3.12"
-            tox:
-              environments:
-                - "py3.9"
-                - "py3.12"
+            tox-environments:
+              - "py3.9"
+              - "py3.12"
 
           # Check type annotations and documentation.
           - name: "Quality"
             runner: "ubuntu-latest"
             cpythons:
               - "3.12"
-            tox:
-              environments:
-                - "docs"
-                - "mypy"
+            tox-environments:
+              - "docs"
+              - "mypy"
+            cache-key-prefix: "quality"
 
-    uses: "kurtmckee/github-workflows/.github/workflows/tox.yaml@73024397dba10c866931a1d26cc2a0e7d223472f" # v0.2
+    uses: "kurtmckee/github-workflows/.github/workflows/tox.yaml@420931a88d3f09ca8dbce4778d145ed610c231e0" # v0.4
     with:
       config: "${{ toJSON(matrix) }}"
