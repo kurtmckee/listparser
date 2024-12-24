@@ -20,7 +20,6 @@ In this example, there is one tag: ``sports``.
 *   ``/opml/body//outline/@category`` [#noslashes]_
 *   ``/opml/body/outline/outline/parent::outline/@text``
 *   ``/opml/body/outline/outline/parent::outline/@title``
-*   ``/gtml:GadgetTabML//gtml:Tab/@title``
 *   ``/rdf:RDF/foaf:Group/foaf:name``
 *   ``/rdf:RDF//foaf:Agent/foaf:name``
 

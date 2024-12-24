@@ -20,7 +20,7 @@ try:
 except ImportError:
     lxml = None  # type: ignore[assignment]
 
-from . import common, foaf, igoogle, opml, xml_handler
+from . import common, foaf, opml, xml_handler
 from .exceptions import ListparserError
 
 __author__ = "Kurt McKee <contactme@kurtmckee.org>"
@@ -33,7 +33,6 @@ Handler = type(
     (
         opml.OpmlMixin,
         foaf.FoafMixin,
-        igoogle.IgoogleMixin,
         xml_handler.XMLHandler,
     ),
     {},
