@@ -73,7 +73,7 @@ def parse(parse_obj: str | bytes) -> common.SuperDict:
         parser = lxml.etree.HTMLParser(target=handler, recover=True)
         lxml.etree.parse(content_file, parser)
     else:
-        handler.feed(content.decode())
+        handler.feed(content.decode())  # type: ignore[unreachable]
 
     harvest = common.SuperDict(handler.harvest)
     handler.close()
@@ -87,7 +87,9 @@ def get_content(obj: bytes | str) -> tuple[bytes | None, dict[str, t.Any]]:
         return obj, {"bozo": False, "bozo_exception": None}
     if not isinstance(obj, str):
         # Only str and bytes objects can be parsed.
-        error = ListparserError("parse() called with unparsable object")
+        message = "parse() called with unparsable object"  # type: ignore[unreachable]
+        error = ListparserError(message)
+
         return None, {"bozo": True, "bozo_exception": error}
     if not obj.startswith(("http://", "https://")):
         # It's not a URL, so it must be treated as an XML document.
@@ -98,7 +100,9 @@ def get_content(obj: bytes | str) -> tuple[bytes | None, dict[str, t.Any]]:
 
     # It's a URL. Confirm requests is installed.
     if requests is None:
-        message = f"requests is not installed so {obj} cannot be retrieved"
+        message = (  # type: ignore[unreachable]
+            f"requests is not installed so {obj} cannot be retrieved"
+        )
         return None, {
             "bozo": True,
             "bozo_exception": ListparserError(message),

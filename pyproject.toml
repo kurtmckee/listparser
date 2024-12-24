@@ -74,6 +74,12 @@ profile = "black"
 packages = "listparser"
 strict = true
 sqlite_cache = true
+warn_unreachable = true
+enable_error_code = [
+    "ignore-without-code",
+    "redundant-expr",
+    "truthy-bool",
+]
 
 
 # pytest
