@@ -3,9 +3,8 @@ Feed and subscription list detection algorithm
 
 ..  note::
 
-    Neither RDF+FOAF nor the iGoogle exported settings formats support
-    embedded subscription lists. This detection algorithm only applies
-    to OPML subscription lists.
+    RDF+FOAF does not support embedded subscription lists.
+    This detection algorithm only applies to OPML subscription lists.
 
 Many services and softwares output OPML subscription lists with slight
 variations. listparser attempts to correctly determine whether an

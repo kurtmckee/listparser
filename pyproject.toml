@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.rst"
 repository = "https://github.com/kurtmckee/listparser/"
 documentation = "https://listparser.readthedocs.io/en/latest/"
-keywords = ["opml", "foaf", "igoogle", "feed"]
+keywords = ["opml", "foaf", "feed"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",

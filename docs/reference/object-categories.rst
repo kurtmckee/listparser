@@ -27,7 +27,6 @@ the ``opml:outline`` element as a source of categorization information.
 *   ``/opml/body//outline/@category`` [#slashes]_
 *   ``/opml/body//outline/ancestor::outline/@text``
 *   ``/opml/body//outline/ancestor::outline/@title``
-*   ``/gtml:GadgetTabML//gtml:Tab/@title``
 *   ``/rdf:RDF/foaf:Group/foaf:name``
 *   ``/rdf:RDF//foaf:Agent/foaf:name``
 

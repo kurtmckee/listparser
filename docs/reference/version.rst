@@ -19,9 +19,6 @@ opml
 rdf
     `RDF+FOAF <http://xmlns.com/foaf/spec/>`_
 
-igoogle
-    iGoogle exported settings format [#igoogle]_
-
 
 ..  rubric:: Footnotes
 
@@ -34,5 +31,3 @@ igoogle
     and included this message:
 
         [If] you see an OPML 1.1 file, you should treat it like an OPML 1.0 file. That's it. Enjoy!
-
-..  [#igoogle] `How to export your iGoogle page settings <https://googlesystem.blogspot.com/2008/04/backup-your-igoogle-page.html>`_

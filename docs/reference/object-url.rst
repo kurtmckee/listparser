@@ -10,7 +10,6 @@ to indicate what format the target feed is presented in.
 ..  rubric:: Feed URLs come from
 
 *   ``/opml/body//outline/@xmlUrl``
-*   ``/gtml:GadgetTabML//iGoogle:Module[@type="RSS"]/iGoogle:ModulePrefs/@xmlUrl``
 *   ``/rdf:RDF//foaf:Agent//rss:channel/@rdf:about``
 *   ``/rdf:RDF//ya:feed/@rdf:resource``
 
