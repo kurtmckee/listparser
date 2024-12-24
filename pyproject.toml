@@ -1,3 +1,11 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+# poetry
+# ------
+
 [tool.poetry]
 name = "listparser"
 version = "0.20"
@@ -14,24 +22,19 @@ classifiers = [
     "Topic :: Text Processing :: Markup :: XML",
 ]
 
-
 [tool.poetry.dependencies]
 python = ">=3.9"
 # The dependencies here must match the minimums tested in `tox.ini`.
 requests = {version = ">=2.32.0,<3", optional = true}
 lxml = {version = ">=4.6.2,<6", optional = true}
 
-
 [tool.poetry.extras]
 http = ["requests"]
 lxml = ["lxml"]
 
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-
+# coverage
+# --------
 
 [tool.coverage.run]
 relative_files = true
@@ -42,23 +45,55 @@ source = [
     "tests",
 ]
 
-
 [tool.coverage.paths]
 source = [
     "src",
     "*/site-packages",
 ]
 
-
 [tool.coverage.report]
 skip_covered = true
 fail_under = 100
-
 
 [tool.coverage.html]
 directory = "htmlcov/"
 skip_covered = false
 
+
+# isort
+# -----
+
+[tool.isort]
+profile = "black"
+
+
+# mypy
+# ----
+
+[tool.mypy]
+packages = "listparser"
+strict = true
+sqlite_cache = true
+warn_unreachable = true
+enable_error_code = [
+    "ignore-without-code",
+    "redundant-expr",
+    "truthy-bool",
+]
+
+
+# pytest
+# ------
+
+[tool.pytest.ini_options]
+addopts = "--color=yes"
+filterwarnings = [
+    "error",
+]
+
+
+# scriv
+# -----
 
 [tool.scriv]
 version = "literal: pyproject.toml: tool.poetry.version"
@@ -78,20 +113,3 @@ fragment_directory = "changelog.d"
 insert_marker = "scriv-insert-here"
 main_branches = ["main", "releases"]
 new_fragment_template = "file: fragment-template.rst.txt"
-
-
-[tool.isort]
-profile = "black"
-
-
-[tool.mypy]
-packages = "listparser"
-strict = true
-sqlite_cache = true
-
-
-[tool.pytest.ini_options]
-addopts = "--color=yes"
-filterwarnings = [
-    "error",
-]
