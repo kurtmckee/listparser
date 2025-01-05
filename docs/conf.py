@@ -23,7 +23,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "listparser"
-copyright = "2009-2024 Kurt McKee"
+copyright = "2009-2025 Kurt McKee"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -31,7 +31,7 @@ copyright = "2009-2024 Kurt McKee"
 #
 pyproject = pathlib.Path(__file__).parent.parent / "pyproject.toml"
 info = tomllib.loads(pyproject.read_text())
-version = release = info["tool"]["poetry"]["version"]
+version = release = info["project"]["version"]
 
 # List of directories, relative to source directory, that shouldn't be searched
 # for source files.
