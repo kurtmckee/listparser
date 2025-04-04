@@ -2,7 +2,7 @@ ci:
   autoupdate_schedule: "quarterly"
 
 default_language_version:
-  python: "python3.12"
+  python: "python3.13"
 
 repos:
   - repo: "meta"
@@ -31,29 +31,29 @@ repos:
           - "--py39-plus"
 
   - repo: "https://github.com/psf/black-pre-commit-mirror"
-    rev: "24.10.0"
+    rev: "25.1.0"
     hooks:
       - id: "black"
 
   - repo: "https://github.com/pycqa/isort"
-    rev: "6.0.0"
+    rev: "6.0.1"
     hooks:
       - id: "isort"
 
   - repo: "https://github.com/pycqa/flake8"
-    rev: "7.1.1"
+    rev: "7.2.0"
     hooks:
       - id: "flake8"
         additional_dependencies:
           - "flake8-bugbear==24.12.12"
 
   - repo: "https://github.com/editorconfig-checker/editorconfig-checker"
-    rev: "v3.2.0"
+    rev: "v3.2.1"
     hooks:
       - id: "editorconfig-checker"
 
   - repo: "https://github.com/python-jsonschema/check-jsonschema"
-    rev: "0.31.0"
+    rev: "0.32.1"
     hooks:
       - id: "check-dependabot"
       - id: "check-github-workflows"
