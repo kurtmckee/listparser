@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Description: OPML with ISO 8601 date in dateCreated
+    Eval: result['bozo'] == 1
+    Eval: result['bozo_exception']['message'] == "dateCreated is not an RFC 822 datetime"
+-->
+<opml version="2.0">
+    <head>
+        <title>ISO 8601 Date Test</title>
+        <dateCreated>2025-04-07T19:52:30.941378073Z</dateCreated>
+    </head>
+    <body>
+        <outline title="Test Feed" xmlUrl="https://example.com/feed" text="Test Feed" type="rss"></outline>
+    </body>
+</opml>

@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import datetime
+import re
 
 months: dict[str, int] = {
     "jan": 1,
@@ -171,3 +172,91 @@ def parse_rfc822(date: str) -> datetime.datetime | None:
         )
     except (ValueError, OverflowError):
         return None
+
+
+def parse_iso8601(date: str) -> datetime.datetime | None:
+    """Parse ISO 8601 dates and times.
+
+    This handles the most common ISO 8601 formats including:
+    - YYYY-MM-DDThh:mm:ss.sssZ
+    - YYYY-MM-DDThh:mm:ss.sss+HH:MM
+    - YYYY-MM-DDThh:mm:ss.sss-HH:MM
+
+    For Python 3.7+ we could use datetime.fromisoformat() for most formats,
+    but using regex gives us more flexibility with variations.
+    """
+    # Main ISO 8601 pattern with optional fractional seconds and timezone
+    iso_pattern = re.compile(
+        r"^(\d{4})-"  # Year
+        r"(\d{2})-"  # Month
+        r"(\d{2})"  # Day
+        r"[T ]"  # T or space separator
+        r"(\d{2}):"  # Hour
+        r"(\d{2}):"  # Minute
+        r"(\d{2})"  # Second
+        r"(?:\.(\d+))?"  # Optional fractional seconds
+        r"(Z|[+-]\d{2}:?\d{2})?"  # Optional timezone (Z or +/-HH:MM)
+        r"$"
+    )
+
+    match = iso_pattern.match(date)
+    if not match:
+        return None
+
+    year, month, day, hour, minute, second, fractional, timezone = match.groups()
+
+    # Convert values to integers
+    year = int(year)
+    month = int(month)
+    day = int(day)
+    hour = int(hour)
+    minute = int(minute)
+    second = int(second)
+
+    # Handle microseconds (if present)
+    microsecond = 0
+    if fractional:
+        # Pad or truncate to 6 digits for microseconds
+        fractional = fractional.ljust(6, "0")[:6]
+        microsecond = int(fractional)
+
+    # Handle timezone
+    tzinfo = None
+    if timezone:
+        if timezone == "Z":
+            tzinfo = datetime.timezone.utc
+        else:
+            # Handle +HH:MM or -HH:MM format
+            sign = 1 if timezone[0] == "+" else -1
+            # Remove sign and any colon
+            timezone = timezone[1:].replace(":", "")
+
+            if len(timezone) == 4:
+                tz_hour = int(timezone[:2])
+                tz_minute = int(timezone[2:])
+                tzinfo = datetime.timezone(
+                    datetime.timedelta(minutes=sign * ((tz_hour * 60) + tz_minute))
+                )
+
+    # Create datetime object
+    try:
+        return datetime.datetime(
+            year, month, day, hour, minute, second, microsecond, tzinfo=tzinfo
+        )
+    except (ValueError, OverflowError):
+        return None
+
+
+def parse_date(date: str) -> datetime.datetime | None:
+    """Parse a date string in either RFC 822 or ISO 8601 format.
+
+    Tries to parse the date as RFC 822 first, then ISO 8601.
+    Returns None if the date cannot be parsed.
+    """
+    # Try RFC 822 first (backward compatibility)
+    timestamp = parse_rfc822(date)
+    if timestamp:
+        return timestamp
+
+    # Try ISO 8601
+    return parse_iso8601(date)

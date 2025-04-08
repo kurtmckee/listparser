@@ -1,0 +1,4 @@
+Fixed
+-----
+
+*   Fix parsing of ISO 8601 dates in OPML files to address (123)
