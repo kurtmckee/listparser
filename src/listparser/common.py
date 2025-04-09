@@ -1,5 +1,5 @@
 # This file is part of listparser.
-# Copyright 2009-2024 Kurt McKee <contactme@kurtmckee.org>
+# Copyright 2009-2025 Kurt McKee <contactme@kurtmckee.org>
 # SPDX-License-Identifier: MIT
 #
 
@@ -27,8 +27,7 @@ class SuperDict(t.Dict[str, t.Any]):
     def __getattribute__(self, name: str) -> t.Any:
         if name in self:
             return self[name]
-        else:
-            return dict.__getattribute__(self, name)
+        return dict.__getattribute__(self, name)
 
 
 class Common(XMLHandler):

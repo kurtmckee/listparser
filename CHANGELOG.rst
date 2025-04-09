@@ -20,6 +20,53 @@ Please see the fragment files in the `changelog.d directory`_.
 
 ..  scriv-insert-here
 
+.. _changelog-0.21:
+
+0.21 - 2025-04-09
+=================
+
+Python support
+--------------
+
+*   Drop Python 3.8 support.
+
+*   Test against early Python 3.14 releases.
+*   Drop support for PyPy 3.9.
+
+*   Support PyPy 3.11.
+
+Added
+-----
+
+*   Add a logo and banner for the project.
+
+Removed
+-------
+
+*   Remove support for the iGoogle exported settings format.
+
+Changed
+-------
+
+*   Try to parse OPML timestamps using RFC 3339 format
+    if the timestamp isn't in RFC 822 format. (#123)
+
+    Thanks to Allen Hutchinson for this improvement!
+
+Security
+--------
+
+*   Update the minimum requests version to 2.32.0.
+
+Development
+-----------
+
+*   Remove old ``.gitignore`` entries that are no longer needed.
+
+*   Migrate to PEP 621 metadata in ``pyproject.toml``.
+
+*   Add a reusable workflow to prepare release branches.
+
 .. _changelog-0.20:
 
 0.20 - 2024-03-29

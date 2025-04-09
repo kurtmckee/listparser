@@ -1,5 +1,5 @@
 # This file is part of listparser.
-# Copyright 2009-2024 Kurt McKee <contactme@kurtmckee.org>
+# Copyright 2009-2025 Kurt McKee <contactme@kurtmckee.org>
 # SPDX-License-Identifier: MIT
 #
 
@@ -12,8 +12,6 @@ import typing
 
 prefixes = {
     "http://opml.org/spec2": "opml",
-    "http://www.google.com/ig": "igoogle",
-    "http://schemas.google.com/GadgetTabML/2008": "gtml",
     "http://www.w3.org/1999/02/22-rdf-syntax-ns#": "rdf",
     "http://www.w3.org/2000/01/rdf-schema#": "rdfs",
     "http://xmlns.com/foaf/0.1/": "foaf",
