@@ -1,7 +1,0 @@
-Changed
--------
-
-*   Try to parse OPML timestamps using RFC 3339 format
-    if the timestamp isn't in RFC 822 format. (#123)
-
-    Thanks to Allen Hutchinson for this improvement!

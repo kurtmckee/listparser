@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "listparser"
-version = "0.20"
+version = "0.21"
 description = "Parse OPML subscription lists"
 authors = [
     { name = "Kurt McKee", email = "contactme@kurtmckee.org" },
