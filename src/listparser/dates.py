@@ -174,69 +174,59 @@ def parse_rfc822(date: str) -> datetime.datetime | None:
         return None
 
 
-def parse_iso8601(date: str) -> datetime.datetime | None:
-    """Parse ISO 8601 dates and times.
+_rfc3339_pattern = re.compile(
+    r"""
+        ^
+        (?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})
+        [T ]
+        (?P<hour>\d{2}):(?P<minute>\d{2}):(?P<second>\d{2})
+        (?:\.(?P<microsecond>\d+))?
+        (?P<timezone>Z|[+-]\d{2}:?\d{2})?
+        $
+    """,
+    flags=re.VERBOSE | re.ASCII,
+)
 
-    This handles the most common ISO 8601 formats including:
-    - YYYY-MM-DDThh:mm:ss.sssZ
-    - YYYY-MM-DDThh:mm:ss.sss+HH:MM
-    - YYYY-MM-DDThh:mm:ss.sss-HH:MM
 
-    For Python 3.7+ we could use datetime.fromisoformat() for most formats,
-    but using regex gives us more flexibility with variations.
+def parse_rfc3339(date: str) -> datetime.datetime | None:
+    """Parse RFC 3339 dates and times.
+
+    `datetime.datetime.fromisoformat()` can be used
+    once Python 3.10 and lower are no longer supported.
     """
-    # Main ISO 8601 pattern with optional fractional seconds and timezone
-    iso_pattern = re.compile(
-        r"^(\d{4})-"  # Year
-        r"(\d{2})-"  # Month
-        r"(\d{2})"  # Day
-        r"[T ]"  # T or space separator
-        r"(\d{2}):"  # Hour
-        r"(\d{2}):"  # Minute
-        r"(\d{2})"  # Second
-        r"(?:\.(\d+))?"  # Optional fractional seconds
-        r"(Z|[+-]\d{2}:?\d{2})?"  # Optional timezone (Z or +/-HH:MM)
-        r"$"
-    )
 
-    match = iso_pattern.match(date)
+    match = _rfc3339_pattern.match(date)
     if not match:
         return None
 
-    year, month, day, hour, minute, second, fractional, timezone = match.groups()
+    year = int(match.group("year"))
+    month = int(match.group("month"))
+    day = int(match.group("day"))
+    hour = int(match.group("hour"))
+    minute = int(match.group("minute"))
+    second = int(match.group("second"))
 
-    # Convert values to integers
-    year = int(year)
-    month = int(month)
-    day = int(day)
-    hour = int(hour)
-    minute = int(minute)
-    second = int(second)
-
-    # Handle microseconds (if present)
+    # Handle microseconds (if present).
     microsecond = 0
-    if fractional:
-        # Pad or truncate to 6 digits for microseconds
+    if fractional := match.group("microsecond"):
+        # Pad or truncate to 6 digits for microseconds.
         fractional = fractional.ljust(6, "0")[:6]
         microsecond = int(fractional)
 
-    # Handle timezone
     tzinfo = None
-    if timezone:
+    if timezone := match.group("timezone"):
         if timezone == "Z":
             tzinfo = datetime.timezone.utc
         else:
-            # Handle +HH:MM or -HH:MM format
+            # Handle +HH:MM and -HH:MM format.
             sign = 1 if timezone[0] == "+" else -1
-            # Remove sign and any colon
-            timezone = timezone[1:].replace(":", "")
-
-            if len(timezone) == 4:
-                tz_hour = int(timezone[:2])
-                tz_minute = int(timezone[2:])
-                tzinfo = datetime.timezone(
-                    datetime.timedelta(minutes=sign * ((tz_hour * 60) + tz_minute))
-                )
+            tz_hour = int(timezone[1:3])
+            tz_minute = int(timezone[-2:])
+            offset = datetime.timedelta(minutes=sign * ((tz_hour * 60) + tz_minute))
+            try:
+                tzinfo = datetime.timezone(offset)
+            except ValueError:
+                return None
 
     # Create datetime object
     try:
@@ -245,18 +235,3 @@ def parse_iso8601(date: str) -> datetime.datetime | None:
         )
     except (ValueError, OverflowError):
         return None
-
-
-def parse_date(date: str) -> datetime.datetime | None:
-    """Parse a date string in either RFC 822 or ISO 8601 format.
-
-    Tries to parse the date as RFC 822 first, then ISO 8601.
-    Returns None if the date cannot be parsed.
-    """
-    # Try RFC 822 first (backward compatibility)
-    timestamp = parse_rfc822(date)
-    if timestamp:
-        return timestamp
-
-    # Try ISO 8601
-    return parse_iso8601(date)

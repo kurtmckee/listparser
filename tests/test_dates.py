@@ -136,3 +136,111 @@ def test_timezones(date, hour, minute, offset):
 )
 def test_invalid_dates(date):
     assert listparser.dates.parse_rfc822(date) is None
+
+
+@pytest.mark.parametrize(
+    "date, expected",
+    (
+        pytest.param(
+            "2025-04-07T19:52:30Z",
+            datetime.datetime(2025, 4, 7, 19, 52, 30, tzinfo=datetime.timezone.utc),
+            id="simple",
+        ),
+        pytest.param(
+            "2025-04-07T19:52:30.941Z",
+            datetime.datetime(
+                2025, 4, 7, 19, 52, 30, 941000, tzinfo=datetime.timezone.utc
+            ),
+            id="milliseconds",
+        ),
+        pytest.param(
+            "2025-04-07T19:52:30.941378073Z",
+            datetime.datetime(
+                2025, 4, 7, 19, 52, 30, 941378, tzinfo=datetime.timezone.utc
+            ),
+            id="truncated milliseconds",
+        ),
+        pytest.param(
+            "2025-04-07T19:52:30+02:00",
+            datetime.datetime(
+                2025,
+                4,
+                7,
+                19,
+                52,
+                30,
+                tzinfo=datetime.timezone(datetime.timedelta(hours=2)),
+            ),
+            id="timezone offset with colon",
+        ),
+        pytest.param(
+            "2025-04-07T19:52:30-0700",
+            datetime.datetime(
+                2025,
+                4,
+                7,
+                19,
+                52,
+                30,
+                tzinfo=datetime.timezone(datetime.timedelta(hours=-7)),
+            ),
+            id="timezone offset without colon",
+        ),
+        pytest.param(
+            "2025-01-01T00:00:00",
+            datetime.datetime(2025, 1, 1, 0, 0, 0),
+            id="no timezone",
+        ),
+        pytest.param(
+            "2025-04-07 19:52:30Z",
+            datetime.datetime(2025, 4, 7, 19, 52, 30, tzinfo=datetime.timezone.utc),
+            id="space instead of 'T'",
+        ),
+        pytest.param(
+            "0001-01-01T00:00:00+23:59",
+            datetime.datetime(
+                1,
+                1,
+                1,
+                0,
+                0,
+                0,
+                tzinfo=datetime.timezone(datetime.timedelta(hours=23, minutes=59)),
+            ),
+            id="earliest possible date",
+        ),
+        pytest.param(
+            "9999-12-31T23:59:59-23:59",
+            datetime.datetime(
+                9999,
+                12,
+                31,
+                23,
+                59,
+                59,
+                tzinfo=datetime.timezone(-datetime.timedelta(hours=23, minutes=59)),
+            ),
+            id="latest possible date",
+        ),
+    ),
+)
+def test_rfc3339_dates(date: str, expected: datetime.datetime):
+    assert listparser.dates.parse_rfc3339(date) == expected
+
+
+@pytest.mark.parametrize(
+    "date",
+    (
+        pytest.param("0000-01-01T01:01:01Z", id="invalid year"),
+        pytest.param("2025-99-01T01:01:01Z", id="invalid month"),
+        pytest.param("2025-01-99T01:01:01Z", id="invalid day"),
+        pytest.param("2025-01-01T99:01:01Z", id="invalid hour"),
+        pytest.param("2025-01-01T01:99:01Z", id="invalid minute"),
+        pytest.param("2025-01-01T01:01:99Z", id="invalid seconds"),
+        pytest.param("2025-01-01T01:01:01+99:00", id="invalid timezone offset hours"),
+        pytest.param("2025-01-01TT01:01:01Z", id="invalid separator"),
+        pytest.param("tomorrow-ish", id="invalid format"),
+    ),
+)
+def test_rfc3339_invalid_dates(date: str):
+    assert listparser.dates.parse_rfc3339(date) is None
