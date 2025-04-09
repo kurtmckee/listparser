@@ -115,11 +115,11 @@ class OpmlMixin(common.Common):
         value = self.get_text()
         if value:
             self.harvest["meta"]["created"] = value
-            timestamp = dates.parse_rfc822(value)
+            timestamp = dates.parse_rfc822(value) or dates.parse_rfc3339(value)
             if timestamp:
                 self.harvest["meta"]["created_parsed"] = timestamp
             else:
-                self.raise_bozo("dateCreated is not an RFC 822 datetime")
+                self.raise_bozo("dateCreated is not a recognized datetime format")
 
     start_opml_datemodified = common.Common.expect_text
 
@@ -127,8 +127,8 @@ class OpmlMixin(common.Common):
         value = self.get_text()
         if value:
             self.harvest["meta"]["modified"] = value
-            timestamp = dates.parse_rfc822(value)
+            timestamp = dates.parse_rfc822(value) or dates.parse_rfc3339(value)
             if timestamp:
                 self.harvest["meta"]["modified_parsed"] = timestamp
             else:
-                self.raise_bozo("dateModified is not an RFC 822 datetime")
+                self.raise_bozo("dateModified is not a recognized datetime format")

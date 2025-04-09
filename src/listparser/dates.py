@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import datetime
+import re
 
 months: dict[str, int] = {
     "jan": 1,
@@ -168,6 +169,69 @@ def parse_rfc822(date: str) -> datetime.datetime | None:
             tzinfo=datetime.timezone(
                 datetime.timedelta(minutes=(tz_hour * 60) + tz_min)
             ),
+        )
+    except (ValueError, OverflowError):
+        return None
+
+
+_rfc3339_pattern = re.compile(
+    r"""
+        ^
+        (?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})
+        [T ]
+        (?P<hour>\d{2}):(?P<minute>\d{2}):(?P<second>\d{2})
+        (?:\.(?P<microsecond>\d+))?
+        (?P<timezone>Z|[+-]\d{2}:?\d{2})?
+        $
+    """,
+    flags=re.VERBOSE | re.ASCII,
+)
+
+
+def parse_rfc3339(date: str) -> datetime.datetime | None:
+    """Parse RFC 3339 dates and times.
+
+    `datetime.datetime.fromisoformat()` can be used
+    once Python 3.10 and lower are no longer supported.
+    """
+
+    match = _rfc3339_pattern.match(date)
+    if not match:
+        return None
+
+    year = int(match.group("year"))
+    month = int(match.group("month"))
+    day = int(match.group("day"))
+    hour = int(match.group("hour"))
+    minute = int(match.group("minute"))
+    second = int(match.group("second"))
+
+    # Handle microseconds (if present).
+    microsecond = 0
+    if fractional := match.group("microsecond"):
+        # Pad or truncate to 6 digits for microseconds.
+        fractional = fractional.ljust(6, "0")[:6]
+        microsecond = int(fractional)
+
+    tzinfo = None
+    if timezone := match.group("timezone"):
+        if timezone == "Z":
+            tzinfo = datetime.timezone.utc
+        else:
+            # Handle +HH:MM and -HH:MM format.
+            sign = 1 if timezone[0] == "+" else -1
+            tz_hour = int(timezone[1:3])
+            tz_minute = int(timezone[-2:])
+            offset = datetime.timedelta(minutes=sign * ((tz_hour * 60) + tz_minute))
+            try:
+                tzinfo = datetime.timezone(offset)
+            except ValueError:
+                return None
+
+    # Create datetime object
+    try:
+        return datetime.datetime(
+            year, month, day, hour, minute, second, microsecond, tzinfo=tzinfo
         )
     except (ValueError, OverflowError):
         return None
