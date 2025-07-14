@@ -64,7 +64,7 @@ html_theme_options = {
 templates_path = ["_templates"]
 html_sidebars = {
     "index": [
-        "about-no-logo.html",  # Don't show a logo on the front page.
+        "about-no-logo.html.jinja",  # Don't show a logo on the front page.
         "searchfield.html",
         "navigation.html",
         "relations.html",

@@ -1,4 +1,9 @@
 ..
+    This file is part of listparser.
+    Copyright 2009-2025 Kurt McKee <contactme@kurtmckee.org>
+    SPDX-License-Identifier: MIT
+
+..
     This is the listparser changelog.
 
     It is managed and updated by scriv during development.
