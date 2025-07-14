@@ -1,3 +1,8 @@
+..
+    This file is part of listparser.
+    Copyright 2009-2025 Kurt McKee <contactme@kurtmckee.org>
+    SPDX-License-Identifier: MIT
+
 ..  rst-class:: visually-hidden
 
 listparser - Parse OPML subscription lists in Python
@@ -11,7 +16,7 @@ If you're building a feed reader and you need to import OPML subscription lists,
 you've come to the right place!
 
 listparser makes it easy to parse and use subscription lists in multiple formats.
-It supports OPML and RDF+FOAF, and runs on Python 3.9+ and on PyPy 3.10.
+It supports OPML and RDF+FOAF, and runs on Python 3.9+ and on PyPy 3.11.
 
 
 Contents
