@@ -27,7 +27,7 @@ http = [
     "requests >=2.32.0, <3",
 ]
 lxml = [
-    "lxml >=4.6.2, <6",
+    "lxml >=5.0.0, <7",
 ]
 
 [build-system]
