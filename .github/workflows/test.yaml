@@ -32,7 +32,6 @@ jobs:
           - name: "Linux"
             runner: "ubuntu-latest"
             cpythons:
-              - "3.9"
               - "3.10"
               - "3.11"
               - "3.12"
@@ -41,28 +40,28 @@ jobs:
             pypys:
               - "3.11"
             tox-post-environments:
-              - "py3.9-minimum_dependencies"
-              - "py3.9-http-lxml"
+              - "py3.10-minimum_dependencies"
+              - "py3.10-http-lxml"
               - "py3.13-http-lxml"
 
           # Test lowest and highest versions on Mac.
           - name: "macOS"
             runner: "macos-latest"
             cpythons:
-              - "3.9"
+              - "3.10"
               - "3.13"
             tox-environments:
-              - "py3.9"
+              - "py3.10"
               - "py3.13"
 
           # Test lowest and highest versions on Windows.
           - name: "Windows"
             runner: "windows-latest"
             cpythons:
-              - "3.9"
+              - "3.10"
               - "3.13"
             tox-environments:
-              - "py3.9"
+              - "py3.10"
               - "py3.13"
 
           # Check type annotations and documentation.
