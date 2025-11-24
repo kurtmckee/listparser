@@ -64,6 +64,8 @@ repos:
     rev: "v1.7.7"
     hooks:
       - id: "actionlint"
+        additional_dependencies:
+          - "github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.11.1"
 
   - repo: "https://github.com/kurtmckee/pre-commit-hooks"
     rev: "v1.0.0"
