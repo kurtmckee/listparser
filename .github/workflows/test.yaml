@@ -71,7 +71,7 @@ jobs:
               - "3.13"
             tox-environments:
               - "docs"
-              - "mypy"
+              - "mypy-py3.13"
             cache-key-prefix: "quality"
 
     uses: "kurtmckee/github-workflows/.github/workflows/tox.yaml@19c3c069be51d3bfc3ac73e85e81b2b1646e91a8" # v1.7
