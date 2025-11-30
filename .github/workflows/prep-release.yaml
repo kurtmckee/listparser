@@ -25,7 +25,7 @@ jobs:
             pr-base: "releases"
             pr-title: "Release v$VERSION"
 
-    uses: "kurtmckee/github-workflows/.github/workflows/create-pr.yaml@a8716fc28daeb38133a50ef8dce70df9c65988ad" # v1.5
+    uses: "kurtmckee/github-workflows/.github/workflows/create-pr.yaml@f85528d9eb4c6af71bf17c82ab94c9404145b064" # v1.6
     with:
       config: "${{ toJSON(matrix) }}"
       version: "${{ inputs.version }}"
