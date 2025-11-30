@@ -74,6 +74,6 @@ jobs:
               - "mypy"
             cache-key-prefix: "quality"
 
-    uses: "kurtmckee/github-workflows/.github/workflows/tox.yaml@a8716fc28daeb38133a50ef8dce70df9c65988ad" # v1.5
+    uses: "kurtmckee/github-workflows/.github/workflows/tox.yaml@19c3c069be51d3bfc3ac73e85e81b2b1646e91a8" # v1.7
     with:
       config: "${{ toJSON(matrix) }}"
