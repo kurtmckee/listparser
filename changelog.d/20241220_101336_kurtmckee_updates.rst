@@ -1,7 +1,7 @@
 Python support
 --------------
 
-*   Test against early Python 3.14 releases.
+*   Support Python 3.14.
 *   Drop support for PyPy 3.9.
 
 Security

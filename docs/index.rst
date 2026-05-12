@@ -15,8 +15,8 @@ listparser - Parse OPML subscription lists in Python
 If you're building a feed reader and you need to import OPML subscription lists,
 you've come to the right place!
 
-listparser makes it easy to parse and use subscription lists in multiple formats.
-It supports OPML and RDF+FOAF, and runs on Python 3.9+ and on PyPy 3.11.
+listparser makes it easy to parse and use subscription lists in multiple formats,
+including OPML and RDF+FOAF.
 
 
 Contents
