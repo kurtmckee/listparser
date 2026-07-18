@@ -148,11 +148,17 @@ def parse_rfc822(date: str) -> datetime.datetime | None:
             tz_min = int(tz_right)
         except ValueError:
             # Perhaps there was no ':' in *timezone*.
+            # ±HHMM/HHMM only; shorter forms like "+050" misread as +00:50.
+            digits = timezone[1:] if timezone[:1] in "+-" else timezone
+            if len(digits) != 4 or not digits.isdigit():
+                return None
             try:
                 tz_hour = int(timezone[:-2])
                 tz_min = int(timezone[-2:])
             except ValueError:
                 return None
+        if not 0 <= abs(tz_min) < 60:
+            return None
         if tz_hour < 0:
             tz_min = tz_min * -1
 

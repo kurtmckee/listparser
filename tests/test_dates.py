@@ -131,6 +131,11 @@ def test_timezones(date, hour, minute, offset):
         "Sun, 16 Dec 2012 11:47:32 +$$00",  # bad timezone hour without colon
         "Sun, 16 Dec 2012 11:47:32 +00$$",  # bad timezone minute without colon
         "Sun, 16 Dec 2012 11:47:32 $",  # bad negative timezone minute
+        # Short numeric zones must not be misread as HHMM (e.g. +050 -> +00:50)
+        "Sun, 16 Dec 2012 11:47:32 +050",
+        "Sun, 16 Dec 2012 11:47:32 -050",
+        "Sun, 16 Dec 2012 11:47:32 GMT+050",
+        "Sun, 16 Dec 2012 11:47:32 +00:60",  # minutes out of range
     ],
 )
 def test_invalid_dates(date):
