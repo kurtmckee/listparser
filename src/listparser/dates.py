@@ -141,7 +141,6 @@ def parse_rfc822(date: str) -> datetime.datetime | None:
     tz_hour = timezones.get(timezone)
 
     # Parse numeric timezones like '-0500' and '+0500'.
-    # Leading sign is applied after parse so "-00:30" is not collapsed by int("-00") == 0.
     if tz_hour is None:
         sign = -1 if timezone.startswith("-") else 1
         body = timezone[1:] if timezone[:1] in "+-" else timezone
