@@ -141,20 +141,23 @@ def parse_rfc822(date: str) -> datetime.datetime | None:
     tz_hour = timezones.get(timezone)
 
     # Parse numeric timezones like '-0500' and '+0500'.
+    # Leading sign is applied after parse so "-00:30" is not collapsed by int("-00") == 0.
     if tz_hour is None:
+        sign = -1 if timezone.startswith("-") else 1
+        body = timezone[1:] if timezone[:1] in "+-" else timezone
         try:
-            tz_left, tz_right = timezone.split(":")
+            tz_left, tz_right = body.split(":")
             tz_hour = int(tz_left)
             tz_min = int(tz_right)
         except ValueError:
             # Perhaps there was no ':' in *timezone*.
             try:
-                tz_hour = int(timezone[:-2])
-                tz_min = int(timezone[-2:])
+                tz_hour = int(body[:-2])
+                tz_min = int(body[-2:])
             except ValueError:
                 return None
-        if tz_hour < 0:
-            tz_min = tz_min * -1
+        tz_hour *= sign
+        tz_min *= sign
 
     # Create the datetime and timezone offset return values.
     try:

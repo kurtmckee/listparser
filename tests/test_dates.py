@@ -91,6 +91,10 @@ def test_month_names(date, expected_month):
         ("Mon, 22 Jun 2009 13:15:17 -0430", 13, 15, (-4 * 60) - 30),
         ("Mon, 22 Jun 2009 13:15:17 +0545", 13, 15, (5 * 60) + 45),
         ("Mon, 22 Jun 2009 13:15:17 0545", 13, 15, (5 * 60) + 45),
+        # Zero hour must keep a leading minus (int("-00") is 0).
+        ("Mon, 22 Jun 2009 13:15:17 -0030", 13, 15, -30),
+        ("Mon, 22 Jun 2009 13:15:17 -00:30", 13, 15, -30),
+        ("Mon, 22 Jun 2009 13:15:17 +00:30", 13, 15, 30),
         # Non-standard timezones
         ("Mon, 22 Jun 2009 13:15:17 UTC", 13, 15, 0),
         ("Mon, 22 Jun 2009 13:15:17 Etc/GMT", 13, 15, 0),
